@@ -1,3 +1,4 @@
+
 // ════════════════════════════════════════════════════════════
 //  ORAK UNIVERSE — engine.js
 //  CAPA 3: Lógica de Estado · Economía · Renderizado · PDF
@@ -53,21 +54,7 @@ const ORAK_ICONS = {
 // ════════════════════════════════════════
 //  USUARIO LOCAL — sin login requerido
 // ════════════════════════════════════════
-// ── Cliente Supabase (frontend) ───────────────────────────
-const SUPABASE_URL  = 'https://ifbyzcxnvvqsqctvyzzq.supabase.co';
-const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlmYnl6Y3hudnZxc3FjdHZ5enpxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxNzc3NDYsImV4cCI6MjA5Mzc1Mzc0Nn0.HQY8z5aoEteWql7ycTo3Pt7RdZjvGC6svxXUsYj386E';
-let _sb = null;
-// Inicializar Supabase cuando el DOM esté listo
-function _initSupabase() {
-  if(window.supabase && window.supabase.createClient) {
-    _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
-    console.log('✓ Supabase cliente inicializado');
-  } else {
-    console.warn('⚠ Supabase SDK no disponible aún, reintentando...');
-    setTimeout(_initSupabase, 200);
-  }
-}
-document.addEventListener('DOMContentLoaded', _initSupabase);
+const _sb = null;
 let _usuario = { id: 'local', email: 'local@orak.app' };
 let _perfil  = {
   id:             'local',
@@ -192,13 +179,13 @@ let _vista     = 'feed';
 let _libroSel  = null;
 let _ws        = null;
 
-const API_SERVER = 'https://hazing-diffusive-affidavit.ngrok-free.dev';
+const API_SERVER = window.location.origin;
 let _modoConexion = 'detectando';
 
 async function detectarServidor() {
   try {
-    const _tout = new Promise((_,r) => setTimeout(() => r(new Error('t')), 5000));
-    const r = await Promise.race([fetch(API_SERVER + '/info'), _tout]);
+    const _tout = new Promise((_,r) => setTimeout(() => r(new Error('t')), 1500));
+    const r = await Promise.race([fetch(API_SERVER + '/'), _tout]);
     if(r.ok) { _modoConexion = 'server'; return true; }
   } catch(_) {}
   _modoConexion = 'local'; return false;
@@ -302,28 +289,13 @@ async function init() {
       toast('⚠ Error cargando datos del servidor', 'err');
     }
   } else {
-    // 2. Sin servidor: reintentar una vez silenciosamente (Railway puede estar despertando)
-    await new Promise(r => setTimeout(r, 3000));
-    const reintento = await detectarServidor();
-    if (reintento) {
-      actualizarBadgeModo(true);
-      try {
-        const data = await GET('/libros');
-        _libros = data.libros || [];
-        _guardarLocal(_libros);
-      } catch(e) {
-        _libros = _cargarLocal();
-      }
-    } else {
-      // Realmente sin conexión después de 2 intentos
-      _libros = _cargarLocal();
-      if (_libros.length === 0 && typeof _UNIVERSO_EMBEBIDO !== 'undefined') {
-        _libros = [..._UNIVERSO_EMBEBIDO];
-        _guardarLocal(_libros);
-      }
-      // Toast discreto solo si realmente no hay servidor
-      setTimeout(() => toast('● Sin conexión al servidor — modo local', 'err'), 1000);
+    // 2. Sin servidor: usar cache local (modo offline)
+    _libros = _cargarLocal();
+    if (_libros.length === 0 && typeof _UNIVERSO_EMBEBIDO !== 'undefined') {
+      _libros = [..._UNIVERSO_EMBEBIDO];
+      _guardarLocal(_libros);
     }
+    toast('● Modo sin conexión', 'err');
   }
 
   _stats    = _calcularStatsLocal(_libros);
@@ -806,103 +778,16 @@ function personajeCard(p) {
     </div>`;
 }
 
-// Habilidades/armas temporales para el modal de edición
-let _editHabs  = [];
-let _editArmas = [];
-
 async function abrirEditarPersonaje(libro, nombre) {
   const l = _libros.find(x => x.titulo === libro);
   const p = l?.personajes?.find(x => x.nombre === nombre); if(!p) return;
-
-  // Rellenar campos del modal
-  document.getElementById('editPerLibro').value          = libro;
-  document.getElementById('editPerNombreOriginal').value = nombre;
-  document.getElementById('editPerNombre').value         = p.nombre;
-  document.getElementById('editPerNac').value            = p.nacimiento || '';
-  document.getElementById('editPerMuerte').value         = p.muerte || '';
-
-  // Habilidades y armas — normalizar a string
-  _editHabs  = (p.habilidades||[]).map(h => typeof h === 'object' ? h.nombre : h);
-  _editArmas = (p.armas||[]).map(a => typeof a === 'object' ? a.nombre : a);
-  _renderHabsEdit();
-  _renderArmasEdit();
-
-  abrirModal('modalEditarPersonaje');
-}
-
-function _renderHabsEdit() {
-  const el = document.getElementById('editPerHabsLista'); if(!el) return;
-  el.innerHTML = _editHabs.map((h,i) =>
-    `<span class="chip chip-skill" style="cursor:pointer" onclick="_editHabs.splice(${i},1);_renderHabsEdit()">⚡ ${esc(h)} ×</span>`
-  ).join('');
-}
-
-function _renderArmasEdit() {
-  const el = document.getElementById('editPerArmasLista'); if(!el) return;
-  el.innerHTML = _editArmas.map((a,i) =>
-    `<span class="chip chip-weapon" style="cursor:pointer" onclick="_editArmas.splice(${i},1);_renderArmasEdit()">⚔ ${esc(a)} ×</span>`
-  ).join('');
-}
-
-function agregarHabEdit() {
-  const inp = document.getElementById('editPerHab');
-  const val = inp.value.trim(); if(!val) return;
-  _editHabs.push(val); inp.value = '';
-  _renderHabsEdit();
-}
-
-function agregarArmaEdit() {
-  const inp = document.getElementById('editPerArma');
-  const val = inp.value.trim(); if(!val) return;
-  _editArmas.push(val); inp.value = '';
-  _renderArmasEdit();
-}
-
-async function guardarEditarPersonaje() {
-  const libro          = document.getElementById('editPerLibro').value;
-  const nombreOriginal = document.getElementById('editPerNombreOriginal').value;
-  const nuevoNombre    = document.getElementById('editPerNombre').value.trim();
-  const nac            = parseInt(document.getElementById('editPerNac').value) || 0;
-  const muerteVal      = document.getElementById('editPerMuerte').value.trim();
-  const muerte         = muerteVal === '' ? null : parseInt(muerteVal);
-
-  if(!nuevoNombre) return toast('El nombre es obligatorio', 'err');
-
-  // Actualizar en memoria
-  const l = _libros.find(x => x.titulo === libro);
-  const p = l?.personajes?.find(x => x.nombre === nombreOriginal); if(!p) return;
-  p.nombre      = nuevoNombre;
-  p.nacimiento  = nac;
-  p.muerte      = muerte;
-  p.habilidades = [..._editHabs];
-  p.armas       = [..._editArmas];
-
-  cerrarModal('modalEditarPersonaje');
-  await _sincronizar();
-  toast('✔ Personaje actualizado');
-
-  // Guardar en servidor
-  if (_modoConexion === 'server') {
-    try {
-      const tEnc = encodeURIComponent(libro).replace(/%2F/gi, '__SLASH__');
-      const nEnc = encodeURIComponent(nombreOriginal).replace(/%2F/gi, '__SLASH__');
-      await PATCH(`/libros/${tEnc}/personajes/${nEnc}`, {
-        nombre:     nuevoNombre,
-        nacimiento: nac,
-        muerte:     muerte
-      });
-      // Guardar habilidades y armas completas via libro
-      const tEnc2 = encodeURIComponent(libro).replace(/%2F/gi, '__SLASH__');
-      await PATCH(`/libros/${tEnc2}/sync`, { libro: l });
-    } catch(e) {
-      // Fallback: guardar libro completo
-      try {
-        const tEnc2 = encodeURIComponent(libro).replace(/%2F/gi, '__SLASH__');
-        await PATCH(`/libros/${tEnc2}/descripcion`, { descripcion: l.descripcion || '' });
-      } catch(_) {}
-      toast(`⚠ Datos guardados localmente`, 'err');
-    }
-  }
+  const nuevoNombre = prompt('Nombre:', p.nombre); if(nuevoNombre===null) return;
+  const nac = prompt('Año de nacimiento:', p.nacimiento); if(nac===null) return;
+  const muerteStr = prompt('Año de muerte (vacío = vive):', p.muerte??''); if(muerteStr===null) return;
+  p.nombre = nuevoNombre.trim() || p.nombre;
+  p.nacimiento = parseInt(nac);
+  p.muerte = muerteStr.trim()==='' ? null : parseInt(muerteStr);
+  renderVista(); toast('✔ Personaje actualizado');
 }
 
 async function confirmarEliminarPersonaje(libro, nombre) {
@@ -1065,7 +950,6 @@ function verDetalleLibro(titulo) {
     <div style="display:flex;gap:8px;margin-bottom:16px">
       <button class="btn btn-primary btn-sm" onclick="cerrarModal('modalDetalleLibro');prepModalPersonaje('${esc(titulo)}')">＋ Personaje</button>
       <button class="btn btn-ghost btn-sm" onclick="cerrarModal('modalDetalleLibro');prepModalEvento('${esc(titulo)}')">＋ Evento</button>
-      <button class="btn btn-ghost btn-sm" onclick="cerrarModal('modalDetalleLibro');abrirEditarDescripcion('${esc(titulo)}')">${ORAK_ICONS.editar} Descripción</button>
       <button class="btn btn-ghost btn-sm" onclick="cerrarModal('modalDetalleLibro');abrirHistoria('${esc(titulo)}')">${ORAK_ICONS.pergaminoSm} Historia</button>
       <button class="btn btn-danger btn-sm" style="margin-left:auto" onclick="eliminarLibro('${esc(titulo)}')">Eliminar</button>
     </div>
@@ -1562,11 +1446,9 @@ const POSTIT_COLORS = {
 async function renderPDF() {
   let pdfsGuardados = [];
   try {
-    const { data } = await _sb.from('pdfs').select('titulo,pdf_url,pdf_nombre,subido_en').order('subido_en',{ascending:false});
+    const { data } = await _sb.from('libros').select('id,titulo,pdf_url,pdf_nombre').not('pdf_url','is',null).order('created_at',{ascending:false});
     pdfsGuardados = data || [];
-  } catch(e) {
-    console.warn('Error cargando PDFs:', e);
-  }
+  } catch(e) {}
 
   const hayPDFs = pdfsGuardados.length > 0;
   return `
@@ -1582,10 +1464,7 @@ async function renderPDF() {
         <div class="pdf-book-info">
           <div class="pdf-book-titulo">${esc(p.pdf_nombre||p.titulo+'.pdf')}</div>
           <div class="pdf-book-libro">📖 ${esc(p.titulo)}</div>
-          <div class="pdf-book-btns">
-            <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();abrirPDFGuardado('${esc(p.pdf_url)}','${esc(p.titulo)}')">📖 Leer</button>
-            <button class="btn btn-danger btn-sm" onclick="event.stopPropagation();eliminarPDF('${esc(p.titulo)}','${esc(p.pdf_url)}')">🗑</button>
-          </div>
+          <div class="pdf-book-btns"><button class="btn btn-primary btn-sm" onclick="event.stopPropagation();abrirPDFGuardado('${esc(p.pdf_url)}','${esc(p.titulo)}')">📖 Leer</button></div>
         </div>
       </div>`).join('')}</div>`:`
     <div class="pdf-upload-zone" style="margin-bottom:24px" onclick="document.getElementById('pdfInputZona').click()"
@@ -1691,65 +1570,11 @@ async function subirPDFASupabase() {
   const tituloLibro    = libroExistente || libroNuevo;
   if(!tituloLibro) return toast('Asocia el PDF a un libro', 'err');
 
-  // Mostrar progress
-  const prog = document.getElementById('pdfUploadProgress');
-  const progBar = document.getElementById('pdfUploadBar');
-  if(prog) prog.style.display = 'block';
-
-  try {
-    // 1. Subir a Supabase Storage
-    const nombreArchivo = `${Date.now()}_${_pdfFileCache.name.replace(/[^a-zA-Z0-9._-]/g,'_')}`;
-    const arrayBuffer   = await _pdfFileCache.arrayBuffer();
-
-    if(progBar) progBar.style.width = '40%';
-
-    const { data: uploadData, error: uploadError } = await _sb
-      .storage
-      .from(SUPABASE_PDF_BUCKET)
-      .upload(nombreArchivo, arrayBuffer, {
-        contentType: 'application/pdf',
-        upsert: false
-      });
-
-    if(uploadError) throw new Error(uploadError.message);
-
-    if(progBar) progBar.style.width = '70%';
-
-    // 2. Obtener URL pública
-    const { data: urlData } = _sb.storage.from(SUPABASE_PDF_BUCKET).getPublicUrl(nombreArchivo);
-    const pdfUrl = urlData.publicUrl;
-
-    // 3. Guardar referencia en la tabla libros de Supabase
-    await _sb.from('pdfs').upsert({
-      titulo:     tituloLibro,
-      pdf_url:    pdfUrl,
-      pdf_nombre: _pdfFileCache.name,
-      subido_en:  new Date().toISOString()
-    }, { onConflict: 'titulo' });
-
-    if(progBar) progBar.style.width = '100%';
-
-    // 4. Si es libro nuevo, crearlo también (ignorar error si ya existe)
-    if(libroNuevo && !_libros.find(l => l.titulo === libroNuevo)) {
-      try {
-        await POST('/libros', { titulo: libroNuevo, descripcion: 'Libro con PDF' });
-      } catch(e) {
-        console.warn('Libro ya existe o error al crear:', e);
-      }
-    }
-
-    await abrirPDFDesdeURL(pdfUrl, tituloLibro, _pdfFileCache.name);
-    cerrarModalSubirPDF();
-    toast('📄 PDF guardado en la nube ✓', 'ok');
-
-  } catch(e) {
-    console.error('Error subiendo PDF:', e);
-    // Fallback: abrir localmente sin guardar
-    const localUrl = URL.createObjectURL(_pdfFileCache);
-    await abrirPDFDesdeURL(localUrl, tituloLibro, _pdfFileCache.name);
-    cerrarModalSubirPDF();
-    toast(`⚠ PDF abierto en modo local (${e.message})`, 'err');
-  }
+  // Modo local (sin Supabase) — abrir directamente
+  const localUrl = URL.createObjectURL(_pdfFileCache);
+  await abrirPDFDesdeURL(localUrl, tituloLibro, _pdfFileCache.name);
+  cerrarModalSubirPDF();
+  toast('📄 PDF abierto en modo local');
 }
 
 async function abrirPDFGuardado(url, titulo) {
@@ -1764,17 +1589,8 @@ async function abrirPDFDesdeURL(url, titulo, nombre) {
   _pdfPage        = 1;
   try {
     _pdfDoc = await pdfjsLib.getDocument(url).promise;
-    // Cargar notas desde Supabase (fuente de verdad)
-    try {
-      const { data: notasData } = await _sb.from('notas_pdf').select('*').eq('libro', titulo);
-      _pdfNotas = notasData || [];
-      // Actualizar cache local
-      const otras = JSON.parse(localStorage.getItem('orak_notas')||'[]').filter(n => n.libro !== titulo);
-      localStorage.setItem('orak_notas', JSON.stringify([...otras, ..._pdfNotas]));
-    } catch(e) {
-      // Fallback a localStorage si Supabase falla
-      _pdfNotas = JSON.parse(localStorage.getItem('orak_notas') || '[]').filter(n => n.libro === titulo);
-    }
+    // Cargar notas del localStorage
+    _pdfNotas = JSON.parse(localStorage.getItem('orak_notas') || '[]').filter(n => n.libro === titulo);
     const container = document.getElementById('pdfContainer');
     if(container) await renderPaginaPDF();
     else {
@@ -1789,27 +1605,11 @@ async function abrirPDFDesdeURL(url, titulo, nombre) {
 
 // Guardar notas en localStorage + Supabase si hay sesión
 async function guardarNotasLocal(nota) {
-  // 1. Guardar en localStorage (cache inmediato)
   const todas = JSON.parse(localStorage.getItem('orak_notas') || '[]');
   const idx   = todas.findIndex(n => n.id === nota.id);
-  if(idx >= 0) todas[idx] = nota;
+  if(idx >= 0) todas[idx] = { ...todas[idx], x: nota.x, y: nota.y };
   else todas.push(nota);
   localStorage.setItem('orak_notas', JSON.stringify(todas));
-
-  // 2. Persistir en Supabase (fuente de verdad)
-  try {
-    await _sb.from('notas_pdf').upsert({
-      id:     nota.id,
-      libro:  nota.libro,
-      pagina: nota.pagina,
-      texto:  nota.texto,
-      color:  nota.color,
-      x:      nota.x,
-      y:      nota.y,
-    }, { onConflict: 'id' });
-  } catch(e) {
-    console.warn('Error guardando nota en Supabase:', e);
-  }
 }
 
 async function renderPaginaPDF() {
@@ -1942,11 +1742,8 @@ function renderPostit(nota, wrap) {
 
 async function eliminarPostit(id, el) {
   _pdfNotas = _pdfNotas.filter(n => n.id !== id);
-  // Local
   const todas = JSON.parse(localStorage.getItem('orak_notas')||'[]').filter(n => n.id !== id);
   localStorage.setItem('orak_notas', JSON.stringify(todas));
-  // Supabase
-  try { await _sb.from('notas_pdf').delete().eq('id', id); } catch(e) {}
   el.style.transition = 'all .2s'; el.style.opacity='0'; el.style.transform='scale(0)';
   setTimeout(() => el.remove(), 200);
 }
@@ -3034,284 +2831,3 @@ async function confirmarEliminarRelacion(libro, indice) {
   await _sincronizar();
   toast('🗑 Relación eliminada');
 }
-
-// ════════════════════════════════════════════════════════════
-//  WEBSOCKET — TIEMPO REAL PARA TODOS LOS DISPOSITIVOS
-//  Escucha cambios del servidor y recarga datos automáticamente
-//  sin necesidad de que el usuario recargue la página
-// ════════════════════════════════════════════════════════════
-
-(function initWebSocket() {
-  'use strict';
-
-  let _ws        = null;
-  let _wsRetries = 0;
-  let _wsRetryTimer = null;
-  const MAX_RETRIES  = 10;
-  const RETRY_BASE   = 2000; // ms — sube exponencialmente
-
-  function _wsUrl() {
-    // Convertir https:// → wss://  |  http:// → ws://
-    return API_SERVER.replace(/^https/, 'wss').replace(/^http/, 'ws') + '/ws';
-  }
-
-  function conectar() {
-    if (_modoConexion !== 'server') return; // solo en modo servidor
-    if (_ws && (_ws.readyState === WebSocket.OPEN || _ws.readyState === WebSocket.CONNECTING)) return;
-
-    try {
-      _ws = new WebSocket(_wsUrl());
-
-      _ws.onopen = () => {
-        _wsRetries = 0;
-        console.log('[ORAK WS] Conectado al servidor en tiempo real');
-        _actualizarIndicadorWS(true);
-      };
-
-      _ws.onmessage = async (e) => {
-        let msg;
-        try { msg = JSON.parse(e.data); } catch { return; }
-
-        const { evento, datos } = msg;
-        console.log('[ORAK WS] Evento recibido:', evento, datos);
-
-        // Recargar datos del servidor ante cualquier cambio
-        const EVENTOS_QUE_RECARGAN = [
-          'libro_creado', 'libro_eliminado', 'libro_editado',
-          'personaje_creado', 'personaje_eliminado',
-          'evento_creado', 'evento_eliminado',
-          'lugar_creado', 'lugar_eliminado',
-          'faccion_creada', 'faccion_eliminada',
-          'relacion_creada', 'relacion_eliminada',
-          'historia_guardada', 'descripcion_guardada',
-          'habilidad_agregada', 'habilidad_eliminada',
-          'arma_agregada', 'arma_eliminada',
-        ];
-
-        if (EVENTOS_QUE_RECARGAN.includes(evento)) {
-          await _recargarDelServidor(evento, datos);
-        }
-      };
-
-      _ws.onerror = (err) => {
-        console.warn('[ORAK WS] Error de conexión:', err);
-      };
-
-      _ws.onclose = (e) => {
-        _actualizarIndicadorWS(false);
-        console.warn('[ORAK WS] Conexión cerrada. Código:', e.code);
-
-        // Reconectar con backoff exponencial
-        if (_wsRetries < MAX_RETRIES) {
-          const delay = Math.min(RETRY_BASE * Math.pow(1.5, _wsRetries), 30000);
-          _wsRetries++;
-          console.log(`[ORAK WS] Reconectando en ${(delay/1000).toFixed(1)}s... (intento ${_wsRetries}/${MAX_RETRIES})`);
-          clearTimeout(_wsRetryTimer);
-          _wsRetryTimer = setTimeout(conectar, delay);
-        }
-      };
-
-    } catch(err) {
-      console.warn('[ORAK WS] No se pudo crear WebSocket:', err);
-    }
-  }
-
-  // ── Recargar datos sin interrumpir al usuario ──────────────
-  async function _recargarDelServidor(evento, datos) {
-    try {
-      const data = await GET('/libros');
-      const nuevos = data.libros || [];
-
-      // Solo re-renderizar si los datos realmente cambiaron
-      const antes  = JSON.stringify(_libros);
-      const despues = JSON.stringify(nuevos);
-      if (antes === despues) return;
-
-      _libros   = nuevos;
-      _guardarLocal(_libros);
-      _stats    = _calcularStatsLocal(_libros);
-      _timeline = _calcularTimelineLocal(_libros);
-      actualizarSidebar();
-      renderVista();
-
-      // Toast discreto para avisar al usuario qué cambió
-      const mensajes = {
-        libro_creado:      `📖 Nuevo libro: "${datos?.titulo || ''}"`,
-        libro_eliminado:   `🗑 Libro eliminado: "${datos?.titulo || ''}"`,
-        libro_editado:     `✏️ Libro actualizado: "${datos?.titulo || ''}"`,
-        historia_guardada: `📝 Historia actualizada`,
-        personaje_creado:  `✨ Nuevo personaje agregado`,
-        personaje_eliminado: `🗑 Personaje eliminado`,
-        evento_creado:     `⚡ Nuevo evento en la timeline`,
-        lugar_creado:      `🗺 Nuevo lugar agregado`,
-      };
-      const msg = mensajes[evento];
-      if (msg) toast(msg, 'ok');
-
-    } catch(e) {
-      console.warn('[ORAK WS] Error al recargar datos:', e);
-    }
-  }
-
-  // ── Indicador visual en el badge de modo ──────────────────
-  function _actualizarIndicadorWS(conectado) {
-    const b = document.getElementById('badgeModo');
-    if (!b) return;
-    if (conectado) {
-      b.textContent = '● En vivo';
-      b.style.background = 'rgba(20,190,120,0.15)';
-      b.style.color      = 'rgba(60,230,150,0.90)';
-      b.style.borderColor = 'rgba(20,190,120,0.30)';
-    } else {
-      b.textContent = '● Servidor';
-      b.style.background = '';
-      b.style.color      = '';
-      b.style.borderColor = '';
-    }
-  }
-
-  // ── Ping cada 25s para mantener la conexión viva ──────────
-  // Railway cierra conexiones inactivas después de 30s
-  setInterval(() => {
-    if (_ws && _ws.readyState === WebSocket.OPEN) {
-      _ws.send(JSON.stringify({ tipo: 'ping' }));
-    }
-  }, 25000);
-
-  // ── Arrancar cuando el servidor esté confirmado ────────────
-  // Parchamos actualizarBadgeModo para conectar el WS al confirmar servidor
-  const _prevBadge = window.actualizarBadgeModo;
-  window.actualizarBadgeModo = function(ok) {
-    if (_prevBadge) _prevBadge(ok);
-    if (ok) {
-      // Pequeño delay para que init() termine primero
-      setTimeout(conectar, 500);
-    }
-  };
-
-  // Reconectar si la pestaña vuelve a estar visible
-  document.addEventListener('visibilitychange', () => {
-    if (!document.hidden && _modoConexion === 'server') {
-      if (!_ws || _ws.readyState === WebSocket.CLOSED) {
-        _wsRetries = 0;
-        conectar();
-      }
-    }
-  });
-
-  // Exponer para debug
-  window._wsConectar   = conectar;
-  window._wsEstado     = () => _ws?.readyState;
-
-})();
-
-
-// ════════════════════════════════════════════════════════════
-//  EDITAR EVENTO — Modal real + servidor
-// ════════════════════════════════════════════════════════════
-
-function abrirEditarEvento(libro, indice) {
-  const l = _libros.find(x => x.titulo === libro); if(!l) return;
-  const ev = (l.eventos||[])[indice]; if(!ev) return;
-
-  document.getElementById('editEvLibro').value   = libro;
-  document.getElementById('editEvIndice').value  = indice;
-  document.getElementById('editEvDesc').value    = ev.descripcion || '';
-  document.getElementById('editEvAnio').value    = ev.año || ev.ano || '';
-
-  // Rellenar personajes del libro
-  const sel = document.getElementById('editEvPersonaje');
-  sel.innerHTML = '<option value="">— ninguno —</option>' +
-    (l.personajes||[]).map(p => `<option value="${esc(p.nombre)}" ${p.nombre === ev.personaje ? 'selected' : ''}>${esc(p.nombre)}</option>`).join('');
-
-  abrirModal('modalEditarEvento');
-}
-
-async function guardarEditarEvento() {
-  const libro   = document.getElementById('editEvLibro').value;
-  const indice  = parseInt(document.getElementById('editEvIndice').value);
-  const desc    = document.getElementById('editEvDesc').value.trim();
-  const año     = parseInt(document.getElementById('editEvAnio').value);
-  const persona = document.getElementById('editEvPersonaje').value;
-
-  if(!desc) return toast('La descripción es obligatoria', 'err');
-  if(isNaN(año)) return toast('El año es obligatorio', 'err');
-
-  const l = _libros.find(x => x.titulo === libro); if(!l) return;
-  const ev = (l.eventos||[])[indice]; if(!ev) return;
-  ev.descripcion = desc;
-  ev.año = año;
-  ev.personaje = persona;
-
-  cerrarModal('modalEditarEvento');
-  await _sincronizar();
-  toast('✔ Evento actualizado');
-
-  if (_modoConexion === 'server') {
-    try {
-      const tEnc = encodeURIComponent(libro).replace(/%2F/gi, '__SLASH__');
-      await PATCH(`/libros/${tEnc}/eventos/${indice}`, { descripcion: desc, año, personaje: persona });
-    } catch(e) { toast(`⚠ ${e.message}`, 'err'); }
-  }
-}
-
-// ════════════════════════════════════════════════════════════
-//  EDITAR DESCRIPCIÓN DE LIBRO — Modal real + servidor
-// ════════════════════════════════════════════════════════════
-
-function abrirEditarDescripcion(titulo) {
-  const l = _libros.find(x => x.titulo === titulo); if(!l) return;
-  document.getElementById('editDescLibro').value  = titulo;
-  document.getElementById('editDescTitulo').value = titulo;
-  document.getElementById('editDescTexto').value  = l.descripcion || '';
-  abrirModal('modalEditarDescripcion');
-}
-
-async function guardarEditarDescripcion() {
-  const titulo = document.getElementById('editDescLibro').value;
-  const desc   = document.getElementById('editDescTexto').value.trim();
-
-  const l = _libros.find(x => x.titulo === titulo); if(!l) return;
-  l.descripcion = desc;
-
-  cerrarModal('modalEditarDescripcion');
-  await _sincronizar();
-  toast('✔ Descripción actualizada');
-
-  if (_modoConexion === 'server') {
-    try {
-      const tEnc = encodeURIComponent(titulo).replace(/%2F/gi, '__SLASH__');
-      await PATCH(`/libros/${tEnc}/descripcion`, { descripcion: desc });
-    } catch(e) { toast(`⚠ ${e.message}`, 'err'); }
-  }
-}
-
-
-// ════════════════════════════════════════════════════════════
-//  ELIMINAR PDF — Borra de Storage + tabla pdfs + notas
-// ════════════════════════════════════════════════════════════
-async function eliminarPDF(titulo, pdfUrl) {
-  if(!confirm(`¿Eliminar el PDF de "${titulo}"?\nTambién se eliminarán todas sus notas.`)) return;
-  try {
-    // 1. Borrar de Supabase Storage
-    const nombreArchivo = pdfUrl.split('/').pop();
-    await _sb.storage.from(SUPABASE_PDF_BUCKET).remove([nombreArchivo]);
-
-    // 2. Borrar referencia en tabla pdfs
-    await _sb.from('pdfs').delete().eq('titulo', titulo);
-
-    // 3. Borrar notas asociadas
-    await _sb.from('notas_pdf').delete().eq('libro', titulo);
-
-    // 4. Limpiar cache local
-    const todas = JSON.parse(localStorage.getItem('orak_notas')||'[]').filter(n => n.libro !== titulo);
-    localStorage.setItem('orak_notas', JSON.stringify(todas));
-
-    toast(`🗑 PDF "${titulo}" eliminado`, 'ok');
-    // Refrescar vista
-    setVista('pdf');
-  } catch(e) {
-    toast(`⚠ Error al eliminar: ${e.message}`, 'err');
-  }
-}
-
