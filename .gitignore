@@ -1,0 +1,46 @@
+# ══════════════════════════════════════
+#  ORAK Universe — .gitignore
+# ══════════════════════════════════════
+
+# ── Secretos — NUNCA commitear ────────
+.env
+*.key
+*.pem
+secrets/
+
+# ── Python ────────────────────────────
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+env/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+
+# ── Node (si usas en el futuro) ───────
+node_modules/
+.npm/
+
+# ── Editores ──────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ── Logs ──────────────────────────────
+*.log
+logs/
+
+# ── Docker ────────────────────────────
+docker/data/
+
+# ── Temporales ────────────────────────
+tmp/
+temp/
+*.tmp

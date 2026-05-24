@@ -1,0 +1,134 @@
+[
+    {
+        "titulo": "El Hijoeputamo Across the universe",
+        "descripcion": "Un Potamo viaja por el multiverso",
+        "contenido": "",
+        "personajes": [
+            {
+                "nombre": "El Potamo",
+                "nacimiento": 2025,
+                "muerte": 3066,
+                "habilidades": [],
+                "armas": []
+            },
+            {
+                "nombre": "un potamo gigante",
+                "nacimiento": 1900,
+                "muerte": null,
+                "habilidades": [],
+                "armas": []
+            },
+            {
+                "nombre": "Marras el hechicero supremo",
+                "nacimiento": 1010,
+                "muerte": null,
+                "habilidades": [],
+                "armas": []
+            },
+            {
+                "nombre": "Patricio",
+                "nacimiento": 140,
+                "muerte": 230,
+                "habilidades": [],
+                "armas": []
+            }
+        ],
+        "eventos": [
+            {
+                "descripcion": "El Potamo viajó por el multiverso al caer en una olla de estofado",
+                "año": 2035,
+                "personaje": "El Potamo"
+            },
+            {
+                "descripcion": "este potamo viajo por universos popotamezcos \ndestruyendo todo a su paso con auyido de sirena",
+                "año": 1901,
+                "personaje": "un potamo gigante"
+            },
+            {
+                "descripcion": "el potamo ataca con su feroz sonido de sirena al marras mago supremo que invade su territorio",
+                "año": 1050,
+                "personaje": "un potamo gigante"
+            }
+        ],
+        "aportes": [],
+        "comentarios": [],
+        "historia": "",
+        "lugares": [
+            {
+                "nombre": "mundo popotamo",
+                "tipo": "territorio",
+                "descripcion": "un lugar hostil y apestoso",
+                "facciones": []
+            }
+        ],
+        "facciones": [],
+        "relaciones": []
+    },
+    {
+        "titulo": "Hola :D",
+        "descripcion": "La invasión de los mini Marras para salvar a su papá: Marras Jr.",
+        "contenido": "",
+        "personajes": [],
+        "eventos": [],
+        "aportes": [],
+        "comentarios": [],
+        "historia": "",
+        "lugares": [],
+        "facciones": [],
+        "relaciones": []
+    },
+    {
+        "titulo": "prueba 1",
+        "descripcion": "libro de prueba 1",
+        "historia": "cuando un mundo desconocido a las afueras del universo entero tenia uno de los personajes mas peligrosos del universo \nun hombre cuyo poder era imparable y por cierto el único en su especie \n",
+        "personajes": [
+            {
+                "nombre": "darkan",
+                "nacimiento": 0,
+                "muerte": null,
+                "habilidades": [],
+                "armas": []
+            }
+        ],
+        "eventos": [
+            {
+                "descripcion": "darkan conoce nuestro mundo",
+                "año": 35,
+                "personaje": "darkan"
+            }
+        ],
+        "lugares": [],
+        "facciones": [],
+        "relaciones": []
+    },
+    {
+        "titulo": "Prueba1",
+        "descripcion": "Vamos a ver que pasa",
+        "historia": "",
+        "personajes": [],
+        "eventos": [],
+        "lugares": [],
+        "facciones": [],
+        "relaciones": []
+    },
+    {
+        "titulo": "prueba1",
+        "descripcion": "vamos a ver que pasa",
+        "historia": "",
+        "personajes": [],
+        "eventos": [],
+        "lugares": [],
+        "facciones": [],
+        "relaciones": []
+    },
+    {
+        "titulo": "prueba2",
+        "descripcion": "xxxxxxxx",
+        "historia": "",
+        "personajes": [],
+        "eventos": [],
+        "lugares": [],
+        "facciones": [],
+        "relaciones": []
+    }
+]

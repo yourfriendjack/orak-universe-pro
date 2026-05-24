@@ -1,0 +1,1513 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>ORAK — Universo Narrativo Colectivo</title>
+<link rel="stylesheet" href="orak.css">
+
+<!-- ══════════════════════════════════════
+     ORAK ICON SYSTEM — CSS
+     Cosmos Fantasy · Sci-Fi · Outline Style
+══════════════════════════════════════ -->
+<style>
+/* ─── Base del sistema de iconos ORAK ─── */
+.orak-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+
+.orak-icon svg {
+  width: 100%;
+  height: 100%;
+  stroke: #D4AF37;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+  filter: drop-shadow(0 0 4px rgba(212, 175, 55, 0.55)) drop-shadow(0 0 10px rgba(212, 175, 55, 0.25));
+  transition: filter 0.25s ease, stroke 0.25s ease;
+}
+
+/* Hover: intensifica el brillo */
+.sidebar-item:hover .orak-icon svg,
+.hdr-icon-btn:hover .orak-icon svg,
+.profile-menu-item:hover .orak-icon svg {
+  filter: drop-shadow(0 0 6px rgba(212, 175, 55, 0.85)) drop-shadow(0 0 14px rgba(212, 175, 55, 0.5));
+  stroke: #F0D060;
+}
+
+/* Icono activo */
+.sidebar-item.active .orak-icon svg {
+  stroke: #F0D060;
+  filter: drop-shadow(0 0 8px rgba(240, 208, 96, 0.9)) drop-shadow(0 0 18px rgba(212, 175, 55, 0.6));
+}
+
+/* Variantes de color especiales */
+.orak-icon.icon-teal svg   { stroke: #4EC9B0; filter: drop-shadow(0 0 4px rgba(78,201,176,0.55)) drop-shadow(0 0 10px rgba(78,201,176,0.25)); }
+.orak-icon.icon-arcane svg { stroke: #B48EF7; filter: drop-shadow(0 0 4px rgba(180,142,247,0.55)) drop-shadow(0 0 10px rgba(180,142,247,0.25)); }
+.orak-icon.icon-danger svg { stroke: #FF6B6B; filter: drop-shadow(0 0 4px rgba(255,107,107,0.55)); }
+.orak-icon.icon-muted svg  { stroke: rgba(212,175,55,0.45); filter: none; }
+
+/* Tamaños */
+.orak-icon.icon-sm  { width: 15px; height: 15px; }
+.orak-icon.icon-md  { width: 20px; height: 20px; }
+.orak-icon.icon-lg  { width: 24px; height: 24px; }
+.orak-icon.icon-xl  { width: 32px; height: 32px; }
+
+/* Icono de logo principal */
+.logo-icon .orak-icon svg {
+  stroke: #D4AF37;
+  width: 22px;
+  height: 22px;
+  filter: drop-shadow(0 0 8px rgba(212,175,55,0.9)) drop-shadow(0 0 18px rgba(212,175,55,0.45));
+}
+
+/* Icono girador para Orun's */
+@keyframes orun-pulse {
+  0%, 100% { filter: drop-shadow(0 0 4px rgba(212,175,55,0.55)) drop-shadow(0 0 10px rgba(212,175,55,0.25)); }
+  50%       { filter: drop-shadow(0 0 8px rgba(212,175,55,0.9))  drop-shadow(0 0 18px rgba(212,175,55,0.55)); }
+}
+.coin-spin .orak-icon svg {
+  animation: orun-pulse 2.4s ease-in-out infinite;
+}
+
+/* Glimmer (supernova) */
+@keyframes glimmer-burst {
+  0%, 100% { transform: scale(1) rotate(0deg); filter: drop-shadow(0 0 4px rgba(78,201,176,0.6)); }
+  50%       { transform: scale(1.15) rotate(15deg); filter: drop-shadow(0 0 10px rgba(78,201,176,0.9)); }
+}
+.glimmer-icon svg {
+  stroke: #4EC9B0;
+  animation: glimmer-burst 3s ease-in-out infinite;
+}
+
+/* Orun hexagonal rúnico */
+.orun-icon-svg svg {
+  stroke: #D4AF37;
+}
+
+/* Icono modal upload */
+.pdf-zone-icon svg {
+  stroke: #D4AF37;
+  width: 36px;
+  height: 36px;
+  filter: drop-shadow(0 0 8px rgba(212,175,55,0.6));
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════
+     ORAK GALAXY BACKGROUND
+     Canvas JS + nebulosas CSS multicapa
+     z-index: 0 — siempre debajo de la UI
+══════════════════════════════════════ -->
+<canvas id="orakGalaxyCanvas"></canvas>
+<div class="galaxy-nebula galaxy-nebula-1"></div>
+<div class="galaxy-nebula galaxy-nebula-2"></div>
+<div class="galaxy-nebula galaxy-nebula-3"></div>
+<div class="galaxy-nebula galaxy-nebula-4"></div>
+<div class="galaxy-core"></div>
+
+<!-- ══════════════════════════════════════
+     HEADER
+══════════════════════════════════════ -->
+<header class="header">
+
+  <!-- Logo: Espada cósmica / runa de ORAK -->
+  <div class="logo-icon">
+    <span class="orak-icon icon-lg">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <!-- Espada arcana estilizada -->
+        <line x1="12" y1="2" x2="12" y2="16"/>
+        <polyline points="9,5 12,2 15,5"/>
+        <line x1="9" y1="12" x2="15" y2="12"/>
+        <path d="M10 16 L12 22 L14 16"/>
+        <circle cx="12" cy="12" r="1.5" fill="#D4AF37" stroke="none"/>
+      </svg>
+    </span>
+  </div>
+  <a class="logo" href="#">ORAK</a>
+
+  <div class="header-breadcrumb" id="headerBreadcrumb">
+    <span>INICIO</span>
+    <span class="sep">/</span>
+    <span class="current" id="headerVistaLabel">MIS LIBROS</span>
+  </div>
+
+  <div class="header-search">
+    <!-- Icono búsqueda: lupa astral -->
+    <span class="orak-icon icon-sm icon-muted">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="11" cy="11" r="7"/>
+        <line x1="16.5" y1="16.5" x2="22" y2="22"/>
+        <line x1="11" y1="8" x2="11" y2="14"/>
+        <line x1="8" y1="11" x2="14" y2="11"/>
+      </svg>
+    </span>
+    <input type="text" placeholder="Buscar personajes, eventos, lugares…" id="searchInput" oninput="buscar(this.value)">
+  </div>
+
+  <div class="header-right">
+    <span class="ws-dot" id="wsDot"></span>
+    <span class="badge-modo" id="badgeModo">● Local</span>
+
+    <!-- Monedas -->
+    <div class="currency-bar">
+      <div class="currency-item">
+        <!-- Orun's: hexágono rúnico pulsante -->
+        <span class="coin-spin">
+          <span class="orak-icon icon-sm">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <polygon points="12,2 20.5,7 20.5,17 12,22 3.5,17 3.5,7"/>
+              <polygon points="12,6 17,9 17,15 12,18 7,15 7,9" stroke-width="1"/>
+              <circle cx="12" cy="12" r="2" fill="#D4AF37" stroke="none"/>
+            </svg>
+          </span>
+        </span>
+        <span class="oruns-val" id="orunsVal">500</span>
+        <span style="font-size:10px;color:var(--text3);margin-left:2px">Orun's</span>
+      </div>
+      <div class="currency-divider"></div>
+      <div class="currency-item">
+        <!-- Glimmer: supernova / destello -->
+        <span class="glimmer-icon">
+          <span class="orak-icon icon-sm">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <line x1="12" y1="2" x2="12" y2="6"/>
+              <line x1="12" y1="18" x2="12" y2="22"/>
+              <line x1="2" y1="12" x2="6" y2="12"/>
+              <line x1="18" y1="12" x2="22" y2="12"/>
+              <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/>
+              <line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/>
+              <line x1="19.07" y1="4.93" x2="16.24" y2="7.76"/>
+              <line x1="7.76" y1="16.24" x2="4.93" y2="19.07"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+          </span>
+        </span>
+        <span class="glimmers-val" id="glimmersVal">0</span>
+        <span style="font-size:10px;color:var(--text3);margin-left:2px">Glimmers</span>
+      </div>
+    </div>
+
+    <!-- Notificaciones -->
+    <div style="position:relative">
+      <div class="hdr-icon-btn" id="notifBtn" title="Notificaciones" onclick="toggleNotifPanel()">
+        <!-- Campana cósmica -->
+        <span class="orak-icon icon-md">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            <line x1="12" y1="2" x2="12" y2="4"/>
+            <circle cx="12" cy="3" r="0.8" fill="#D4AF37" stroke="none"/>
+          </svg>
+        </span>
+        <span class="notif-dot red" id="notifDot" style="display:none"></span>
+      </div>
+      <div class="notif-panel" id="notifPanel">
+        <div class="notif-panel-hdr">
+          <span style="font-weight:700;font-size:14px">Notificaciones</span>
+          <button onclick="marcarTodasLeidas()" style="font-size:11px;color:var(--gold-lt);background:none;border:none;cursor:pointer">Marcar leídas</button>
+        </div>
+        <div id="notifList">
+          <div style="text-align:center;padding:24px;color:var(--text3);font-size:13px">Sin notificaciones</div>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn btn-primary btn-sm header-nuevo-libro" onclick="abrirModal('modalLibro')">＋ Nuevo libro</button>
+
+    <!-- Perfil -->
+    <div style="position:relative" id="authArea">
+      <div class="avatar-placeholder" onclick="toggleProfileMenu()">A</div>
+      <div class="profile-menu" id="profileMenu">
+        <div class="profile-menu-hdr">
+          <div class="profile-menu-name" id="pmNombre">Autor</div>
+          <div class="profile-menu-bal"><span id="pmOruns">500</span> Orun's &nbsp;·&nbsp; <span id="pmGlimmers">0</span> Glimmers</div>
+        </div>
+        <!-- Mi perfil: silueta rúnica -->
+        <button class="profile-menu-item" onclick="toggleProfileMenu()">
+          <span class="orak-icon icon-md icon-arcane" style="margin-right:8px">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="8" r="4"/>
+              <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+              <line x1="12" y1="4" x2="12" y2="2"/>
+              <line x1="15.5" y1="5.5" x2="17" y2="4"/>
+              <line x1="8.5" y1="5.5" x2="7" y2="4"/>
+            </svg>
+          </span>
+          Mi perfil
+        </button>
+        <!-- Inventario: mochila arcana -->
+        <button class="profile-menu-item" onclick="toggleProfileMenu()">
+          <span class="orak-icon icon-md icon-arcane" style="margin-right:8px">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M9 4a3 3 0 0 1 6 0"/>
+              <rect x="3" y="6" width="18" height="15" rx="3"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+              <line x1="12" y1="14" x2="12" y2="18"/>
+              <line x1="10" y1="16" x2="14" y2="16"/>
+            </svg>
+          </span>
+          Inventario
+        </button>
+        <!-- Tienda de skins: paleta mágica -->
+        <button class="profile-menu-item" onclick="setVista('tienda');toggleProfileMenu()">
+          <span class="orak-icon icon-md icon-arcane" style="margin-right:8px">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="12" r="9"/>
+              <circle cx="8.5" cy="9" r="1.5" fill="#B48EF7" stroke="none"/>
+              <circle cx="15.5" cy="9" r="1.5" fill="#4EC9B0" stroke="none"/>
+              <circle cx="8.5" cy="15" r="1.5" fill="#D4AF37" stroke="none"/>
+              <circle cx="15.5" cy="15" r="1.5" fill="#FF6B6B" stroke="none"/>
+              <circle cx="12" cy="12" r="2"/>
+            </svg>
+          </span>
+          Tienda de skins
+        </button>
+        <!-- Cerrar sesión -->
+        <button class="profile-menu-item danger" onclick="cerrarSesion()">
+          <span class="orak-icon icon-md icon-danger" style="margin-right:8px">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+              <polyline points="16,17 21,12 16,7"/>
+              <line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
+          </span>
+          Cerrar sesión
+        </button>
+      </div>
+    </div>
+
+    <!-- Hamburguesa (móvil) -->
+    <button class="burger" id="burgerBtn" onclick="toggleDrawer()">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════════
+     LAYOUT PRINCIPAL — 3 COLUMNAS
+══════════════════════════════════════ -->
+<div class="layout">
+
+  <!-- ── SIDEBAR IZQUIERDO ── -->
+  <nav class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Navegar</div>
+
+      <!-- Inicio: planeta / astro -->
+      <button class="sidebar-item active" onclick="setVista('feed')" id="nav-feed">
+        <span class="icon orak-icon icon-md">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="9"/>
+            <ellipse cx="12" cy="12" rx="4" ry="9"/>
+            <line x1="3" y1="9" x2="21" y2="9"/>
+            <line x1="3" y1="15" x2="21" y2="15"/>
+          </svg>
+        </span>
+        Inicio
+      </button>
+
+      <!-- Mis Libros: tomo arcano -->
+      <button class="sidebar-item has-sub" onclick="setVista('libros')" id="nav-libros">
+        <span class="icon orak-icon icon-md">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+            <line x1="9" y1="7" x2="15" y2="7"/>
+            <line x1="9" y1="11" x2="15" y2="11"/>
+            <line x1="9" y1="15" x2="12" y2="15"/>
+            <path d="M17 7 l1 2 l1-2" stroke-width="1"/>
+          </svg>
+        </span>
+        Mis Libros
+        <span class="count" id="countLibros">0</span>
+      </button>
+
+      <!-- Timeline: espiral temporal -->
+      <button class="sidebar-item" onclick="setVista('timeline')" id="nav-timeline">
+        <span class="icon orak-icon icon-md">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="9"/>
+            <polyline points="12,7 12,12 15,15"/>
+            <line x1="12" y1="3" x2="12" y2="1"/>
+            <line x1="12" y1="23" x2="12" y2="21"/>
+            <line x1="3" y1="12" x2="1" y2="12"/>
+            <line x1="23" y1="12" x2="21" y2="12"/>
+          </svg>
+        </span>
+        Timeline Multiversal
+      </button>
+
+      <!-- Personajes: mago / runa astral (categoría especial) -->
+      <button class="sidebar-item has-sub" onclick="setVista('personajes')" id="nav-personajes">
+        <span class="icon orak-icon icon-md">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <!-- Runa de mago: pentagrama astral -->
+            <circle cx="12" cy="12" r="9"/>
+            <polygon points="12,4 14.5,10 21,10 15.5,14 18,21 12,17 6,21 8.5,14 3,10 9.5,10"/>
+          </svg>
+        </span>
+        Personajes
+        <span class="sidebar-arrow">›</span>
+      </button>
+
+      <!-- Facciones: escudo herálico -->
+      <button class="sidebar-item has-sub" onclick="setVista('facciones')" id="nav-facciones">
+        <span class="icon orak-icon icon-md">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L3 7v7c0 4.4 3.8 8.5 9 9.5 5.2-1 9-5.1 9-9.5V7z"/>
+            <line x1="12" y1="7" x2="12" y2="17"/>
+            <line x1="7" y1="12" x2="17" y2="12"/>
+          </svg>
+        </span>
+        Facciones
+        <span class="sidebar-arrow">›</span>
+      </button>
+
+      <!-- Lugares: mapa estelar -->
+      <button class="sidebar-item has-sub" onclick="setVista('lugares')" id="nav-lugares">
+        <span class="icon orak-icon icon-md">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="3,6 9,3 15,6 21,3 21,18 15,21 9,18 3,21"/>
+            <line x1="9" y1="3" x2="9" y2="18"/>
+            <line x1="15" y1="6" x2="15" y2="21"/>
+            <circle cx="6" cy="10" r="1" fill="#D4AF37" stroke="none"/>
+            <circle cx="18" cy="14" r="1" fill="#D4AF37" stroke="none"/>
+          </svg>
+        </span>
+        Lugares
+        <span class="sidebar-arrow">›</span>
+      </button>
+
+      <!-- Relaciones: nexo de red -->
+      <button class="sidebar-item" onclick="setVista('relaciones')" id="nav-relaciones">
+        <span class="icon orak-icon icon-md">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="5" cy="12" r="3"/>
+            <circle cx="19" cy="5" r="3"/>
+            <circle cx="19" cy="19" r="3"/>
+            <line x1="8" y1="11" x2="16" y2="6.5"/>
+            <line x1="8" y1="13" x2="16" y2="17.5"/>
+          </svg>
+        </span>
+        Relaciones
+      </button>
+
+      <!-- Diagnóstico: ojo arcano / alerta -->
+      <button class="sidebar-item" onclick="setVista('errores')" id="nav-errores">
+        <span class="icon orak-icon icon-md">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+            <circle cx="12" cy="17" r="0.5" fill="#D4AF37" stroke="none"/>
+          </svg>
+        </span>
+        Diagnóstico
+      </button>
+
+      <!-- Chat: burbuja cósmica -->
+      <button class="sidebar-item" onclick="setVista('chat')" id="nav-chat">
+        <span class="icon orak-icon icon-md">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            <line x1="9" y1="10" x2="15" y2="10"/>
+            <line x1="9" y1="13" x2="13" y2="13"/>
+          </svg>
+        </span>
+        Chat
+      </button>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <div class="sidebar-section" style="flex:1">
+      <!-- Tienda: cristal energético -->
+      <button class="sidebar-item" onclick="setVista('tienda')" id="nav-tienda" style="width:100%;margin-bottom:6px;border-radius:8px;justify-content:flex-start">
+        <span class="icon orak-icon icon-md">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="12,2 15.5,8.5 22,9.3 17,14.1 18.2,21 12,17.8 5.8,21 7,14.1 2,9.3 8.5,8.5"/>
+            <circle cx="12" cy="12" r="2.5"/>
+          </svg>
+        </span>
+        <span>Tienda del Universe</span>
+        <span style="margin-left:auto;font-size:9px;background:var(--gold-bg);color:var(--gold-lt);border:1px solid var(--gold-dim);padding:1px 5px;border-radius:10px;font-weight:700">NEW</span>
+      </button>
+
+      <!-- Mis Libros PDF: pergamino -->
+      <button class="sidebar-item" onclick="setVista('pdf')" id="nav-pdf" style="width:100%;margin-bottom:6px;border-radius:8px;justify-content:flex-start">
+        <span class="icon orak-icon icon-md">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14,2 14,8 20,8"/>
+            <line x1="9" y1="13" x2="15" y2="13"/>
+            <line x1="9" y1="17" x2="13" y2="17"/>
+            <line x1="9" y1="9" x2="11" y2="9"/>
+          </svg>
+        </span>
+        <span>Mis Libros (PDF)</span>
+      </button>
+      <div class="libros-lista" id="librosSidebar"></div>
+      <div style="padding:6px 8px;">
+        <button class="btn btn-ghost btn-sm" style="width:100%;justify-content:center" onclick="abrirModal('modalLibro')">＋ Agregar libro</button>
+      </div>
+    </div>
+
+    <!-- Personajes sidebar bottom -->
+    <div class="sidebar-chars" id="sidebarChars"></div>
+  </nav>
+
+  <!-- ── CONTENIDO CENTRAL ── -->
+  <main class="main" id="mainContent">
+    <div class="spinner"></div>
+  </main>
+
+  <!-- ── PANEL DERECHO ── -->
+  <aside class="right-panel">
+
+    <!-- Estado de Cuenta -->
+    <div class="account-section">
+      <div class="section-title">Estado de Cuenta</div>
+      <div class="currency-cards">
+
+        <!-- GLIMMERS — supernova / destello (categoría especial) -->
+        <div class="currency-card glimmers">
+          <span class="cc-icon glimmer-icon">
+            <span class="orak-icon icon-lg">
+              <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <line x1="12" y1="1" x2="12" y2="5"/>
+                <line x1="12" y1="19" x2="12" y2="23"/>
+                <line x1="1" y1="12" x2="5" y2="12"/>
+                <line x1="19" y1="12" x2="23" y2="12"/>
+                <line x1="4.22" y1="4.22" x2="7.05" y2="7.05"/>
+                <line x1="16.95" y1="16.95" x2="19.78" y2="19.78"/>
+                <line x1="19.78" y1="4.22" x2="16.95" y2="7.05"/>
+                <line x1="7.05" y1="16.95" x2="4.22" y2="19.78"/>
+                <circle cx="12" cy="12" r="4"/>
+                <circle cx="12" cy="12" r="1.5" fill="#4EC9B0" stroke="none"/>
+              </svg>
+            </span>
+          </span>
+          <div class="cc-label">Glimmers <span class="cc-sub">(Calificación)</span></div>
+          <div class="cc-value" id="rpGlimmers">0</div>
+        </div>
+
+        <!-- ORUN'S — hexágono rúnico circular (categoría especial) -->
+        <div class="currency-card">
+          <span class="cc-icon orun-icon orun-icon-svg">
+            <span class="orak-icon icon-lg">
+              <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <!-- Diseño circular rúnico para ORUN'S -->
+                <circle cx="12" cy="12" r="10"/>
+                <polygon points="12,4 18.9,8 18.9,16 12,20 5.1,16 5.1,8"/>
+                <polygon points="12,7.5 15.9,9.75 15.9,14.25 12,16.5 8.1,14.25 8.1,9.75" stroke-width="1"/>
+                <circle cx="12" cy="12" r="2" fill="#D4AF37" stroke="none"/>
+                <!-- runas internas -->
+                <line x1="12" y1="4" x2="12" y2="7.5" stroke-width="1"/>
+                <line x1="18.9" y1="8" x2="15.9" y2="9.75" stroke-width="1"/>
+                <line x1="18.9" y1="16" x2="15.9" y2="14.25" stroke-width="1"/>
+                <line x1="12" y1="20" x2="12" y2="16.5" stroke-width="1"/>
+                <line x1="5.1" y1="16" x2="8.1" y2="14.25" stroke-width="1"/>
+                <line x1="5.1" y1="8" x2="8.1" y2="9.75" stroke-width="1"/>
+              </svg>
+            </span>
+          </span>
+          <div class="cc-label">Orun's <span class="cc-sub">(Moneda)</span></div>
+          <div class="cc-value" id="rpOruns">500</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Encuesta narrativa D&D -->
+    <div class="poll-card" id="pollCard">
+      <div class="poll-badge">Encuesta Narrativa D&amp;D</div>
+      <div class="poll-question" id="pollQuestion">¿Cómo debe la ciudad enfrentar la infección?</div>
+      <div id="pollOptions">
+        <div class="poll-option" onclick="votarPoll(0)">
+          <div class="poll-option-top"><span>1. Aislamiento Estricto</span><span class="poll-option-pct pct-1" id="pct0">45%</span></div>
+          <div class="poll-bar-track"><div class="poll-bar-fill fill-1" style="width:45%" id="bar0"></div></div>
+        </div>
+        <div class="poll-option" onclick="votarPoll(1)">
+          <div class="poll-option-top"><span>2. Resistencia Armada</span><span class="poll-option-pct pct-2" id="pct1">35%</span></div>
+          <div class="poll-bar-track"><div class="poll-bar-fill fill-2" style="width:35%" id="bar1"></div></div>
+        </div>
+        <div class="poll-option" onclick="votarPoll(2)">
+          <div class="poll-option-top"><span>3. Negociación</span><span class="poll-option-pct pct-3" id="pct2">20%</span></div>
+          <div class="poll-bar-track"><div class="poll-bar-fill fill-3" style="width:20%" id="bar2"></div></div>
+        </div>
+      </div>
+      <div class="poll-footer">
+        <span>0Ra <span style="color:var(--teal-lt);font-weight:700">Voting</span> · 10 min</span>
+        <button class="poll-vote-btn" onclick="votarPoll(0)">VOTA Y CALIFICA CON GLIMMERS</button>
+      </div>
+    </div>
+
+    <!-- Ranking de participación -->
+    <div class="ranking-card">
+      <div class="section-title">Ranking de Participación</div>
+      <div class="ranking-item">
+        <span class="ranking-num rank-1">1</span>
+        <div class="ranking-avatar" style="background:linear-gradient(135deg,rgba(180,100,220,0.3),rgba(212,175,55,0.15))">E</div>
+        <div class="ranking-info"><div class="ranking-name">Elara Nero</div><div class="ranking-badge"><span class="rb-icon">⚡</span> Uls</div></div>
+        <div class="ranking-star">✦ ✦ ✦</div>
+      </div>
+      <div class="ranking-item">
+        <span class="ranking-num rank-2">2</span>
+        <div class="ranking-avatar" style="background:linear-gradient(135deg,rgba(80,140,200,0.3),rgba(60,200,160,0.15))">R</div>
+        <div class="ranking-info"><div class="ranking-name">Razor_9</div><div class="ranking-badge"><span class="rb-icon">⚡</span> Uls</div></div>
+        <div class="ranking-star">✦ ✦</div>
+      </div>
+      <div class="ranking-item">
+        <span class="ranking-num rank-other">3.</span>
+        <div class="ranking-avatar" style="background:var(--glass)">?</div>
+        <div class="ranking-info"><div class="ranking-name" style="color:var(--text3)">—</div><div class="ranking-badge">Sin clasificar</div></div>
+        <div style="margin-left:auto;cursor:pointer;font-size:12px;color:var(--arcane-lt)">▲</div>
+      </div>
+      <div class="ranking-item">
+        <span class="ranking-num rank-other">4.</span>
+        <div class="ranking-avatar" style="background:var(--glass)">?</div>
+        <div class="ranking-info"><div class="ranking-name" style="color:var(--text3)">—</div><div class="ranking-badge">Sin clasificar</div></div>
+        <div style="margin-left:auto;cursor:pointer;font-size:12px;color:var(--arcane-lt)">▲</div>
+      </div>
+    </div>
+
+    <!-- Notificación flotante de Orun's -->
+    <div class="floating-notif" id="floatingNotif" style="opacity:0">
+      <div>
+        <span class="fn-avatar">R</span>
+        <strong>RAZOR_9</strong> sugiere un final alternativo al
+        Capítulo 4: Usa <span class="fn-highlight">50 ORUN's</span> para desbloquear
+      </div>
+      <div class="fn-footer">
+        <span class="fn-diamond">◆</span>
+        <span>Contenido exclusivo disponible</span>
+        <button class="poll-vote-btn" style="margin-left:auto;font-size:9px;padding:3px 8px"
+          onclick="tryUnlock('finales')">Ver</button>
+      </div>
+    </div>
+
+  </aside>
+
+</div><!-- /layout -->
+
+<!-- ══════════════════════════════════════
+     DRAWER MÓVIL
+══════════════════════════════════════ -->
+<div class="drawer-backdrop" id="drawerBackdrop" onclick="cerrarDrawer()"></div>
+<nav class="drawer" id="drawerMenu">
+  <div class="drawer-header">
+    <div class="drawer-logo">
+      <span class="orak-icon icon-md" style="margin-right:6px">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <line x1="12" y1="2" x2="12" y2="16"/>
+          <polyline points="9,5 12,2 15,5"/>
+          <line x1="9" y1="12" x2="15" y2="12"/>
+          <path d="M10 16 L12 22 L14 16"/>
+          <circle cx="12" cy="12" r="1.5" fill="#D4AF37" stroke="none"/>
+        </svg>
+      </span>
+      ORAK
+    </div>
+    <button class="drawer-close" onclick="cerrarDrawer()">✕</button>
+  </div>
+  <div class="drawer-body">
+    <div style="padding:12px 12px 8px">
+      <button class="btn btn-primary btn-sm" style="width:100%;justify-content:center"
+        onclick="cerrarDrawer();abrirModal('modalLibro')">＋ Nuevo libro</button>
+    </div>
+    <div style="height:1px;background:var(--border);margin:8px 16px 12px"></div>
+    <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;padding:0 16px 8px">Navegar</div>
+
+    <button class="sidebar-item" onclick="cerrarDrawer();setVista('feed')">
+      <span class="icon orak-icon icon-md">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg>
+      </span>
+      Inicio
+    </button>
+    <button class="sidebar-item" onclick="cerrarDrawer();setVista('libros')">
+      <span class="icon orak-icon icon-md">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="9" y1="7" x2="15" y2="7"/><line x1="9" y1="11" x2="15" y2="11"/></svg>
+      </span>
+      Libros <span class="count" id="dCountLibros">0</span>
+    </button>
+    <button class="sidebar-item" onclick="cerrarDrawer();setVista('personajes')">
+      <span class="icon orak-icon icon-md">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="9"/><polygon points="12,4 14.5,10 21,10 15.5,14 18,21 12,17 6,21 8.5,14 3,10 9.5,10"/></svg>
+      </span>
+      Personajes <span class="count" id="dCountPersonajes">0</span>
+    </button>
+    <button class="sidebar-item" onclick="cerrarDrawer();setVista('timeline')">
+      <span class="icon orak-icon icon-md">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="9"/><polyline points="12,7 12,12 15,15"/><line x1="12" y1="3" x2="12" y2="1"/><line x1="12" y1="23" x2="12" y2="21"/></svg>
+      </span>
+      Timeline
+    </button>
+    <button class="sidebar-item" onclick="cerrarDrawer();setVista('lugares')">
+      <span class="icon orak-icon icon-md">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><polygon points="3,6 9,3 15,6 21,3 21,18 15,21 9,18 3,21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>
+      </span>
+      Lugares
+    </button>
+    <button class="sidebar-item" onclick="cerrarDrawer();setVista('facciones')">
+      <span class="icon orak-icon icon-md">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L3 7v7c0 4.4 3.8 8.5 9 9.5 5.2-1 9-5.1 9-9.5V7z"/><line x1="12" y1="7" x2="12" y2="17"/><line x1="7" y1="12" x2="17" y2="12"/></svg>
+      </span>
+      Facciones
+    </button>
+    <button class="sidebar-item" onclick="cerrarDrawer();setVista('relaciones')">
+      <span class="icon orak-icon icon-md">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="5" cy="12" r="3"/><circle cx="19" cy="5" r="3"/><circle cx="19" cy="19" r="3"/><line x1="8" y1="11" x2="16" y2="6.5"/><line x1="8" y1="13" x2="16" y2="17.5"/></svg>
+      </span>
+      Relaciones
+    </button>
+    <button class="sidebar-item" onclick="cerrarDrawer();setVista('chat')">
+      <span class="icon orak-icon icon-md">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      </span>
+      Chat
+    </button>
+    <button class="sidebar-item" onclick="cerrarDrawer();setVista('tienda')">
+      <span class="icon orak-icon icon-md">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><polygon points="12,2 15.5,8.5 22,9.3 17,14.1 18.2,21 12,17.8 5.8,21 7,14.1 2,9.3 8.5,8.5"/><circle cx="12" cy="12" r="2.5"/></svg>
+      </span>
+      Tienda
+    </button>
+    <button class="sidebar-item" onclick="cerrarDrawer();setVista('pdf')">
+      <span class="icon orak-icon icon-md">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>
+      </span>
+      Mis Libros (PDF)
+    </button>
+
+    <div style="height:1px;background:var(--border);margin:12px 16px"></div>
+    <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;padding:0 16px 8px">Mis libros</div>
+    <div id="drawerLibros" style="padding:0 8px"></div>
+
+    <!-- Monedas en drawer -->
+    <div style="margin:12px 12px 0;padding:10px;background:var(--glass);border:1px solid var(--glass-border);border-radius:10px;display:flex;gap:14px;justify-content:center">
+      <div style="text-align:center">
+        <!-- ORUN'S rúnico -->
+        <div style="display:flex;justify-content:center;margin-bottom:2px">
+          <span class="orak-icon icon-lg orun-icon-svg">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="12" r="10"/>
+              <polygon points="12,4 18.9,8 18.9,16 12,20 5.1,16 5.1,8"/>
+              <polygon points="12,7.5 15.9,9.75 15.9,14.25 12,16.5 8.1,14.25 8.1,9.75" stroke-width="1"/>
+              <circle cx="12" cy="12" r="2" fill="#D4AF37" stroke="none"/>
+            </svg>
+          </span>
+        </div>
+        <div class="cc-value" id="drawerOruns" style="font-size:16px;color:var(--gold-lt)">500</div>
+        <div style="font-size:10px;color:var(--text3)">Orun's</div>
+      </div>
+      <div style="width:1px;background:var(--border)"></div>
+      <div style="text-align:center">
+        <!-- GLIMMER supernova -->
+        <div style="display:flex;justify-content:center;margin-bottom:2px">
+          <span class="orak-icon icon-lg glimmer-icon">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/>
+              <line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/>
+              <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/>
+              <line x1="19.07" y1="4.93" x2="16.24" y2="7.76"/><line x1="7.76" y1="16.24" x2="4.93" y2="19.07"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+          </span>
+        </div>
+        <div class="cc-value" id="drawerGlimmers" style="font-size:16px;color:rgba(180,220,255,0.9)">0</div>
+        <div style="font-size:10px;color:var(--text3)">Glimmers</div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════════
+     MENÚ COMPLETO MÓVIL (panel superior)
+     Se despliega al tocar la hamburguesa
+══════════════════════════════════════ -->
+<div class="mobile-menu-backdrop" id="mobileMenuBackdrop" onclick="closeMobileMenu()"></div>
+<div class="mobile-menu-panel" id="mobileMenuPanel">
+  <!-- Zona de arrastre táctil — sigue al dedo con inercia física -->
+  <div class="mobile-menu-drag-handle" id="mobileMenuDragHandle"></div>
+  <div class="mobile-menu-header">
+    <div class="mobile-menu-logo">
+      <span class="orak-icon icon-md" style="margin-right:6px">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <line x1="12" y1="2" x2="12" y2="16"/>
+          <polyline points="9,5 12,2 15,5"/>
+          <line x1="9" y1="12" x2="15" y2="12"/>
+          <path d="M10 16 L12 22 L14 16"/>
+          <circle cx="12" cy="12" r="1.5" fill="#D4AF37" stroke="none"/>
+        </svg>
+      </span>
+      ORAK
+    </div>
+    <button class="mobile-menu-close" onclick="closeMobileMenu()">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+  </div>
+
+  <div class="mobile-menu-body">
+    <div class="mobile-menu-section-label">Navegar</div>
+
+    <button class="mobile-menu-item" onclick="closeMobileMenu();mobileNavTo('feed')">
+      <span class="orak-icon icon-md"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg></span>
+      Inicio
+    </button>
+    <button class="mobile-menu-item" onclick="closeMobileMenu();mobileNavTo('libros')">
+      <span class="orak-icon icon-md"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="9" y1="7" x2="15" y2="7"/><line x1="9" y1="11" x2="15" y2="11"/></svg></span>
+      Mis Libros
+      <span class="mobile-menu-count" id="mmCountLibros">0</span>
+    </button>
+    <button class="mobile-menu-item" onclick="closeMobileMenu();mobileNavTo('personajes')">
+      <span class="orak-icon icon-md"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="9"/><polygon points="12,4 14.5,10 21,10 15.5,14 18,21 12,17 6,21 8.5,14 3,10 9.5,10"/></svg></span>
+      Personajes
+      <span class="mobile-menu-count" id="mmCountPersonajes">0</span>
+    </button>
+    <button class="mobile-menu-item" onclick="closeMobileMenu();mobileNavTo('timeline')">
+      <span class="orak-icon icon-md"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="9"/><polyline points="12,7 12,12 15,15"/><line x1="12" y1="3" x2="12" y2="1"/><line x1="12" y1="23" x2="12" y2="21"/></svg></span>
+      Timeline Multiversal
+    </button>
+    <button class="mobile-menu-item" onclick="closeMobileMenu();mobileNavTo('lugares')">
+      <span class="orak-icon icon-md"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><polygon points="3,6 9,3 15,6 21,3 21,18 15,21 9,18 3,21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg></span>
+      Lugares
+    </button>
+    <button class="mobile-menu-item" onclick="closeMobileMenu();mobileNavTo('facciones')">
+      <span class="orak-icon icon-md"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L3 7v7c0 4.4 3.8 8.5 9 9.5 5.2-1 9-5.1 9-9.5V7z"/><line x1="12" y1="7" x2="12" y2="17"/><line x1="7" y1="12" x2="17" y2="12"/></svg></span>
+      Facciones
+    </button>
+    <button class="mobile-menu-item" onclick="closeMobileMenu();mobileNavTo('relaciones')">
+      <span class="orak-icon icon-md"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="5" cy="12" r="3"/><circle cx="19" cy="5" r="3"/><circle cx="19" cy="19" r="3"/><line x1="8" y1="11" x2="16" y2="6.5"/><line x1="8" y1="13" x2="16" y2="17.5"/></svg></span>
+      Relaciones
+    </button>
+    <button class="mobile-menu-item" onclick="closeMobileMenu();mobileNavTo('errores')">
+      <span class="orak-icon icon-md"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
+      Diagnóstico
+    </button>
+    <button class="mobile-menu-item" onclick="closeMobileMenu();mobileNavTo('chat')">
+      <span class="orak-icon icon-md"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+      Chat
+    </button>
+
+    <div class="mobile-menu-divider"></div>
+    <div class="mobile-menu-section-label">Especial</div>
+
+    <button class="mobile-menu-item" onclick="closeMobileMenu();mobileNavTo('tienda')">
+      <span class="orak-icon icon-md"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><polygon points="12,2 15.5,8.5 22,9.3 17,14.1 18.2,21 12,17.8 5.8,21 7,14.1 2,9.3 8.5,8.5"/><circle cx="12" cy="12" r="2.5"/></svg></span>
+      Tienda del Universe
+      <span style="margin-left:auto;font-size:9px;background:var(--gold-bg);color:var(--gold-lt);border:1px solid var(--gold-dim);padding:1px 6px;border-radius:10px;font-weight:700">NEW</span>
+    </button>
+    <button class="mobile-menu-item" onclick="closeMobileMenu();mobileNavTo('pdf')">
+      <span class="orak-icon icon-md"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg></span>
+      Mis Libros (PDF)
+    </button>
+
+    <div class="mobile-menu-divider"></div>
+
+    <button class="mobile-menu-item mobile-menu-new-book" onclick="closeMobileMenu();abrirModal('modalLibro')">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Nuevo libro
+    </button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     BARRA DE NAVEGACIÓN MÓVIL INFERIOR
+     Reemplaza el sidebar en móvil
+══════════════════════════════════════ -->
+<nav class="mobile-nav-bar" id="mobileNavBar">
+  <!-- Inicio -->
+  <button class="mobile-nav-item active" id="mnav-feed" onclick="mobileNavTo('feed')">
+    <span class="orak-icon icon-md">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/>
+        <line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/>
+      </svg>
+    </span>
+    <span class="nav-label">Inicio</span>
+  </button>
+
+  <!-- Libros -->
+  <button class="mobile-nav-item" id="mnav-libros" onclick="mobileNavTo('libros')">
+    <span class="orak-icon icon-md">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+        <line x1="9" y1="7" x2="15" y2="7"/><line x1="9" y1="11" x2="15" y2="11"/>
+      </svg>
+    </span>
+    <span class="nav-label">Libros</span>
+  </button>
+
+  <!-- Hamburguesa central — abre el menú completo -->
+  <button class="mobile-nav-hamburger" id="mobileHamburger" onclick="toggleMobileMenu()" title="Menú">
+    <span class="ham-line"></span>
+    <span class="ham-line"></span>
+    <span class="ham-line"></span>
+  </button>
+
+  <!-- Personajes -->
+  <button class="mobile-nav-item" id="mnav-personajes" onclick="mobileNavTo('personajes')">
+    <span class="orak-icon icon-md">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="12" cy="12" r="9"/>
+        <polygon points="12,4 14.5,10 21,10 15.5,14 18,21 12,17 6,21 8.5,14 3,10 9.5,10"/>
+      </svg>
+    </span>
+    <span class="nav-label">Personajes</span>
+  </button>
+
+  <!-- Timeline -->
+  <button class="mobile-nav-item" id="mnav-timeline" onclick="mobileNavTo('timeline')">
+    <span class="orak-icon icon-md">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="12" cy="12" r="9"/>
+        <polyline points="12,7 12,12 15,15"/>
+        <line x1="12" y1="3" x2="12" y2="1"/>
+        <line x1="12" y1="23" x2="12" y2="21"/>
+      </svg>
+    </span>
+    <span class="nav-label">Timeline</span>
+  </button>
+</nav>
+
+<!-- ══════════════════════════════════════
+     TOASTS
+══════════════════════════════════════ -->
+<div class="toast-container" id="toasts"></div>
+
+<!-- ══════════════════════════════════════
+     MODAL — Nuevo Lugar
+══════════════════════════════════════ -->
+<div class="overlay" id="modalLugar">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">
+        <span class="orak-icon icon-md" style="margin-right:6px">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><polygon points="3,6 9,3 15,6 21,3 21,18 15,21 9,18 3,21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>
+        </span>
+        Nuevo lugar
+      </div>
+      <button class="modal-close" onclick="cerrarModal('modalLugar')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Libro</label><select class="form-select" id="lugarLibro"></select></div>
+      <div class="form-group"><label class="form-label">Nombre</label><input class="form-input" id="lugarNombre" placeholder="ej. Ciudad de Arken"></div>
+      <div class="form-group">
+        <label class="form-label">Tipo</label>
+        <select class="form-select" id="lugarTipo">
+          <option value="ciudad">Ciudad</option><option value="region">Región</option>
+          <option value="territorio">Territorio</option><option value="reino">Reino</option>
+          <option value="aldea">Aldea</option><option value="fortaleza">Fortaleza</option><option value="otro">Otro</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">Descripción</label><textarea class="form-textarea" id="lugarDesc" placeholder="¿Cómo es este lugar?"></textarea></div>
+      <div class="form-actions">
+        <button class="btn btn-ghost" onclick="cerrarModal('modalLugar')">Cancelar</button>
+        <button class="btn btn-primary" onclick="crearLugar()">Agregar lugar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     MODAL — Nueva Facción
+══════════════════════════════════════ -->
+<div class="overlay" id="modalFaccion">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">
+        <span class="orak-icon icon-md" style="margin-right:6px">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L3 7v7c0 4.4 3.8 8.5 9 9.5 5.2-1 9-5.1 9-9.5V7z"/><line x1="12" y1="7" x2="12" y2="17"/><line x1="7" y1="12" x2="17" y2="12"/></svg>
+        </span>
+        Nueva facción
+      </div>
+      <button class="modal-close" onclick="cerrarModal('modalFaccion')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Libro</label><select class="form-select" id="faccionLibro"></select></div>
+      <div class="form-group"><label class="form-label">Nombre</label><input class="form-input" id="faccionNombre" placeholder="ej. Orden del Sol Negro"></div>
+      <div class="form-group">
+        <label class="form-label">Tipo</label>
+        <select class="form-select" id="faccionTipo">
+          <option value="imperio">Imperio</option><option value="orden">Orden</option>
+          <option value="banda">Banda</option><option value="organizacion">Organización</option>
+          <option value="clan">Clan</option><option value="gremio">Gremio</option><option value="otro">Otro</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">Descripción</label><textarea class="form-textarea" id="faccionDesc" placeholder="¿Qué busca esta facción?"></textarea></div>
+      <div class="form-actions">
+        <button class="btn btn-ghost" onclick="cerrarModal('modalFaccion')">Cancelar</button>
+        <button class="btn btn-primary" onclick="crearFaccion()">Crear facción</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     MODAL — Nueva Relación
+══════════════════════════════════════ -->
+<div class="overlay" id="modalRelacion">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">
+        <span class="orak-icon icon-md" style="margin-right:6px">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="5" cy="12" r="3"/><circle cx="19" cy="5" r="3"/><circle cx="19" cy="19" r="3"/><line x1="8" y1="11" x2="16" y2="6.5"/><line x1="8" y1="13" x2="16" y2="17.5"/></svg>
+        </span>
+        Nueva relación
+      </div>
+      <button class="modal-close" onclick="cerrarModal('modalRelacion')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Libro</label><select class="form-select" id="relLibro" onchange="actualizarPersonajesRel()"></select></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Personaje A</label><select class="form-select" id="relPerA"></select></div>
+        <div class="form-group"><label class="form-label">Personaje B</label><select class="form-select" id="relPerB"></select></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tipo de relación</label>
+        <select class="form-select" id="relTipo">
+          <option value="aliado">Aliado</option><option value="enemigo">Enemigo</option>
+          <option value="familiar">Familiar</option><option value="mentor">Mentor</option>
+          <option value="rival">Rival</option><option value="amante">Amante</option><option value="otro">Otro</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">Descripción (opcional)</label><input class="form-input" id="relDesc" placeholder="ej. Hermanos separados al nacer"></div>
+      <div class="form-actions">
+        <button class="btn btn-ghost" onclick="cerrarModal('modalRelacion')">Cancelar</button>
+        <button class="btn btn-primary" onclick="crearRelacion()">Agregar relación</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     MODAL — Nuevo Libro
+══════════════════════════════════════ -->
+<div class="overlay" id="modalLibro">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">
+        <span class="orak-icon icon-md" style="margin-right:6px">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="9" y1="7" x2="15" y2="7"/><line x1="9" y1="11" x2="15" y2="11"/></svg>
+        </span>
+        Nuevo libro
+      </div>
+      <button class="modal-close" onclick="cerrarModal('modalLibro')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Título</label><input class="form-input" id="libroTitulo" placeholder="El nombre de tu mundo…"></div>
+      <div class="form-group"><label class="form-label">Descripción</label><textarea class="form-textarea" id="libroDesc" placeholder="¿De qué trata este universo?"></textarea></div>
+      <div class="form-actions">
+        <button class="btn btn-ghost" onclick="cerrarModal('modalLibro')">Cancelar</button>
+        <button class="btn btn-primary" onclick="crearLibro()">Crear libro</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     MODAL — Nuevo Personaje
+══════════════════════════════════════ -->
+<div class="overlay" id="modalPersonaje">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">
+        <span class="orak-icon icon-md" style="margin-right:6px">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="9"/><polygon points="12,4 14.5,10 21,10 15.5,14 18,21 12,17 6,21 8.5,14 3,10 9.5,10"/></svg>
+        </span>
+        Nuevo personaje
+      </div>
+      <button class="modal-close" onclick="cerrarModal('modalPersonaje')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Libro</label><select class="form-select" id="perLibro"></select></div>
+      <div class="form-group"><label class="form-label">Nombre</label><input class="form-input" id="perNombre" placeholder="Nombre del personaje…"></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Año de nacimiento</label><input class="form-input" id="perNac" type="number" placeholder="ej. 240"></div>
+        <div class="form-group"><label class="form-label">Año de muerte (opcional)</label><input class="form-input" id="perMuerte" type="number" placeholder="vacío = vive"></div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-ghost" onclick="cerrarModal('modalPersonaje')">Cancelar</button>
+        <button class="btn btn-primary" onclick="crearPersonaje()">Crear personaje</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     MODAL — Nuevo Evento
+══════════════════════════════════════ -->
+<div class="overlay" id="modalEvento">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">
+        <span class="orak-icon icon-md" style="margin-right:6px">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="9"/><polyline points="12,7 12,12 15,15"/></svg>
+        </span>
+        Nuevo evento
+      </div>
+      <button class="modal-close" onclick="cerrarModal('modalEvento')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Libro</label><select class="form-select" id="evLibro"></select></div>
+      <div class="form-group"><label class="form-label">Descripción</label><textarea class="form-textarea" id="evDesc" placeholder="¿Qué ocurrió?"></textarea></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Año</label><input class="form-input" id="evAnio" type="number" placeholder="ej. 350"></div>
+        <div class="form-group"><label class="form-label">Personaje (opcional)</label><select class="form-select" id="evPersonaje"><option value="">— ninguno —</option></select></div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-ghost" onclick="cerrarModal('modalEvento')">Cancelar</button>
+        <button class="btn btn-primary" onclick="crearEvento()">Registrar evento</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     MODAL — Historia del libro
+══════════════════════════════════════ -->
+<div class="overlay" id="modalHistoria">
+  <div class="modal" style="max-width:680px">
+    <div class="modal-header">
+      <div class="modal-title">
+        <span class="orak-icon icon-md" style="margin-right:6px">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/><line x1="9" y1="9" x2="11" y2="9"/></svg>
+        </span>
+        Historia — <span id="historiaLibroTitulo"></span>
+      </div>
+      <button class="modal-close" onclick="cerrarModal('modalHistoria')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:12px;color:var(--text3);margin-bottom:10px">Escribe aquí la historia completa, capítulos, notas de autor.</p>
+      <textarea class="form-textarea" id="historiaTexto" style="min-height:340px;font-size:13px;line-height:1.7" placeholder="Érase una vez…"></textarea>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
+        <span id="historiaChars" style="font-size:11px;color:var(--text3)">0 caracteres</span>
+        <div class="form-actions" style="margin:0;margin-left:auto">
+          <button class="btn btn-ghost" onclick="cerrarModal('modalHistoria')">Cancelar</button>
+          <button class="btn btn-primary" onclick="guardarHistoria()">Guardar historia</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     MODAL — Detalle Libro
+══════════════════════════════════════ -->
+<div class="overlay" id="modalDetalleLibro">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-header">
+      <div class="modal-title" id="detalleLibroTitulo">—</div>
+      <button class="modal-close" onclick="cerrarModal('modalDetalleLibro')">✕</button>
+    </div>
+    <div class="modal-body" id="detalleLibroBody"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     MODAL — Ficha Personaje D&D
+══════════════════════════════════════ -->
+<div class="pers-ficha-overlay" id="fichaOverlay" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="pers-ficha">
+    <button onclick="document.getElementById('fichaOverlay').classList.remove('open')"
+      style="position:absolute;top:14px;right:14px;background:none;border:none;font-size:18px;color:var(--text3);cursor:pointer">✕</button>
+    <div id="fichaContent"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     MODAL — Subir PDF
+══════════════════════════════════════ -->
+<div class="overlay" id="modalSubirPDFOverlay"
+  style="align-items:center;justify-content:center">
+  <div class="pdf-upload-modal">
+    <div style="font-size:20px;font-weight:700;font-family:var(--font-display);margin-bottom:4px;display:flex;align-items:center;gap:8px">
+      <span class="orak-icon icon-lg">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="17,8 12,3 7,8"/>
+          <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+      </span>
+      Subir PDF al universo
+    </div>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:20px">Asocia un PDF a un libro existente o crea uno nuevo.</p>
+
+    <!-- Zona de drop -->
+    <div class="pdf-upload-zone" style="margin-bottom:16px;padding:20px"
+      onclick="document.getElementById('pdfInputModal').click()"
+      ondragover="event.preventDefault();this.classList.add('dragover')"
+      ondragleave="this.classList.remove('dragover')"
+      ondrop="event.preventDefault();this.classList.remove('dragover');seleccionarArchivoPDF({files:event.dataTransfer.files})">
+      <input type="file" id="pdfInputModal" accept=".pdf" style="display:none" onchange="seleccionarArchivoPDF(this)">
+      <div style="display:flex;justify-content:center;margin-bottom:8px">
+        <span class="pdf-zone-icon orak-icon icon-xl">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14,2 14,8 20,8"/>
+            <line x1="9" y1="13" x2="15" y2="13"/>
+            <line x1="9" y1="17" x2="13" y2="17"/>
+            <line x1="12" y1="10" x2="12" y2="16"/>
+            <polyline points="9,13 12,10 15,13"/>
+          </svg>
+        </span>
+      </div>
+      <div style="font-weight:600;font-size:13px">Arrastra aquí o haz clic</div>
+      <div id="pdfFileNombre" style="font-size:12px;color:var(--gold-lt);margin-top:6px"></div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Libro existente</label>
+      <select class="form-select" id="pdfLibroAsociar">
+        <option value="">— Selecciona un libro existente —</option>
+      </select>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;margin:10px 0;color:var(--text3);font-size:11px">
+      <div style="flex:1;height:1px;background:var(--glass-border)"></div>o<div style="flex:1;height:1px;background:var(--glass-border)"></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Crear nuevo libro</label>
+      <input class="form-input" id="pdfLibroNuevo" placeholder="Título del nuevo libro…">
+    </div>
+
+    <div id="pdfUploadProgress" style="display:none">
+      <div id="pdfUploadStatus" style="font-size:12px;color:var(--text2);margin-bottom:6px">Procesando…</div>
+      <div class="progress-bar"><div class="progress-fill" id="pdfProgressFill" style="width:0%"></div></div>
+    </div>
+
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:18px">
+      <button class="btn btn-ghost" onclick="cerrarModalSubirPDF()">Cancelar</button>
+      <button class="btn btn-primary" id="btnSubirPDF" onclick="subirPDFASupabase()">
+        <span class="orak-icon icon-sm" style="margin-right:4px">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17,8 12,3 7,8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        </span>
+        Abrir PDF
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     ENGINE — Lógica y Estado
+══════════════════════════════════════ -->
+<!-- ══════════════════════════════════════
+     GALAXY ENGINE — Lightweight Edition
+     Optimizaciones:
+     · Estrellas precalculadas (sin cos/sin por frame)
+     · Sin gradientes dinámicos por frame
+     · Throttle a 30fps en móvil
+     · Pausa si tab oculto (visibilitychange)
+     · Detección automática de dispositivo lento
+══════════════════════════════════════ -->
+<script>
+(function(){
+  const canvas = document.getElementById('orakGalaxyCanvas');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d', { alpha: true });
+
+  const isMobile = window.innerWidth < 769;
+  const STAR_COUNT   = isMobile ? 80  : 160;  // mucho menos que antes
+  const SHOOT_CHANCE = isMobile ? 0.002 : 0.004;
+  const FPS_TARGET   = isMobile ? 30  : 60;
+  const FRAME_MS     = 1000 / FPS_TARGET;
+
+  let W, H, stars = [], shooting = [];
+  let rot = 0, lastFrame = 0, paused = false;
+  const rand = (a, b) => a + Math.random() * (b - a);
+
+  /* ── Construir estrellas UNA vez ──
+     Guardamos coordenadas polares (angle, radius)
+     para rotar sin cos/sin por cada estrella en cada frame.
+     Solo recalculamos sin/cos del delta de rotación global. */
+  function build() {
+    stars = [];
+    const armCount = 3;
+    const perArm   = Math.floor(STAR_COUNT * 0.60 / armCount);
+    const bgCount  = Math.floor(STAR_COUNT * 0.40);
+
+    // Brazos espirales — coordenadas polares relativas al centro
+    for(let a = 0; a < armCount; a++){
+      const baseAngle = (a / armCount) * Math.PI * 2;
+      for(let i = 0; i < perArm; i++){
+        const t   = i / perArm;
+        const ang = baseAngle + t * Math.PI * 2.1 + rand(-0.25, 0.25);
+        const r   = t * Math.min(W, H) * 0.43 + rand(-16, 16);
+        stars.push({
+          // Posición relativa al centro (se rota globalmente)
+          ox: Math.cos(ang) * r,
+          oy: Math.sin(ang) * r * 0.50, // inclinación galáctica
+          size:  rand(0.4, t < 0.15 ? 1.8 : 1.1),
+          alpha: rand(0.45, 0.95),
+          gold:  Math.random() < 0.22,
+          // Parpadeo — precalculado como offset y velocidad
+          tOff:  rand(0, Math.PI * 2),
+          tSpd:  rand(0.3, 1.4)
+        });
+      }
+    }
+
+    // Estrellas de fondo — posición fija, no rotan
+    for(let i = 0; i < bgCount; i++){
+      stars.push({
+        ox: rand(-W/2, W/2),
+        oy: rand(-H/2, H/2),
+        size:  rand(0.2, 0.8),
+        alpha: rand(0.10, 0.50),
+        gold:  false,
+        tOff:  rand(0, Math.PI * 2),
+        tSpd:  rand(0.2, 0.9),
+        fixed: true  // no participan en la rotación
+      });
+    }
+  }
+
+  /* ── Loop de render ── */
+  function frame(ts) {
+    if(paused){ lastFrame = ts; requestAnimationFrame(frame); return; }
+
+    // Throttle de FPS
+    if(ts - lastFrame < FRAME_MS){ requestAnimationFrame(frame); return; }
+    const dt = Math.min(ts - lastFrame, 50); // cap delta para tabs inactivos
+    lastFrame = ts;
+
+    ctx.clearRect(0, 0, W, H);
+
+    // Incremento de rotación proporcional al tiempo real
+    rot += 0.000055 * (dt / 16.67);
+    const cosR = Math.cos(rot), sinR = Math.sin(rot);
+    const cx = W/2, cy = H/2;
+
+    // Tiempo normalizado para parpadeo
+    const t = ts * 0.001;
+
+    for(const s of stars){
+      let sx, sy;
+      if(s.fixed){
+        sx = cx + s.ox;
+        sy = cy + s.oy;
+      } else {
+        // Rotación aplicada con los sin/cos ya calculados (1 vez por frame)
+        sx = cx + s.ox * cosR - s.oy * sinR;
+        sy = cy + s.ox * sinR + s.oy * cosR;
+      }
+
+      // Culling: no dibujar lo que está fuera de pantalla
+      if(sx < -4 || sx > W+4 || sy < -4 || sy > H+4) continue;
+
+      const twinkle = 0.80 + 0.20 * Math.sin(t * s.tSpd + s.tOff);
+      const al = s.alpha * twinkle;
+
+      ctx.globalAlpha = al;
+      ctx.fillStyle   = s.gold ? '#F0D060' : '#FFFFFF';
+      ctx.beginPath();
+      ctx.arc(sx, sy, s.size, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    ctx.globalAlpha = 1;
+
+    // ── Estrellas fugaces (muy ocasionales) ──
+    if(Math.random() < SHOOT_CHANCE){
+      shooting.push({
+        x: rand(0, W * 0.65), y: rand(0, H * 0.35),
+        vx: rand(2.5, 5.5), vy: rand(0.8, 2.2),
+        len: rand(50, 110), life: 1,
+        decay: rand(0.022, 0.042)
+      });
+    }
+
+    for(let i = shooting.length - 1; i >= 0; i--){
+      const ss = shooting[i];
+      ctx.globalAlpha = ss.life * 0.80;
+      ctx.strokeStyle = '#FFFFFF';
+      ctx.lineWidth   = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(ss.x, ss.y);
+      ctx.lineTo(ss.x - ss.len, ss.y - ss.len * 0.35);
+      ctx.stroke();
+      ss.x += ss.vx; ss.y += ss.vy; ss.life -= ss.decay;
+      if(ss.life <= 0) shooting.splice(i, 1);
+    }
+    ctx.globalAlpha = 1;
+
+    requestAnimationFrame(frame);
+  }
+
+  function resize(){
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+    build();
+  }
+
+  // Pausa cuando el tab está oculto — ahorra batería y CPU
+  document.addEventListener('visibilitychange', () => {
+    paused = document.hidden;
+  });
+
+  // Respetar preferencia de movimiento reducido
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+    canvas.style.display = 'none';
+    return;
+  }
+
+  window.addEventListener('resize', resize);
+  resize();
+  requestAnimationFrame(frame);
+})();
+</script>
+
+<!-- ══════════════════════════════════════
+     CONFIG — Inyectado por el servidor
+     En Railway/ngrok el backend escribe aquí las keys del frontend
+     (SUPABASE_ANON, API_SERVER) sin exponerlas en el repositorio.
+══════════════════════════════════════ -->
+<!-- SERVER_CONFIG_INJECTION_POINT -->
+
+<!-- ══════════════════════════════════════
+     MÓDULOS JS — Orden de carga importa
+══════════════════════════════════════ -->
+<!-- 1. SDKs externos -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+
+<!-- 2. Config central (URLs, claves desde servidor) -->
+<script src="js/config.js"></script>
+
+<!-- 3. Utilidades base -->
+<script src="js/utils/icons.js"></script>
+
+<!-- 4. API client + WebSocket -->
+<script src="js/api/client.js"></script>
+<script src="js/api/websocket.js"></script>
+
+<!-- 5. Estado global + servicios -->
+<script src="js/state/store.js"></script>
+<script src="js/services/auth.js"></script>
+
+<!-- 6. UI + Navegación -->
+<script src="js/ui/navigation.js"></script>
+<script src="js/ui/render.js"></script>
+<script src="js/ui/mobile.js"></script>
+
+<!-- 7. Componentes -->
+<script src="js/components/chat.js"></script>
+<script src="js/components/notifications.js"></script>
+<script src="js/components/store.js"></script>
+
+<!-- 8. Servicios pesados (PDF) -->
+<script src="js/services/pdf.js"></script>
+
+<!-- 9. Animaciones (al final — no bloquean el render) -->
+<script src="js/animations/particles.js"></script>
+<script src="js/animations/canvas.js"></script>
+
+<!-- 10. CRUD actions (acciones que llaman al API) -->
+<script src="js/api/crud.js"></script>
+
+<!-- 11. engine.js — Orquestador principal (init, renderVista, etc.)
+     Mantener este archivo mientras dure la migración incremental.
+     Con el tiempo se vaciará conforme el código se mueva a módulos. -->
+<script src="js/engine.js"></script>
+
+
+
+<!-- ══════════════════════════════════════
+     MODAL — Editar Personaje
+══════════════════════════════════════ -->
+<div class="overlay" id="modalEditarPersonaje">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">✏️ Editar personaje</div>
+      <button class="modal-close" onclick="cerrarModal('modalEditarPersonaje')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editPerLibro">
+      <input type="hidden" id="editPerNombreOriginal">
+      <div class="form-group"><label class="form-label">Nombre</label><input class="form-input" id="editPerNombre" placeholder="Nombre del personaje…"></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Año de nacimiento</label><input class="form-input" id="editPerNac" type="number"></div>
+        <div class="form-group"><label class="form-label">Año de muerte (vacío = vive)</label><input class="form-input" id="editPerMuerte" type="number" placeholder="vacío = vive"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Habilidades</label>
+        <div style="display:flex;gap:8px;margin-bottom:8px">
+          <input class="form-input" id="editPerHab" placeholder="Nueva habilidad…" style="flex:1">
+          <button class="btn btn-ghost btn-sm" onclick="agregarHabEdit()">＋ Añadir</button>
+        </div>
+        <div id="editPerHabsLista" class="chips"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Armas</label>
+        <div style="display:flex;gap:8px;margin-bottom:8px">
+          <input class="form-input" id="editPerArma" placeholder="Nueva arma…" style="flex:1">
+          <button class="btn btn-ghost btn-sm" onclick="agregarArmaEdit()">＋ Añadir</button>
+        </div>
+        <div id="editPerArmasLista" class="chips"></div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-ghost" onclick="cerrarModal('modalEditarPersonaje')">Cancelar</button>
+        <button class="btn btn-primary" onclick="guardarEditarPersonaje()">Guardar cambios</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     MODAL — Editar Evento
+══════════════════════════════════════ -->
+<div class="overlay" id="modalEditarEvento">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">✏️ Editar evento</div>
+      <button class="modal-close" onclick="cerrarModal('modalEditarEvento')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editEvLibro">
+      <input type="hidden" id="editEvIndice">
+      <div class="form-group"><label class="form-label">Descripción</label><textarea class="form-textarea" id="editEvDesc" placeholder="¿Qué ocurrió?"></textarea></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Año</label><input class="form-input" id="editEvAnio" type="number"></div>
+        <div class="form-group"><label class="form-label">Personaje</label><select class="form-select" id="editEvPersonaje"><option value="">— ninguno —</option></select></div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-ghost" onclick="cerrarModal('modalEditarEvento')">Cancelar</button>
+        <button class="btn btn-primary" onclick="guardarEditarEvento()">Guardar cambios</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     MODAL — Editar Descripción de Libro
+══════════════════════════════════════ -->
+<div class="overlay" id="modalEditarDescripcion">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">✏️ Editar descripción</div>
+      <button class="modal-close" onclick="cerrarModal('modalEditarDescripcion')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editDescLibro">
+      <div class="form-group"><label class="form-label">Título</label><input class="form-input" id="editDescTitulo" placeholder="Título del libro…"></div>
+      <div class="form-group"><label class="form-label">Descripción</label><textarea class="form-textarea" id="editDescTexto" placeholder="Descripción del libro…"></textarea></div>
+      <div class="form-actions">
+        <button class="btn btn-ghost" onclick="cerrarModal('modalEditarDescripcion')">Cancelar</button>
+        <button class="btn btn-primary" onclick="guardarEditarDescripcion()">Guardar cambios</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

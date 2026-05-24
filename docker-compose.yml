@@ -1,0 +1,43 @@
+version: "3.9"
+
+# ══════════════════════════════════════════════════════
+#  ORAK UNIVERSE — Docker Compose (desarrollo local)
+#  Uso: docker compose up --build
+# ══════════════════════════════════════════════════════
+
+services:
+
+  # ── Backend FastAPI ─────────────────────────────────
+  backend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.backend
+    env_file: .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app/backend       # hot-reload en dev
+      - ./frontend:/app/frontend     # sirve el frontend
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/info"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ── Nginx (reverse proxy + static files) ────────────
+  # Descomenta en producción
+  # nginx:
+  #   image: nginx:alpine
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+  #     - ./frontend:/usr/share/nginx/html:ro
+  #   depends_on:
+  #     - backend
+  #   restart: unless-stopped
+
+volumes:
+  {}
