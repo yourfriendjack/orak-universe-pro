@@ -70,3 +70,41 @@ def guardar_todos(libros: list[dict]) -> None:
     """Persiste todos los libros (batch upsert)."""
     for libro in libros:
         guardar_libro(libro)
+
+# ── Chat ──────────────────────────────────────────────────────────────────────
+
+def guardar_mensaje(msg: dict) -> bool:
+    """Guarda un mensaje de chat en Supabase."""
+    try:
+        sb = get_supabase()
+        sb.table("chat_mensajes").insert({
+            "usuario": msg.get("usuario", ""),
+            "texto":   msg.get("texto", ""),
+            "libro":   msg.get("libro", ""),
+        }).execute()
+        return True
+    except Exception as e:
+        print(f"⚠ Error guardando mensaje: {e}")
+        return False
+
+
+def cargar_mensajes(libro: str = "", limite: int = 200) -> list[dict]:
+    """Carga los últimos mensajes del chat desde Supabase."""
+    try:
+        sb = get_supabase()
+        q = sb.table("chat_mensajes").select("*").order("creado_en", desc=False).limit(limite)
+        if libro:
+            q = q.eq("libro", libro)
+        res = q.execute()
+        return [
+            {
+                "usuario":  r["usuario"],
+                "texto":    r["texto"],
+                "libro":    r["libro"],
+                "ts":       r["creado_en"],
+            }
+            for r in res.data
+        ]
+    except Exception as e:
+        print(f"⚠ Error cargando mensajes: {e}")
+        return []

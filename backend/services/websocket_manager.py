@@ -2,20 +2,16 @@
 backend/services/websocket_manager.py
 =======================================
 Gestión de conexiones WebSocket.
-Separado del servidor para poder testearlo de forma aislada.
+Mensajes de chat persistidos en Supabase.
 """
 import json
-from collections import deque
 from fastapi import WebSocket
-
-
-MAX_CHAT = 200  # máximo mensajes en historial
+from backend.database import repository
 
 
 class ConnectionManager:
     def __init__(self):
         self.activas: list[WebSocket] = []
-        self._chat: deque = deque(maxlen=MAX_CHAT)
 
     # ── Conexión ──────────────────────────────────────────────────────────────
 
@@ -45,15 +41,15 @@ class ConnectionManager:
         """Notifica a todos los clientes que el universo cambió."""
         await self.broadcast({"tipo": "universo_actualizado", "libros": libros})
 
-    # ── Chat ──────────────────────────────────────────────────────────────────
+    # ── Chat persistido en Supabase ───────────────────────────────────────────
 
     def agregar_mensaje(self, msg: dict) -> None:
-        self._chat.append(msg)
+        """Guarda el mensaje en Supabase."""
+        repository.guardar_mensaje(msg)
 
     def mensajes(self, libro: str = "") -> list[dict]:
-        if not libro:
-            return list(self._chat)
-        return [m for m in self._chat if m.get("libro") == libro]
+        """Lee mensajes desde Supabase."""
+        return repository.cargar_mensajes(libro)
 
 
 # Singleton global
