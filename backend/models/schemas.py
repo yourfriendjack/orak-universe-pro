@@ -23,20 +23,21 @@ class DescripcionIn(BaseModel):
 # ── Eventos ───────────────────────────────────────────────────────────────────
 
 class EventoIn(BaseModel):
-    nombre: str
-    fecha: str = ""
-    descripcion: str = ""
+    descripcion: str
+    año: int
+    personaje: str = ""
 
 class EventoEdit(BaseModel):
-    nombre: Optional[str] = None
-    fecha: Optional[str] = None
     descripcion: Optional[str] = None
-
+    año: Optional[int] = None
+    personaje: Optional[str] = None
 
 # ── Personajes ────────────────────────────────────────────────────────────────
 
 class PersonajeIn(BaseModel):
     nombre: str
+    nacimiento: int = 0
+    muerte: Optional[int] = None
     rol: str = ""
     descripcion: str = ""
     nivel: int = 1
@@ -45,12 +46,13 @@ class PersonajeIn(BaseModel):
 
 class PersonajeEdit(BaseModel):
     nombre: Optional[str] = None
+    nacimiento: Optional[int] = None
+    muerte: Optional[int] = None
     rol: Optional[str] = None
     descripcion: Optional[str] = None
     nivel: Optional[int] = None
     raza: Optional[str] = None
     clase: Optional[str] = None
-
 
 # ── Items (habilidades / armas) ───────────────────────────────────────────────
 

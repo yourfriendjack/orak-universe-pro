@@ -32,7 +32,7 @@ class Store:
     # ── Lectura ───────────────────────────────────────────────────────────────
 
     def todos(self) -> list[dict]:
-        return list(self._libros)
+        return self._libros
 
     def buscar(self, titulo: str) -> Optional[dict]:
         t = titulo.lower()

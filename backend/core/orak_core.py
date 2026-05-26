@@ -38,6 +38,22 @@ def _libro_vacio(titulo: str) -> Libro:
         "relaciones":  [],
     }
 
+def _personaje_vacio(nombre: str, nacimiento: int, muerte: Optional[int] = None,
+                     rol: str = "", descripcion: str = "", nivel: int = 1,
+                     raza: str = "", clase: str = "") -> Personaje:
+    return {
+        "nombre":      nombre,
+        "nacimiento":  nacimiento,
+        "muerte":      muerte,
+        "rol":         rol,
+        "descripcion": descripcion,
+        "nivel":       nivel,
+        "raza":        raza,
+        "clase":       clase,
+        "habilidades": [],
+        "armas":       [],
+    }
+
 def _lugar_vacio(nombre: str, tipo: str, descripcion: str) -> Lugar:
     return {
         "nombre":      nombre,
@@ -152,7 +168,9 @@ def eliminar_evento(libros: list, titulo_libro: str, indice: int) -> tuple[bool,
 # ── Personajes ────────────────────────────────────────────────
 
 def agregar_personaje(libros: list, titulo_libro: str, nombre: str,
-                      nacimiento: int, muerte: Optional[int] = None) -> tuple[bool, str]:
+                      nacimiento: int = 0, muerte: Optional[int] = None,
+                      rol: str = "", descripcion: str = "", nivel: int = 1,
+                      raza: str = "", clase: str = "") -> tuple[bool, str]:
     libro = _buscar_libro(libros, titulo_libro)
     if not libro:
         return False, "Libro no encontrado"
@@ -160,7 +178,10 @@ def agregar_personaje(libros: list, titulo_libro: str, nombre: str,
         return False, "El nombre no puede estar vacío"
     if any(p["nombre"] == nombre for p in libro.get("personajes", [])):
         return False, f"Ya existe un personaje llamado '{nombre}'"
-    libro["personajes"].append(_personaje_vacio(nombre.strip(), int(nacimiento), muerte))
+    libro["personajes"].append(_personaje_vacio(
+        nombre.strip(), int(nacimiento), muerte,
+        rol, descripcion, nivel, raza, clase
+    ))
     return True, "Personaje agregado"
 
 # Sentinel para distinguir "no se pasó el campo" de "se pasó None explícitamente"

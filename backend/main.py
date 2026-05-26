@@ -67,6 +67,14 @@ app.include_router(personajes.router)        # /libros/{t}/personajes
 app.include_router(mundo.router)             # /libros/{t}/eventos|lugares|facciones|relaciones
 app.include_router(web.router)               # /  /orak.css  /engine.js
 
+# ── Static files ──────────────────────────────────────────────────────────────
+import os
+from fastapi.staticfiles import StaticFiles
+_FRONTEND = os.path.join(os.path.dirname(__file__), "..", "frontend")
+app.mount("/js",     StaticFiles(directory=os.path.join(_FRONTEND, "js")),     name="js")
+app.mount("/css",    StaticFiles(directory=os.path.join(_FRONTEND, "css")),    name="css")
+app.mount("/assets", StaticFiles(directory=os.path.join(_FRONTEND, "assets")), name="assets")
+
 
 # ── Dev entrypoint ────────────────────────────────────────────────────────────
 

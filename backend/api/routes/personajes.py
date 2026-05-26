@@ -18,8 +18,8 @@ async def crear_personaje(titulo: str, datos: PersonajeIn):
     t = dec_titulo(titulo)
     libros = store.todos()
     ok_flag, msg = core.agregar_personaje(
-        libros, t, datos.nombre, datos.rol, datos.descripcion,
-        datos.nivel, datos.raza, datos.clase
+        libros, t, datos.nombre, datos.nacimiento, datos.muerte,
+        datos.rol, datos.descripcion, datos.nivel, datos.raza, datos.clase
     )
     if not ok_flag:
         error(msg)

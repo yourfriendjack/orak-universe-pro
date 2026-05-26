@@ -20,7 +20,7 @@ router = APIRouter(prefix="/libros", tags=["Mundo"])
 async def crear_evento(titulo: str, datos: EventoIn):
     t = dec_titulo(titulo)
     libros = store.todos()
-    ok_flag, msg = core.agregar_evento(libros, t, datos.nombre, datos.fecha, datos.descripcion)
+    ok_flag, msg = core.agregar_evento(libros, t, datos.descripcion, datos.año, datos.personaje)
     if not ok_flag:
         error(msg)
     libro = core._buscar_libro(libros, t)

@@ -265,6 +265,7 @@ function _calcularTimelineLocal(libros) {
 //  INIT
 // ════════════════════════════════════════
 async function init() {
+  localStorage.removeItem('orak_libros');
   aplicarSkinCSS(localStorage.getItem('orak_skin') || 'default');
   actualizarBadgeModo(false);
 
@@ -279,7 +280,7 @@ async function init() {
   if (servidorOk) {
     try {
       const data = await GET('/libros');
-      _libros = data.libros || [];
+      _libros = Array.isArray(data) ? data : (data.libros || []);
       // Reemplazar cache local completamente con la verdad del servidor
       _guardarLocal(_libros);
     } catch(e) {
@@ -342,7 +343,7 @@ async function cargarTodo() {
   if(_modoConexion === 'server') {
     try {
       const data = await GET('/libros');
-      _libros = data.libros || [];
+      _libros = Array.isArray(data) ? data : (data.libros || []);
       _guardarLocal(_libros);
     } catch(e) { console.warn(e); }
   }
@@ -920,7 +921,7 @@ async function renderErrores() {
   const main = document.getElementById('mainContent');
   main.innerHTML = '<div class="spinner"></div>';
   try {
-    const { errores } = await GET('/errores');
+    const errores = await GET('/errores');
     const html = errores.length === 0
       ? `<div class="empty"><div class="empty-icon">✅</div><div class="empty-title">Sin errores detectados</div><div class="empty-sub">El universo es coherente</div></div>`
       : errores.map(e => `<div class="card" style="border-left:3px solid var(--red)"><div class="card-body" style="padding:14px;color:var(--red)">${esc(e)}</div></div>`).join('');
@@ -1414,7 +1415,7 @@ function cambiarNombreChat() { _chatUsuario = ''; localStorage.removeItem('orak_
 async function enviarChat() {
   const input = document.getElementById('chatInput'); const msg = input?.value.trim(); if(!msg) return;
   try {
-    await POST('/chat', { usuario: _chatUsuario, mensaje: msg, libro: _libroSel||'' });
+    await POST('/chat', { usuario: _chatUsuario, texto: msg, libro: _libroSel||'' });
     input.value = ''; await cargarChat(); renderVista();
     setTimeout(() => { const el=document.getElementById('chatMsgs'); if(el) el.scrollTop=el.scrollHeight; }, 50);
   } catch(e) { toast(e.message, 'err'); }
@@ -2776,7 +2777,7 @@ async function confirmarEliminarLugar(libro, nombre) {
       const nEnc = encodeURIComponent(nombre).replace(/%2F/gi, '__SLASH__');
       await DEL(`/libros/${tEnc}/lugares/${nEnc}`);
       const data = await GET('/libros');
-      _libros = data.libros || [];
+      _libros = Array.isArray(data) ? data : (data.libros || []);
     } catch(e) {
       return toast(`⚠ Error al eliminar: ${e.message}`, 'err');
     }
@@ -2798,7 +2799,7 @@ async function confirmarEliminarFaccion(libro, nombre) {
       const nEnc = encodeURIComponent(nombre).replace(/%2F/gi, '__SLASH__');
       await DEL(`/libros/${tEnc}/facciones/${nEnc}`);
       const data = await GET('/libros');
-      _libros = data.libros || [];
+      _libros = Array.isArray(data) ? data : (data.libros || []);
     } catch(e) {
       return toast(`⚠ Error al eliminar: ${e.message}`, 'err');
     }
@@ -2819,7 +2820,7 @@ async function confirmarEliminarRelacion(libro, indice) {
       const tEnc = encodeURIComponent(libro).replace(/%2F/gi, '__SLASH__');
       await DEL(`/libros/${tEnc}/relaciones/${indice}`);
       const data = await GET('/libros');
-      _libros = data.libros || [];
+      _libros = Array.isArray(data) ? data : (data.libros || []);
     } catch(e) {
       return toast(`⚠ Error al eliminar: ${e.message}`, 'err');
     }
