@@ -1,3 +1,4 @@
+
 import os
 from fastapi import APIRouter
 from fastapi.responses import HTMLResponse, Response
@@ -38,7 +39,17 @@ async def serve_css():
 
 @router.get("/", response_class=HTMLResponse)
 async def web_app():
+    from backend.core.config import get_settings
+    cfg = get_settings()
     content = _read(os.path.join(FRONTEND_DIR, "index.html"))
-    if content:
-        return HTMLResponse(content)
-    return HTMLResponse("<h1>Frontend no encontrado</h1>", status_code=404)
+    if not content:
+        return HTMLResponse("<h1>Frontend no encontrado</h1>", status_code=404)
+    config_script = f"""<script>
+window.ORAK_CONFIG = {{
+  supabaseUrl:  "{cfg.SUPABASE_URL}",
+  supabaseAnon: "{cfg.SUPABASE_ANON_KEY}",
+  apiServer:    "{cfg.public_url}"
+}};
+</script>"""
+    content = content.replace('<!-- SERVER_CONFIG_INJECTION_POINT -->', config_script)
+    return HTMLResponse(content)
