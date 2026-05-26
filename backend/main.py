@@ -16,7 +16,7 @@ from backend.services.websocket_manager import ws_manager
 from backend.utils.middleware import SlashEncoderMiddleware
 
 # ── Routers ───────────────────────────────────────────────────────────────────
-from backend.api.routes import libros, personajes, mundo, universo, web
+from backend.api.routes import libros, personajes, mundo, universo, web, pdf
 
 cfg = get_settings()
 
@@ -66,6 +66,7 @@ app.include_router(libros.router)            # /libros
 app.include_router(personajes.router)        # /libros/{t}/personajes
 app.include_router(mundo.router)             # /libros/{t}/eventos|lugares|facciones|relaciones
 app.include_router(web.router)               # /  /orak.css  /engine.js
+app.include_router(pdf.router)             # /pdf  /pdf/notas
 
 # ── Static files ──────────────────────────────────────────────────────────────
 import os

@@ -108,3 +108,70 @@ def cargar_mensajes(libro: str = "", limite: int = 200) -> list[dict]:
     except Exception as e:
         print(f"⚠ Error cargando mensajes: {e}")
         return []
+
+# ── PDFs ──────────────────────────────────────────────────────────────────────
+
+def guardar_pdf(titulo: str, pdf_url: str, pdf_nombre: str) -> bool:
+    """Registra un PDF en la tabla pdfs."""
+    try:
+        sb = get_supabase()
+        sb.table("pdfs").upsert(
+            {"titulo": titulo, "pdf_url": pdf_url, "pdf_nombre": pdf_nombre},
+            on_conflict="titulo"
+        ).execute()
+        return True
+    except Exception as e:
+        print(f"⚠ Error guardando PDF '{titulo}': {e}")
+        return False
+
+
+def cargar_pdfs() -> list[dict]:
+    """Carga todos los PDFs registrados."""
+    try:
+        sb = get_supabase()
+        res = sb.table("pdfs").select("*").order("subido_en", desc=True).execute()
+        return res.data or []
+    except Exception as e:
+        print(f"⚠ Error cargando PDFs: {e}")
+        return []
+
+
+def guardar_nota_pdf(nota: dict) -> bool:
+    """Guarda o actualiza una nota en Supabase."""
+    try:
+        sb = get_supabase()
+        sb.table("notas_pdf").upsert({
+            "id":     nota["id"],
+            "libro":  nota["libro"],
+            "pagina": nota["pagina"],
+            "texto":  nota["texto"],
+            "color":  nota["color"],
+            "x":      nota["x"],
+            "y":      nota["y"],
+        }, on_conflict="id").execute()
+        return True
+    except Exception as e:
+        print(f"⚠ Error guardando nota: {e}")
+        return False
+
+
+def cargar_notas_pdf(libro: str, pagina: int) -> list[dict]:
+    """Carga las notas de un libro y página."""
+    try:
+        sb = get_supabase()
+        res = sb.table("notas_pdf").select("*").eq("libro", libro).eq("pagina", pagina).execute()
+        return res.data or []
+    except Exception as e:
+        print(f"⚠ Error cargando notas: {e}")
+        return []
+
+
+def eliminar_nota_pdf(nota_id: str) -> bool:
+    """Elimina una nota por ID."""
+    try:
+        sb = get_supabase()
+        sb.table("notas_pdf").delete().eq("id", nota_id).execute()
+        return True
+    except Exception as e:
+        print(f"⚠ Error eliminando nota: {e}")
+        return False

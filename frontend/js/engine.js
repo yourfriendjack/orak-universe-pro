@@ -54,7 +54,16 @@ const ORAK_ICONS = {
 // ════════════════════════════════════════
 //  USUARIO LOCAL — sin login requerido
 // ════════════════════════════════════════
-const _sb = null;
+let _sb = null;
+function _initSupabase() {
+  if(window.supabase && window.supabase.createClient && window.ORAK_CONFIG && window.ORAK_CONFIG.supabaseUrl) {
+    _sb = window.supabase.createClient(window.ORAK_CONFIG.supabaseUrl, window.ORAK_CONFIG.supabaseAnon);
+    console.log('✓ Supabase cliente inicializado');
+  } else {
+    setTimeout(_initSupabase, 200);
+  }
+}
+setTimeout(_initSupabase, 500);
 let _usuario = { id: 'local', email: 'local@orak.app' };
 let _perfil  = {
   id:             'local',
@@ -1447,8 +1456,7 @@ const POSTIT_COLORS = {
 async function renderPDF() {
   let pdfsGuardados = [];
   try {
-    const { data } = await _sb.from('libros').select('id,titulo,pdf_url,pdf_nombre').not('pdf_url','is',null).order('created_at',{ascending:false});
-    pdfsGuardados = data || [];
+    pdfsGuardados = await GET('/pdf');
   } catch(e) {}
 
   const hayPDFs = pdfsGuardados.length > 0;
@@ -1571,11 +1579,44 @@ async function subirPDFASupabase() {
   const tituloLibro    = libroExistente || libroNuevo;
   if(!tituloLibro) return toast('Asocia el PDF a un libro', 'err');
 
-  // Modo local (sin Supabase) — abrir directamente
-  const localUrl = URL.createObjectURL(_pdfFileCache);
-  await abrirPDFDesdeURL(localUrl, tituloLibro, _pdfFileCache.name);
-  cerrarModalSubirPDF();
-  toast('📄 PDF abierto en modo local');
+  toast('⬆ Subiendo PDF...');
+
+  try {
+    // 1. Subir archivo a Supabase Storage
+    const nombreArchivo = `${Date.now()}_${_pdfFileCache.name}`;
+    const { data, error } = await _sb.storage
+      .from(SUPABASE_PDF_BUCKET)
+      .upload(nombreArchivo, _pdfFileCache, { upsert: true });
+
+    if(error) throw error;
+
+    // 2. Obtener URL pública
+    const { data: urlData } = _sb.storage
+      .from(SUPABASE_PDF_BUCKET)
+      .getPublicUrl(nombreArchivo);
+
+    const pdfUrl = urlData.publicUrl;
+
+    // 3. Registrar en la tabla pdfs via API
+    await POST('/pdf', {
+      titulo:     tituloLibro,
+      pdf_url:    pdfUrl,
+      pdf_nombre: _pdfFileCache.name
+    });
+
+    // 4. Abrir el PDF
+    await abrirPDFDesdeURL(pdfUrl, tituloLibro, _pdfFileCache.name);
+    cerrarModalSubirPDF();
+    toast('✅ PDF guardado en el universo');
+
+  } catch(e) {
+    console.error(e);
+    // Si falla Supabase abrir en modo local
+    const localUrl = URL.createObjectURL(_pdfFileCache);
+    await abrirPDFDesdeURL(localUrl, tituloLibro, _pdfFileCache.name);
+    cerrarModalSubirPDF();
+    toast('📄 PDF abierto en modo local (no se pudo guardar)', 'err');
+  }
 }
 
 async function abrirPDFGuardado(url, titulo) {
@@ -1591,7 +1632,12 @@ async function abrirPDFDesdeURL(url, titulo, nombre) {
   try {
     _pdfDoc = await pdfjsLib.getDocument(url).promise;
     // Cargar notas del localStorage
+    try {
+    const notasServidor = await GET(`/pdf/notas?libro=${encodeURIComponent(titulo)}&pagina=${_pdfPage}`);
+    _pdfNotas = notasServidor;
+  } catch(e) {
     _pdfNotas = JSON.parse(localStorage.getItem('orak_notas') || '[]').filter(n => n.libro === titulo);
+  }
     const container = document.getElementById('pdfContainer');
     if(container) await renderPaginaPDF();
     else {
@@ -1606,11 +1652,19 @@ async function abrirPDFDesdeURL(url, titulo, nombre) {
 
 // Guardar notas en localStorage + Supabase si hay sesión
 async function guardarNotasLocal(nota) {
+  // Guardar en localStorage como respaldo
   const todas = JSON.parse(localStorage.getItem('orak_notas') || '[]');
   const idx   = todas.findIndex(n => n.id === nota.id);
   if(idx >= 0) todas[idx] = { ...todas[idx], x: nota.x, y: nota.y };
   else todas.push(nota);
   localStorage.setItem('orak_notas', JSON.stringify(todas));
+
+  // Guardar en Supabase via API
+  try {
+    await POST('/pdf/notas', nota);
+  } catch(e) {
+    console.warn('⚠ Nota guardada solo en local:', e);
+  }
 }
 
 async function renderPaginaPDF() {
@@ -1644,7 +1698,7 @@ async function renderPaginaPDF() {
       crearPostit(x, y, wrap);
     }, 400);
   };
-  wrap.addEventListener('click', (e) => {
+  wrap.addEventListener('dblclick', (e) => {
     const rect   = wrap.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width)  * 100;
     const y = ((e.clientY - rect.top)  / rect.height) * 100;
@@ -1655,15 +1709,22 @@ async function renderPaginaPDF() {
   wrap.addEventListener('touchend', () => clearTimeout(holdTimer));
 
   // Renderizar notas existentes de esta página
-  const notasPag = _pdfNotas.filter(n => n.pagina === _pdfPage);
+  const notasPag = _pdfNotas.filter(n => Number(n.pagina) === Number(_pdfPage));
   notasPag.forEach(n => renderPostit(n, wrap));
 }
 
-function cambiarPagina(dir) {
+async function cambiarPagina(dir) {
   if(!_pdfDoc) return;
   const nueva = _pdfPage + dir;
   if(nueva < 1 || nueva > _pdfDoc.numPages) return;
   _pdfPage = nueva;
+  // Recargar notas del servidor para esta página
+  try {
+    _pdfNotas = await GET(`/pdf/notas?libro=${encodeURIComponent(_pdfLibroActivo)}&pagina=${_pdfPage}`);
+  } catch(e) {
+    _pdfNotas = JSON.parse(localStorage.getItem('orak_notas') || '[]')
+      .filter(n => n.libro === _pdfLibroActivo && n.pagina === _pdfPage);
+  }
   renderPaginaPDF();
 }
 
@@ -1747,6 +1808,13 @@ async function eliminarPostit(id, el) {
   localStorage.setItem('orak_notas', JSON.stringify(todas));
   el.style.transition = 'all .2s'; el.style.opacity='0'; el.style.transform='scale(0)';
   setTimeout(() => el.remove(), 200);
+
+  // Eliminar en Supabase via API
+  try {
+    await DEL(`/pdf/notas/${id}`);
+  } catch(e) {
+    console.warn('⚠ Error eliminando nota en servidor:', e);
+  }
 }
 
 // ════════════════════════════════════════
