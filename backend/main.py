@@ -76,8 +76,22 @@ app.mount("/css",    StaticFiles(directory=os.path.join(_FRONTEND, "css")),    n
 app.mount("/assets", StaticFiles(directory=os.path.join(_FRONTEND, "assets")), name="assets")
 
 
-# ── Dev entrypoint ────────────────────────────────────────────────────────────
+# ── Manejador global 404 ──────────────────────────────────────────────────────
+from fastapi import Request
+from fastapi.responses import HTMLResponse as _HTMLResponse
+import os as _os
 
+@app.exception_handler(404)
+async def not_found_handler(request: Request, exc):
+    ruta = _os.path.join(_os.path.dirname(__file__), "..", "frontend", "404.html")
+    try:
+        with open(ruta, encoding="utf-8") as f:
+            return _HTMLResponse(f.read(), status_code=404)
+    except FileNotFoundError:
+        return _HTMLResponse("<h1>404 — No encontrado</h1>", status_code=404)
+
+
+# ── Dev entrypoint ────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     uvicorn.run(
         "backend.main:app",

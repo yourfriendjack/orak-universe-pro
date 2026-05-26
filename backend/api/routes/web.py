@@ -53,3 +53,10 @@ window.ORAK_CONFIG = {{
 </script>"""
     content = content.replace('<!-- SERVER_CONFIG_INJECTION_POINT -->', config_script)
     return HTMLResponse(content)
+
+@router.get("/404", response_class=HTMLResponse)
+async def pagina_404():
+    content = _read(os.path.join(FRONTEND_DIR, "404.html"))
+    if content:
+        return HTMLResponse(content)
+    return HTMLResponse("<h1>404 — No encontrado</h1>", status_code=404)
