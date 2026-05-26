@@ -1360,7 +1360,7 @@ let _chatMensajes = [];
 async function cargarChat() {
   try {
     const filtro = _libroSel ? `?libro=${enc(_libroSel)}` : '';
-    const r = await GET(`/chat${filtro}`); _chatMensajes = r.mensajes || [];
+    const r = await GET(`/chat${filtro}`); _chatMensajes = Array.isArray(r) ? r : (r.mensajes || []);
   } catch(e) {}
 }
 
@@ -1383,7 +1383,7 @@ function renderChat() {
           <span style="font-size:11px;color:var(--text3)">${esc(m.ts||'')}</span>
           ${m.libro?`<span class="tag tag-gray" style="font-size:10px">${esc(m.libro)}</span>`:''}
         </div>
-        <div style="font-size:13px;line-height:1.5">${esc(m.mensaje)}</div>
+        <div style="font-size:13px;line-height:1.5">${esc(m.texto || m.mensaje || "")}</div>
       </div>
     </div>`).join('') || `<div style="color:var(--text3);font-size:13px;text-align:center;padding:20px">Sin mensajes todavía. ¡Sé el primero!</div>`;
   return `
