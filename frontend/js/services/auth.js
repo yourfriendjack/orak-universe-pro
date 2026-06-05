@@ -1,135 +1,139 @@
-// ════════════════════════════════════════
-//  USUARIO LOCAL — sin login requerido
-// ════════════════════════════════════════
-// ── Cliente Supabase (frontend) ───────────────────────────
-const SUPABASE_URL  = 'https://ifbyzcxnvvqsqctvyzzq.supabase.co';
-const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlmYnl6Y3hudnZxc3FjdHZ5enpxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxNzc3NDYsImV4cCI6MjA5Mzc1Mzc0Nn0.HQY8z5aoEteWql7ycTo3Pt7RdZjvGC6svxXUsYj386E';
-let _sb = null;
-// Inicializar Supabase cuando el DOM esté listo
-function _initSupabase() {
-  if(window.supabase && window.supabase.createClient) {
-    _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
-    console.log('✓ Supabase cliente inicializado');
-  } else {
-    console.warn('⚠ Supabase SDK no disponible aún, reintentando...');
-    setTimeout(_initSupabase, 200);
+// ════════════════════════════════════════════════════════════════
+//  frontend/js/services/auth.js
+//  Auth real con Supabase — login, registro, sesión persistente
+// ════════════════════════════════════════════════════════════════
+
+import { apiPost, apiGet, apiPatch } from './api.js';
+
+// ── Estado de sesión ─────────────────────────────────────────────
+let _sesion = null;   // { access_token, perfil }
+
+const STORAGE_KEY = 'orak_sesion';
+
+// ── Inicializar (llamar al cargar la app) ─────────────────────────
+export async function initAuth() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (raw) {
+    try {
+      _sesion = JSON.parse(raw);
+      // Verificar que el token sigue activo
+      const perfil = await apiGet('/api/auth/me', _sesion.access_token);
+      _sesion.perfil = perfil;
+      _guardarSesion();
+      _actualizarUI();
+      return _sesion;
+    } catch {
+      _limpiarSesion();
+    }
+  }
+  return null;
+}
+
+// ── Registro ─────────────────────────────────────────────────────
+export async function registro({ email, password, username, display_name, generos = [] }) {
+  const res = await apiPost('/api/auth/registro', {
+    email, password, username, display_name, generos
+  });
+  return res;
+}
+
+// ── Login ────────────────────────────────────────────────────────
+export async function login(email, password) {
+  const res = await apiPost('/api/auth/login', { email, password });
+  _sesion = { access_token: res.access_token, perfil: res.perfil };
+  _guardarSesion();
+  _actualizarUI();
+  return _sesion;
+}
+
+// ── Logout ───────────────────────────────────────────────────────
+export async function logout() {
+  try {
+    await apiPost('/api/auth/logout', {}, getToken());
+  } catch { /* continuar aunque falle */ }
+  _limpiarSesion();
+  window.location.reload();
+}
+
+// ── Actualizar perfil ────────────────────────────────────────────
+export async function actualizarPerfil(cambios) {
+  const res = await apiPatch('/api/auth/me', cambios, getToken());
+  if (_sesion) {
+    _sesion.perfil = { ..._sesion.perfil, ...cambios };
+    _guardarSesion();
+    _actualizarUI();
+  }
+  return res;
+}
+
+// ── Getters ──────────────────────────────────────────────────────
+export const getToken    = ()  => _sesion?.access_token || null;
+export const getPerfil   = ()  => _sesion?.perfil || null;
+export const estaLogueado = () => !!_sesion?.access_token;
+export const getOruns    = ()  => _sesion?.perfil?.oruns || 0;
+export const getGlimmers = ()  => _sesion?.perfil?.glimmers_week || 0;
+
+// ── Actualizar balance local (sin re-fetch) ──────────────────────
+export function actualizarOruns(delta) {
+  if (_sesion?.perfil) {
+    _sesion.perfil.oruns = (_sesion.perfil.oruns || 0) + delta;
+    _guardarSesion();
+    _actualizarUI();
   }
 }
-document.addEventListener('DOMContentLoaded', _initSupabase);
-let _usuario = { id: 'local', email: 'local@orak.app' };
-let _perfil  = {
-  id:             'local',
-  username:       'Autor',
-  oruns_balance:  500,
-  glimmers_total: 0
-};
-
-async function initAuth() {
-  actualizarUIAuth();
+export function actualizarGlimmers(delta) {
+  if (_sesion?.perfil) {
+    _sesion.perfil.glimmers_week = Math.max(0, (_sesion.perfil.glimmers_week || 0) + delta);
+    _guardarSesion();
+    _actualizarUI();
+  }
 }
 
-function _onLogout() {}
-
-function actualizarUIAuth() {
-  ['orunsVal','pmOruns'].forEach(id => {
-    const el = document.getElementById(id);
-    if(el) el.textContent = _perfil.oruns_balance || 0;
-  });
-  ['glimmersVal','pmGlimmers'].forEach(id => {
-    const el = document.getElementById(id);
-    if(el) el.textContent = _perfil.glimmers_total || 0;
-  });
-  const rpO = document.getElementById('rpOruns');
-  if(rpO) rpO.textContent = _perfil.oruns_balance || 0;
-  const rpG = document.getElementById('rpGlimmers');
-  if(rpG) rpG.textContent = _perfil.glimmers_total || 0;
+// ── UI ───────────────────────────────────────────────────────────
+function _actualizarUI() {
+  if (!_sesion?.perfil) return;
+  const { oruns, glimmers_week, display_name, username } = _sesion.perfil;
+  _set('orunsVal',    oruns);
+  _set('glimmersVal', glimmers_week);
+  _set('pmOruns',     oruns);
+  _set('rpOruns',     oruns);
+  _set('rpGlimmers',  glimmers_week);
+  _set('orun-display',   oruns?.toLocaleString());
+  _set('glimmer-display', glimmers_week);
+  _set('ec-oruns',    oruns?.toLocaleString());
+  _set('ec-glimmers', `${glimmers_week}/10`);
+  _set('topbar-av',   (display_name || username || 'U').slice(0,2).toUpperCase());
+  _set('prof-name',   display_name || username);
+  _set('prof-handle', `@${username}`);
+  _set('ec-name',     display_name || username);
 }
 
-function abrirAuthModal()  {}
-function cerrarAuthModal() {}
-function toggleAuthMode()  {}
-async function submitAuth() {}
-async function loginGoogle() { toast('Login deshabilitado en modo local', 'err'); }
-async function cerrarSesion() { toast('Sin sesión activa', 'err'); }
-
-function toggleProfileMenu() {
-  document.getElementById('profileMenu')?.classList.toggle('open');
+function _set(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = val ?? '';
 }
-document.addEventListener('click', e => {
-  const m = document.getElementById('profileMenu'), a = document.getElementById('authArea');
-  if(m && a && !a.contains(e.target)) m.classList.remove('open');
-});
 
-// ════════════════════════════════════════
-//  ECONOMÍA — Glimmers & Orun's
-// ════════════════════════════════════════
+function _guardarSesion() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(_sesion));
+}
+function _limpiarSesion() {
+  _sesion = null;
+  localStorage.removeItem(STORAGE_KEY);
+}
 
-/**
- * Gastar Orun's. Devuelve nuevo balance o null si insuficiente.
- * Se usa para: desbloquear Personajes (-50), Finales Alternativos (-50), Fichas D&D (-1)
- */
-async function gastarOruns(cant, concepto, tipo='gasto') {
-  if((_perfil.oruns_balance || 0) < cant) {
-    toast(`Orun's insuficientes (tienes ${_perfil.oruns_balance})`, 'err');
+// ── Economía legacy (compatibilidad con engine.js) ───────────────
+export async function gastarOruns(cant, concepto) {
+  if (getOruns() < cant) {
+    toast?.(`Oruns insuficientes (tienes ${getOruns()})`, 'err');
     return null;
   }
-  _perfil.oruns_balance -= cant;
-  actualizarUIAuth();
-  toast(`⬡ -${cant} Orun's · ${concepto}`);
-  return _perfil.oruns_balance;
+  actualizarOruns(-cant);
+  return getOruns();
 }
-
-/**
- * Ganar Orun's (logros, subir contenido, crear libros)
- */
-async function ganarOruns(cant, concepto, tipo='logro') {
-  _perfil.oruns_balance = (_perfil.oruns_balance || 0) + cant;
-  actualizarUIAuth();
-  return _perfil.oruns_balance;
+export async function ganarOruns(cant, concepto) {
+  actualizarOruns(cant);
+  return getOruns();
 }
-
-/**
- * Ganar Glimmers. Se dispara al dejar una nota en el PDF (+25).
- */
-function ganarGlimmers(cant, origen) {
-  _perfil.glimmers_total = (_perfil.glimmers_total || 0) + cant;
-  actualizarUIAuth();
-  lanzarGlimmers(origen);
-  toast(`✦ +${cant} Glimmers`);
+export function ganarGlimmers(cant) {
+  actualizarGlimmers(-cant);
 }
-
-/**
- * Desbloquear sección bloqueada (Personajes, Finales, etc.)
- * Cuesta 50 Orun's, muestra confirmación.
- */
-async function tryUnlock(tipo) {
-  const nombres = { personajes: 'Personajes', finales: 'Finales Alternativos' };
-  const nombre  = nombres[tipo] || tipo;
-  if(!confirm(`¿Desbloquear "${nombre}" por 50 Orun's?`)) return;
-  const ok = await gastarOruns(50, `Desbloqueo: ${nombre}`, 'desbloqueo');
-  if(ok !== null) {
-    toast(`✅ "${nombre}" desbloqueado`);
-    if(tipo === 'personajes') setVista('personajes');
-  }
-}
-
-// ════════════════════════════════════════
-//  RANKING
-// ════════════════════════════════════════
-
-/**
- * Ordena usuarios por participación y saldo de Orun's.
- * @param {Array} usuarios - Lista de { username, oruns_balance, notas, libros }
- * @returns Array ordenado de mayor a menor participación
- */
-function calcularRanking(usuarios) {
-  return [...usuarios].sort((a, b) => {
-    const scoreA = (a.oruns_balance || 0) + (a.notas || 0) * 25 + (a.libros || 0) * 50;
-    const scoreB = (b.oruns_balance || 0) + (b.notas || 0) * 25 + (b.libros || 0) * 50;
-    return scoreB - scoreA;
-  });
-}
-
-// ════════════════════════════════════════
-//  ESTADO GLOBAL
-// ════════════════════════════════════════

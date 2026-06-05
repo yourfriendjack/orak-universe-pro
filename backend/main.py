@@ -1,55 +1,47 @@
 """
 backend/main.py
 ================
-Punto de entrada de la aplicación FastAPI.
-Solo configuración, middleware y registro de routers.
-Ninguna lógica de negocio vive aquí.
+Punto de entrada — ORAK Universe Red Social.
 """
-import uvicorn
+import uvicorn, os
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import HTMLResponse
 
 from backend.core.config import get_settings
 from backend.services.store import store
 from backend.services.websocket_manager import ws_manager
 from backend.utils.middleware import SlashEncoderMiddleware
 
-# ── Routers ───────────────────────────────────────────────────────────────────
+# ── Routers worldbuilding (sin cambios) ───────────────────────────────────────
 from backend.api.routes import libros, personajes, mundo, universo, web, pdf
+
+# ── Routers nuevos — red social ───────────────────────────────────────────────
+from backend.api.routes import auth, social
+from backend.api.routes import capitulos as caps_router
 
 cfg = get_settings()
 
-
-# ── Lifespan (startup / shutdown) ─────────────────────────────────────────────
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """
-    Código que corre al arrancar y al apagar la app.
-    Reemplaza los obsoletos @app.on_event("startup").
-    """
-    # Startup
-    print(f"🚀 {cfg.APP_NAME} v{cfg.APP_VERSION} arrancando…")
+    print(f"🚀 {cfg.APP_NAME} arrancando — Red Social activa")
     store.cargar()
     store.on_change(ws_manager.broadcast_update)
     yield
-    # Shutdown
     print("👋 Cerrando ORAK Universe…")
-
-
-# ── App ───────────────────────────────────────────────────────────────────────
 
 app = FastAPI(
     title=cfg.APP_NAME,
-    version=cfg.APP_VERSION,
+    version="4.0.0",
+    description="Red social para escritores — worldbuilding colaborativo",
     docs_url="/docs",
     redoc_url="/redoc",
     lifespan=lifespan,
 )
 
 # ── Middleware ────────────────────────────────────────────────────────────────
-
 app.add_middleware(SlashEncoderMiddleware)
 app.add_middleware(
     CORSMiddleware,
@@ -60,43 +52,33 @@ app.add_middleware(
 )
 
 # ── Routers ───────────────────────────────────────────────────────────────────
+# Red social
+app.include_router(auth.router,         prefix="/api")   # /api/auth/...
+app.include_router(social.router,       prefix="/api")   # /api/social/...
+app.include_router(caps_router.router,  prefix="/api")   # /api/libros/{id}/capitulos
 
-app.include_router(universo.router)          # /ws  /chat  /timeline  /stats  /info
-app.include_router(libros.router)            # /libros
-app.include_router(personajes.router)        # /libros/{t}/personajes
-app.include_router(mundo.router)             # /libros/{t}/eventos|lugares|facciones|relaciones
-app.include_router(web.router)               # /  /orak.css  /engine.js
-app.include_router(pdf.router)             # /pdf  /pdf/notas
+# Worldbuilding (compatibilidad total)
+app.include_router(universo.router)
+app.include_router(libros.router)
+app.include_router(personajes.router)
+app.include_router(mundo.router)
+app.include_router(web.router)
+app.include_router(pdf.router)
 
 # ── Static files ──────────────────────────────────────────────────────────────
-import os
-from fastapi.staticfiles import StaticFiles
 _FRONTEND = os.path.join(os.path.dirname(__file__), "..", "frontend")
 app.mount("/js",     StaticFiles(directory=os.path.join(_FRONTEND, "js")),     name="js")
 app.mount("/css",    StaticFiles(directory=os.path.join(_FRONTEND, "css")),    name="css")
 app.mount("/assets", StaticFiles(directory=os.path.join(_FRONTEND, "assets")), name="assets")
 
-
-# ── Manejador global 404 ──────────────────────────────────────────────────────
-from fastapi import Request
-from fastapi.responses import HTMLResponse as _HTMLResponse
-import os as _os
-
+# ── 404 ───────────────────────────────────────────────────────────────────────
 @app.exception_handler(404)
-async def not_found_handler(request: Request, exc):
-    ruta = _os.path.join(_os.path.dirname(__file__), "..", "frontend", "404.html")
+async def not_found(request: Request, exc):
+    ruta = os.path.join(_FRONTEND, "404.html")
     try:
-        with open(ruta, encoding="utf-8") as f:
-            return _HTMLResponse(f.read(), status_code=404)
+        return HTMLResponse(open(ruta, encoding="utf-8").read(), status_code=404)
     except FileNotFoundError:
-        return _HTMLResponse("<h1>404 — No encontrado</h1>", status_code=404)
+        return HTMLResponse("<h1>404</h1>", status_code=404)
 
-
-# ── Dev entrypoint ────────────────────────────────────────────────────────────
 if __name__ == "__main__":
-    uvicorn.run(
-        "backend.main:app",
-        host=cfg.HOST,
-        port=cfg.PORT,
-        reload=cfg.DEBUG,
-    )
+    uvicorn.run("backend.main:app", host=cfg.HOST, port=cfg.PORT, reload=cfg.DEBUG)
