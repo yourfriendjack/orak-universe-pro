@@ -84,3 +84,10 @@ async def pagina_404():
     if content:
         return HTMLResponse(content)
     return HTMLResponse("<h1>404 — No encontrado</h1>", status_code=404)
+@router.get("/auth", response_class=HTMLResponse)
+@router.get("/auth.html", response_class=HTMLResponse)
+async def web_auth():
+    content = _read(os.path.join(FRONTEND_DIR, "auth.html"))
+    if not content:
+        return HTMLResponse("<h1>Auth no encontrado</h1>", status_code=404)
+    return HTMLResponse(_inject_config(content))

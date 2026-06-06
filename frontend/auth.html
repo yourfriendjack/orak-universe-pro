@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ORAK Universe — Acceso</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:#0e0d0b; --deep:#0a0908; --page:#faf7f2;
+  --amber:#c8860a; --amber-dim:#7a5006; --gold:#e8c55a;
+  --fog:#4a4540; --mist:#2a2520;
+  --glimmer:#a8d4e8; --rust:#8b3a1f;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { height:100%; overflow:hidden; }
+
+body {
+  background:var(--deep);
+  font-family:'Crimson Pro', Georgia, serif;
+  display:flex; align-items:center; justify-content:center;
+}
+
+/* ── CONTENEDOR PRINCIPAL ── */
+.shell {
+  width: min(960px, 96vw);
+  height: min(620px, 92vh);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 40px 120px rgba(0,0,0,.7), 0 0 0 1px rgba(200,134,10,.12);
+  animation: appear .7s cubic-bezier(.16,1,.3,1) both;
+}
+
+@keyframes appear {
+  from { opacity:0; transform:scale(.96) translateY(16px); }
+  to   { opacity:1; transform:scale(1)   translateY(0); }
+}
+
+/* ══════════════════════════════
+   LADO IZQUIERDO — FORMULARIO
+══════════════════════════════ */
+.left {
+  background: #141210;
+  padding: 52px 48px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  z-index: 2;
+}
+
+/* Logo */
+.logo {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 44px;
+}
+.logo-hex {
+  width: 32px; height: 32px;
+  background: var(--amber);
+  clip-path: polygon(50% 0%,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+}
+.logo-hex::after {
+  content:'';
+  width: 12px; height: 12px;
+  background: #141210;
+  clip-path: polygon(50% 0%,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);
+}
+.logo-text {
+  font-family: 'Cinzel', serif;
+  font-size: .85rem;
+  font-weight: 900;
+  letter-spacing: .18em;
+  color: var(--gold);
+}
+
+/* Título */
+.form-title {
+  font-family: 'Cinzel', serif;
+  font-size: 1.9rem;
+  font-weight: 600;
+  letter-spacing: .03em;
+  color: var(--page);
+  margin-bottom: 6px;
+}
+.form-sub {
+  font-style: italic;
+  font-size: .88rem;
+  color: var(--fog);
+  margin-bottom: 32px;
+}
+
+/* Tabs */
+.tabs {
+  display: flex; gap: 0;
+  margin-bottom: 28px;
+  border-bottom: 1px solid rgba(255,255,255,.07);
+}
+.tab {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .62rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  padding: 8px 16px 8px 0;
+  color: var(--fog);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: all .18s;
+}
+.tab.active { color: var(--gold); border-bottom-color: var(--amber); }
+
+/* Campos */
+.field { margin-bottom: 16px; }
+.field-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .58rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--fog);
+  margin-bottom: 7px;
+  display: flex; justify-content: space-between;
+}
+.field-label a {
+  color: rgba(200,134,10,.6);
+  cursor: pointer;
+  transition: color .15s;
+  text-decoration: none;
+}
+.field-label a:hover { color: var(--amber); }
+.field-wrap { position: relative; }
+.field-input {
+  width: 100%;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 7px;
+  padding: 11px 14px;
+  font-family: 'Crimson Pro', serif;
+  font-size: 1rem;
+  color: var(--page);
+  outline: none;
+  transition: border-color .18s, background .18s;
+}
+.field-input:focus {
+  border-color: rgba(200,134,10,.5);
+  background: rgba(255,255,255,.07);
+}
+.field-input::placeholder { color: rgba(255,255,255,.18); font-style: italic; }
+.eye-btn {
+  position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; cursor: pointer;
+  color: var(--fog); font-size: .85rem; transition: color .15s;
+}
+.eye-btn:hover { color: var(--amber); }
+
+/* Géneros */
+.genre-grid { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 4px; }
+.genre-chip {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .55rem; letter-spacing: .06em; text-transform: uppercase;
+  padding: 4px 9px; border-radius: 20px;
+  border: 1px solid rgba(255,255,255,.1);
+  color: rgba(255,255,255,.3); cursor: pointer; transition: all .15s;
+}
+.genre-chip.on {
+  background: rgba(200,134,10,.15);
+  color: var(--amber); border-color: rgba(200,134,10,.4);
+}
+
+/* Error */
+.form-error {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .6rem; color: #e07070;
+  background: rgba(139,31,31,.12);
+  border: 1px solid rgba(139,31,31,.2);
+  padding: 8px 12px; border-radius: 6px;
+  margin-bottom: 14px; display: none;
+}
+.form-error.show { display: block; }
+
+/* Submit */
+.submit-btn {
+  width: 100%; padding: 13px;
+  background: linear-gradient(135deg, var(--amber-dim) 0%, var(--amber) 100%);
+  color: #0a0908;
+  border: none; border-radius: 7px;
+  font-family: 'Cinzel', serif;
+  font-size: .88rem; font-weight: 700; letter-spacing: .08em;
+  cursor: pointer; transition: all .2s;
+  margin-top: 4px;
+  position: relative; overflow: hidden;
+}
+.submit-btn::after {
+  content:'';
+  position:absolute; inset:0;
+  background: linear-gradient(135deg, rgba(255,255,255,.15) 0%, transparent 60%);
+  opacity:0; transition: opacity .2s;
+}
+.submit-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(200,134,10,.35); }
+.submit-btn:hover::after { opacity:1; }
+.submit-btn:active { transform: translateY(0); }
+
+.form-hint {
+  text-align: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .56rem;
+  color: rgba(255,255,255,.2);
+  margin-top: 10px;
+}
+
+/* Panels */
+.panel { display: none; flex-direction: column; gap: 0; }
+.panel.active { display: flex; overflow-y: auto; max-height: 420px; padding-right: 4px; scrollbar-width: thin; scrollbar-color: rgba(200,134,10,.3) transparent; }
+
+/* ══════════════════════════════
+   LADO DERECHO — COSMOS
+══════════════════════════════ */
+.right {
+  background: #050404;
+  position: relative;
+  overflow: hidden;
+  display: flex; align-items: flex-end; justify-content: flex-start;
+  padding: 28px 32px;
+}
+
+/* Canvas cosmos */
+#cosmos { position:absolute; inset:0; width:100%; height:100%; }
+
+/* Planeta principal */
+.planet {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -52%);
+  width: 160px; height: 160px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%,
+    #c8e8f0 0%,
+    #7ab8d0 30%,
+    #3a7898 60%,
+    #1a3848 100%
+  );
+  box-shadow:
+    inset -20px -20px 40px rgba(0,0,0,.5),
+    0 0 60px rgba(120,200,230,.15),
+    0 0 120px rgba(100,180,210,.08);
+  animation: float 8s ease-in-out infinite;
+}
+.planet::before {
+  content:'';
+  position:absolute; inset:-8px;
+  border-radius: 50%;
+  border: 1px solid rgba(168,212,232,.12);
+  animation: ring-pulse 4s ease-in-out infinite;
+}
+.planet::after {
+  content:'';
+  position:absolute; inset:-24px;
+  border-radius: 50%;
+  border: 1px solid rgba(168,212,232,.06);
+  animation: ring-pulse 4s ease-in-out infinite .5s;
+}
+
+/* Anillo del planeta */
+.ring {
+  position:absolute;
+  top: 50%; left: 50%;
+  width: 240px; height: 24px;
+  margin-left: -120px; margin-top: -12px;
+  border-radius: 50%;
+  border: 2px solid rgba(168,212,232,.2);
+  transform: translateY(-52%) rotateX(72deg);
+  box-shadow: 0 0 20px rgba(168,212,232,.08);
+  animation: float 8s ease-in-out infinite;
+}
+
+/* Lunas */
+.moon {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #e0e8f0, #8090a0);
+  box-shadow: inset -3px -3px 8px rgba(0,0,0,.4), 0 0 12px rgba(168,212,232,.15);
+}
+.moon-1 {
+  width: 22px; height: 22px;
+  top: 26%; right: 25%;
+  animation: orbit-1 12s linear infinite;
+}
+.moon-2 {
+  width: 10px; height: 10px;
+  top: 62%; left: 22%;
+  animation: orbit-2 18s linear infinite;
+  opacity: .7;
+}
+
+/* Líneas orbitales */
+.orbit-line {
+  position: absolute;
+  top: 50%; left: 50%;
+  border-radius: 50%;
+  border: 1px solid rgba(168,212,232,.06);
+  transform: translate(-50%,-52%);
+}
+.ol-1 { width: 220px; height: 220px; margin: -110px 0 0 -110px; top:50%; left:50%; transform:translate(-50%,-52%) rotateX(72deg); }
+.ol-2 { width: 310px; height: 310px; margin: -155px 0 0 -155px; top:50%; left:50%; transform:translate(-50%,-52%) rotateX(72deg); }
+
+/* Partículas estrellas */
+.star {
+  position: absolute;
+  border-radius: 50%;
+  background: white;
+  animation: twinkle var(--d, 3s) ease-in-out infinite var(--del, 0s);
+}
+
+/* Líneas verticales decorativas */
+.vline {
+  position: absolute;
+  width: 1px;
+  background: linear-gradient(to bottom, transparent, rgba(168,212,232,.3), transparent);
+  animation: vline-fade var(--vd, 4s) ease-in-out infinite var(--vdel,0s);
+}
+
+/* Branding */
+.cosmos-brand {
+  position: relative; z-index: 2;
+  font-family: 'Cinzel', serif;
+  font-size: .75rem;
+  font-weight: 900;
+  letter-spacing: .2em;
+  color: rgba(168,212,232,.4);
+}
+
+.cosmos-tagline {
+  position: absolute;
+  top: 28px; left: 32px;
+  z-index: 2;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .56rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: rgba(168,212,232,.25);
+}
+
+/* ── Animaciones ── */
+@keyframes float {
+  0%,100% { transform: translate(-50%,-52%) translateY(0); }
+  50%      { transform: translate(-50%,-52%) translateY(-14px); }
+}
+@keyframes ring-pulse {
+  0%,100% { opacity:.6; }
+  50%      { opacity:1; }
+}
+@keyframes orbit-1 {
+  from { transform: rotate(0deg) translateX(110px) rotate(0deg); }
+  to   { transform: rotate(360deg) translateX(110px) rotate(-360deg); }
+}
+@keyframes orbit-2 {
+  from { transform: rotate(180deg) translateX(150px) rotate(-180deg); }
+  to   { transform: rotate(540deg) translateX(150px) rotate(-540deg); }
+}
+@keyframes twinkle {
+  0%,100% { opacity: var(--op, .8); transform: scale(1); }
+  50%      { opacity: .2; transform: scale(.5); }
+}
+@keyframes vline-fade {
+  0%,100% { opacity:0; height: 0; }
+  30%,70% { opacity:1; }
+  50%      { height: var(--vh, 80px); }
+}
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(8px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+/* Géneros animados entrada */
+.field { animation: fadeUp .4s ease both; }
+.field:nth-child(1){ animation-delay:.1s; }
+.field:nth-child(2){ animation-delay:.18s; }
+.field:nth-child(3){ animation-delay:.26s; }
+.field:nth-child(4){ animation-delay:.34s; }
+.panel.active::-webkit-scrollbar { width: 3px; }
+.panel.active::-webkit-scrollbar-track { background: transparent; }
+.panel.active::-webkit-scrollbar-thumb { background: rgba(200,134,10,.25); border-radius: 2px; }
+.panel.active::-webkit-scrollbar-thumb:hover { background: rgba(200,134,10,.5); }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- ── IZQUIERDA ── -->
+  <div class="left">
+    <div class="logo">
+      <div class="logo-hex"></div>
+      <div class="logo-text">ORAK UNIVERSE</div>
+    </div>
+
+    <div class="form-title" id="form-title">Bienvenido</div>
+    <div class="form-sub" id="form-sub">Entra a tu universo narrativo</div>
+
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('login')">Iniciar sesión</div>
+      <div class="tab" onclick="switchTab('register')">Registrarse</div>
+    </div>
+
+    <div class="form-error" id="form-error"></div>
+
+    <!-- LOGIN -->
+    <div class="panel active" id="panel-login">
+      <div class="field">
+        <div class="field-label">
+          <span>Tu correo</span>
+        </div>
+        <input class="field-input" type="email" id="login-email" placeholder="escritor@correo.com"
+          onkeydown="if(event.key==='Enter') doLogin()">
+      </div>
+      <div class="field">
+        <div class="field-label">
+          <span>Contraseña</span>
+          <a>¿Olvidaste la contraseña?</a>
+        </div>
+        <div class="field-wrap">
+          <input class="field-input" type="password" id="login-pass" placeholder="••••••••••"
+            onkeydown="if(event.key==='Enter') doLogin()">
+          <button class="eye-btn" onclick="toggleEye('login-pass',this)">👁</button>
+        </div>
+      </div>
+      <button class="submit-btn" onclick="doLogin()">Entrar al Universo</button>
+      <div class="form-hint">Tus mundos te esperan</div>
+    </div>
+
+    <!-- REGISTER -->
+    <div class="panel" id="panel-register">
+      <div class="field">
+        <div class="field-label"><span>Nombre de escritor</span></div>
+        <input class="field-input" type="text" id="reg-name" placeholder="Cómo te conocerá el mundo">
+      </div>
+      <div class="field">
+        <div class="field-label"><span>@handle único</span></div>
+        <input class="field-input" type="text" id="reg-handle" placeholder="tuhandle">
+      </div>
+      <div class="field">
+        <div class="field-label"><span>Correo</span></div>
+        <input class="field-input" type="email" id="reg-email" placeholder="tu@correo.com">
+      </div>
+      <div class="field">
+        <div class="field-label"><span>Contraseña</span></div>
+        <div class="field-wrap">
+          <input class="field-input" type="password" id="reg-pass" placeholder="Mínimo 6 caracteres">
+          <button class="eye-btn" onclick="toggleEye('reg-pass',this)">👁</button>
+        </div>
+      </div>
+      <div class="field">
+        <div class="field-label"><span>Géneros favoritos</span></div>
+        <div class="genre-grid">
+          <div class="genre-chip" onclick="toggleG(this)">Fantasía</div>
+          <div class="genre-chip" onclick="toggleG(this)">Sci-Fi</div>
+          <div class="genre-chip" onclick="toggleG(this)">Terror</div>
+          <div class="genre-chip" onclick="toggleG(this)">Histórico</div>
+          <div class="genre-chip" onclick="toggleG(this)">Distopía</div>
+          <div class="genre-chip" onclick="toggleG(this)">Mitología</div>
+          <div class="genre-chip" onclick="toggleG(this)">Romance</div>
+          <div class="genre-chip" onclick="toggleG(this)">Thriller</div>
+        </div>
+      </div>
+      <button class="submit-btn" onclick="doRegister()" style="margin-top:10px">Crear mi Universo</button>
+    </div>
+  </div>
+
+  <!-- ── DERECHA — COSMOS ── -->
+  <div class="right">
+    <canvas id="cosmos"></canvas>
+
+    <!-- Planeta -->
+    <div class="orbit-line ol-1"></div>
+    <div class="orbit-line ol-2"></div>
+    <div class="ring"></div>
+    <div class="planet"></div>
+    <div class="moon moon-1"></div>
+    <div class="moon moon-2"></div>
+
+    <div class="cosmos-tagline">Universo Narrativo Colectivo</div>
+    <div class="cosmos-brand">ORAK</div>
+  </div>
+
+</div>
+
+<script>
+// ── Canvas de estrellas ─────────────────────────────────────────
+const canvas = document.getElementById('cosmos');
+const ctx    = canvas.getContext('2d');
+
+function resizeCanvas() {
+  const r = canvas.parentElement.getBoundingClientRect();
+  canvas.width  = r.width;
+  canvas.height = r.height;
+}
+
+const stars = [];
+function initStars() {
+  stars.length = 0;
+  for (let i = 0; i < 140; i++) {
+    stars.push({
+      x:   Math.random() * canvas.width,
+      y:   Math.random() * canvas.height,
+      r:   Math.random() * 1.2 + 0.2,
+      op:  Math.random() * .7 + .2,
+      sp:  Math.random() * .008 + .002,
+      ph:  Math.random() * Math.PI * 2,
+    });
+  }
+}
+
+function drawStars(t) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  for (const s of stars) {
+    const op = s.op * (.5 + .5 * Math.sin(t * s.sp + s.ph));
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(255,255,255,${op})`;
+    ctx.fill();
+  }
+
+  // Partículas ámbar ocasionales
+  for (const s of stars) {
+    if (s.r > 1) {
+      const op = s.op * .3 * Math.max(0, Math.sin(t * s.sp * .5 + s.ph + 1));
+      ctx.beginPath();
+      ctx.arc(s.x + 2, s.y - 2, s.r * .4, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(200,134,10,${op})`;
+      ctx.fill();
+    }
+  }
+
+  // Líneas verticales
+  const lines = [
+    { x:.45, yStart:.1, yEnd:.42, op:.25 },
+    { x:.62, yStart:.55, yEnd:.85, op:.18 },
+  ];
+  for (const l of lines) {
+    const grad = ctx.createLinearGradient(
+      l.x*canvas.width, l.yStart*canvas.height,
+      l.x*canvas.width, l.yEnd*canvas.height
+    );
+    grad.addColorStop(0, 'transparent');
+    grad.addColorStop(.5, `rgba(168,212,232,${l.op * (.5 + .5 * Math.sin(t*.003 + l.x))})`);
+    grad.addColorStop(1, 'transparent');
+    ctx.beginPath();
+    ctx.moveTo(l.x*canvas.width, l.yStart*canvas.height);
+    ctx.lineTo(l.x*canvas.width, l.yEnd*canvas.height);
+    ctx.strokeStyle = grad;
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+}
+
+let frame;
+function animate(t) {
+  drawStars(t);
+  frame = requestAnimationFrame(animate);
+}
+
+resizeCanvas();
+initStars();
+requestAnimationFrame(animate);
+window.addEventListener('resize', () => { resizeCanvas(); initStars(); });
+
+// ── Tabs ───────────────────────────────────────────────────────
+const titles = {
+  login:    ['Bienvenido',     'Entra a tu universo narrativo'],
+  register: ['Crea tu mundo',  'Únete a la comunidad de escritores'],
+};
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelector(`.tab[onclick="switchTab('${tab}')"]`).classList.add('active');
+  document.getElementById('panel-' + tab).classList.add('active');
+  document.getElementById('form-title').textContent = titles[tab][0];
+  document.getElementById('form-sub').textContent   = titles[tab][1];
+  showError('');
+}
+
+// ── Géneros ────────────────────────────────────────────────────
+const selGenres = new Set();
+function toggleG(el) {
+  const g = el.textContent;
+  el.classList.toggle('on');
+  selGenres.has(g) ? selGenres.delete(g) : selGenres.add(g);
+}
+
+// ── Ojo contraseña ─────────────────────────────────────────────
+function toggleEye(id, btn) {
+  const inp = document.getElementById(id);
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+  btn.textContent = inp.type === 'password' ? '👁' : '🙈';
+}
+
+// ── Error ──────────────────────────────────────────────────────
+function showError(msg) {
+  const el = document.getElementById('form-error');
+  el.textContent = msg;
+  el.classList.toggle('show', !!msg);
+}
+
+// ── Auth (conecta con el backend real) ─────────────────────────
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass  = document.getElementById('login-pass').value;
+  if (!email || !pass) { showError('Completa todos los campos'); return; }
+  showError('');
+  const btn = document.querySelector('#panel-login .submit-btn');
+  btn.textContent = 'Entrando…'; btn.disabled = true;
+  try {
+    const res = await fetch('/api/auth/login', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ email, password: pass })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail?.mensaje || data.detail || 'Credenciales incorrectas');
+    localStorage.setItem('orak_sesion', JSON.stringify({ access_token: data.access_token, perfil: data.perfil }));
+    window.location.href = '/index-social.html';
+  } catch(e) {
+    showError(e.message);
+    btn.textContent = 'Entrar al Universo'; btn.disabled = false;
+  }
+}
+
+async function doRegister() {
+  const name   = document.getElementById('reg-name').value.trim();
+  const handle = document.getElementById('reg-handle').value.trim().replace('@','');
+  const email  = document.getElementById('reg-email').value.trim();
+  const pass   = document.getElementById('reg-pass').value;
+  if (!name||!handle||!email||!pass) { showError('Completa todos los campos'); return; }
+  if (pass.length < 6) { showError('La contraseña debe tener al menos 6 caracteres'); return; }
+  showError('');
+  const btn = document.querySelector('#panel-register .submit-btn');
+  btn.textContent = 'Creando universo…'; btn.disabled = true;
+  try {
+    // Registro
+    const r1 = await fetch('/api/auth/registro', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ email, password:pass, username:handle, display_name:name, generos:[...selGenres] })
+    });
+    const d1 = await r1.json();
+    if (!r1.ok) throw new Error(d1.detail?.mensaje || d1.detail || 'Error al registrarse');
+    // Auto-login
+    const r2 = await fetch('/api/auth/login', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ email, password: pass })
+    });
+    const d2 = await r2.json();
+    if (!r2.ok) throw new Error('Cuenta creada — inicia sesión manualmente');
+    localStorage.setItem('orak_sesion', JSON.stringify({ access_token: d2.access_token, perfil: d2.perfil }));
+    window.location.href = '/index-social.html';
+  } catch(e) {
+    showError(e.message);
+    btn.textContent = 'Crear mi Universo'; btn.disabled = false;
+  }
+}
+</script>
+</body>
+</html>
