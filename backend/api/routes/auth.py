@@ -139,7 +139,7 @@ async def get_libros_de_perfil(username: str):
     if not perfil.data:
         raise HTTPException(404, "Perfil no encontrado")
     res = sb.table("libros")\
-            .select("id,titulo,descripcion,genero,portada_url,es_publico,glimmers,lectores,forks_count,creado_en")\
+            .select("id,titulo,datos,genero,portada_url,es_publico,glimmers,lectores,forks_count,creado_en")\
             .eq("autor_id", perfil.data["id"])\
             .eq("es_publico", True)\
             .order("creado_en", desc=True)\

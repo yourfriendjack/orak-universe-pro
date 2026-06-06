@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ORAK Universe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/orak-social.css">
+</head>
+<body>
+
+<!-- ═══════════════════════════ AUTH ═══════════════════════════ -->
+<div class="screen active" id="screen-auth">
+  <div class="auth-glow"></div>
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="auth-hex"></div>
+      <div class="auth-title">ORAK UNIVERSE</div>
+      <div class="auth-sub">La red social de los escritores</div>
+    </div>
+    <div class="auth-tabs">
+      <div class="auth-tab active" onclick="authTab('login')">Entrar</div>
+      <div class="auth-tab" onclick="authTab('register')">Registrarse</div>
+    </div>
+    <div class="auth-error" id="auth-error"></div>
+
+    <!-- LOGIN -->
+    <div class="auth-panel active" id="auth-login">
+      <div>
+        <div class="field-label">Correo electrónico</div>
+        <input class="field-input" type="email" id="login-email" placeholder="tu@correo.com">
+      </div>
+      <div>
+        <div class="field-label">Contraseña</div>
+        <input class="field-input" type="password" id="login-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+      <button class="auth-submit" onclick="doLogin()">Entrar al Universo</button>
+      <div class="auth-hint">¿Sin cuenta? Regístrate arriba — es gratis</div>
+    </div>
+
+    <!-- REGISTER -->
+    <div class="auth-panel" id="auth-register">
+      <div>
+        <div class="field-label">Nombre de escritor</div>
+        <input class="field-input" type="text" id="reg-name" placeholder="Cómo te conocerá el mundo">
+      </div>
+      <div>
+        <div class="field-label">@handle único</div>
+        <input class="field-input" type="text" id="reg-handle" placeholder="tuhandle">
+      </div>
+      <div>
+        <div class="field-label">Correo electrónico</div>
+        <input class="field-input" type="email" id="reg-email" placeholder="tu@correo.com">
+      </div>
+      <div>
+        <div class="field-label">Contraseña</div>
+        <input class="field-input" type="password" id="reg-pass" placeholder="Mínimo 6 caracteres">
+      </div>
+      <div>
+        <div class="field-label">Géneros favoritos</div>
+        <div class="genre-row" id="genre-chips">
+          <div class="genre-chip" onclick="toggleGenre(this,'Fantasía')">Fantasía</div>
+          <div class="genre-chip" onclick="toggleGenre(this,'Sci-Fi')">Sci-Fi</div>
+          <div class="genre-chip" onclick="toggleGenre(this,'Terror')">Terror</div>
+          <div class="genre-chip" onclick="toggleGenre(this,'Histórico')">Histórico</div>
+          <div class="genre-chip" onclick="toggleGenre(this,'Distopía')">Distopía</div>
+          <div class="genre-chip" onclick="toggleGenre(this,'Mitología')">Mitología</div>
+          <div class="genre-chip" onclick="toggleGenre(this,'Romance')">Romance</div>
+          <div class="genre-chip" onclick="toggleGenre(this,'Thriller')">Thriller</div>
+        </div>
+      </div>
+      <button class="auth-submit" onclick="doRegister()">Crear mi Universo</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ APP ════════════════════════════ -->
+<div class="screen" id="screen-app">
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="logo" onclick="goView('feed')">
+      <div class="logo-hex"></div>ORAK
+    </div>
+    <input class="topbar-search" type="text" placeholder="Buscar libros, escritores…">
+    <nav class="topbar-nav">
+      <button class="tnav active" id="tnav-feed"    onclick="goView('feed')">◈ Feed</button>
+      <button class="tnav"        id="tnav-explore" onclick="goView('explore')">◎ Explorar</button>
+      <button class="tnav"        id="tnav-people"  onclick="goView('people')">◷ Escritores</button>
+      <button class="tnav"        id="tnav-profile" onclick="goView('profile')">◧ Mi Perfil</button>
+    </nav>
+    <div class="topbar-right">
+      <button class="notif-btn" id="notif-btn" onclick="toggleNotif()">
+        🔔<div class="notif-dot" id="notif-dot"></div>
+      </button>
+      <div class="orun-pill">⬡ <span id="orun-display">—</span> · ✦ <span id="glimmer-display">—</span></div>
+      <div class="user-av" id="topbar-av" onclick="goView('profile')">…</div>
+    </div>
+  </header>
+
+  <div class="app-body">
+
+    <!-- SIDEBAR -->
+    <nav class="sidebar">
+      <button class="write-btn" onclick="toast('✦ Editor próximamente')">✦ Nuevo Libro</button>
+      <div class="snav-label">Navegar</div>
+      <div class="snav-item active" id="snav-feed"    onclick="goView('feed')"><span class="snav-icon">◈</span>Feed</div>
+      <div class="snav-item"        id="snav-explore" onclick="goView('explore')"><span class="snav-icon">◎</span>Explorar</div>
+      <div class="snav-item"        id="snav-people"  onclick="goView('people')"><span class="snav-icon">◷</span>Escritores</div>
+      <div class="snav-item"        id="snav-profile" onclick="goView('profile')"><span class="snav-icon">◧</span>Mi Perfil</div>
+      <div class="snav-label">Biblioteca</div>
+      <div class="snav-item" onclick="toast('📚 Mis libros próximamente')"><span class="snav-icon">◫</span>Mis Libros</div>
+      <div class="snav-item" onclick="toast('◈ Colaboraciones próximamente')"><span class="snav-icon">◆</span>Colaboraciones</div>
+      <div class="snav-label">Comunidad</div>
+      <div class="snav-item" onclick="toggleNotif()"><span class="snav-icon">🔔</span>Notificaciones<span class="snav-badge" id="snav-badge" style="display:none">0</span></div>
+      <div class="snav-item" onclick="toast('💬 Mensajes próximamente')"><span class="snav-icon">✉</span>Mensajes</div>
+      <div class="snav-item" onclick="toast('⬡ Tienda próximamente')"><span class="snav-icon">❋</span>Tienda Oruns</div>
+      <div class="snav-label">Cuenta</div>
+      <div class="snav-item" onclick="doLogout()"><span class="snav-icon">←</span>Cerrar sesión</div>
+    </nav>
+
+    <!-- ── FEED ── -->
+    <div class="view active" id="view-feed">
+      <div class="feed-shell">
+        <div class="feed-main">
+          <div class="composer">
+            <div class="composer-top">
+              <div class="composer-av" id="comp-av">…</div>
+              <textarea class="composer-input" id="comp-text" placeholder="¿Qué estás escribiendo hoy?"></textarea>
+            </div>
+            <div class="composer-footer">
+              <select class="comp-sel" id="comp-type">
+                <option value="nuevo_libro">📖 Nuevo libro</option>
+                <option value="capitulo">✏️ Nuevo capítulo</option>
+                <option value="colaboracion">👥 Busco colaborador</option>
+                <option value="reflexion">💬 Reflexión</option>
+              </select>
+              <button class="comp-btn" onclick="submitPost()">Publicar</button>
+            </div>
+          </div>
+          <div class="feed-posts" id="feed-posts">
+            <div class="loading">Cargando feed</div>
+          </div>
+        </div>
+        <div class="feed-widgets">
+          <div class="widget-block">
+            <div class="widget-label">Tu Economía</div>
+            <div class="eco-card">
+              <div class="eco-head">
+                <div class="eco-name" id="eco-name">—</div>
+                <div class="eco-lvl" id="eco-lvl">Nivel 1</div>
+              </div>
+              <div class="eco-pills">
+                <div class="eco-pill">
+                  <div class="eco-pill-ico">⬡</div>
+                  <div class="eco-pill-val ov" id="eco-oruns">—</div>
+                  <div class="eco-pill-lbl">Oruns</div>
+                </div>
+                <div class="eco-pill">
+                  <div class="eco-pill-ico">✦</div>
+                  <div class="eco-pill-val gv" id="eco-glimmers">—</div>
+                  <div class="eco-pill-lbl">Glimmers</div>
+                </div>
+              </div>
+              <div class="eco-xp">
+                <div class="eco-xp-row">
+                  <span class="eco-xp-lbl">Progreso al siguiente nivel</span>
+                  <span class="eco-xp-pct" id="eco-pct">0%</span>
+                </div>
+                <div class="eco-bar"><div class="eco-fill" id="eco-fill" style="width:0%"></div></div>
+              </div>
+              <div class="eco-hint">Publica y recibe Glimmers para subir</div>
+            </div>
+          </div>
+          <div class="widget-block">
+            <div class="widget-label">Top Escritores</div>
+            <div class="rank-list" id="rank-list"><div class="loading" style="padding:10px"></div></div>
+          </div>
+          <div class="widget-block">
+            <div class="widget-label">Sugeridos</div>
+            <div class="sug-list" id="sug-list"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── EXPLORAR ── -->
+    <div class="view" id="view-explore">
+      <div class="explore-head">
+        <div class="explore-title">Explorar Universos</div>
+        <div class="explore-sub">Descubre mundos escritos por la comunidad</div>
+        <div class="genre-pills">
+          <div class="gpill active" onclick="filterGenre(this,null)">Todos</div>
+          <div class="gpill" onclick="filterGenre(this,'fantasía')">Fantasía</div>
+          <div class="gpill" onclick="filterGenre(this,'sci-fi')">Sci-Fi</div>
+          <div class="gpill" onclick="filterGenre(this,'terror')">Terror</div>
+          <div class="gpill" onclick="filterGenre(this,'histórico')">Histórico</div>
+          <div class="gpill" onclick="filterGenre(this,'distopía')">Distopía</div>
+          <div class="gpill" onclick="filterGenre(this,'mitología')">Mitología</div>
+        </div>
+      </div>
+      <div class="books-grid" id="books-grid"><div class="loading">Cargando libros</div></div>
+    </div>
+
+    <!-- ── ESCRITORES ── -->
+    <div class="view" id="view-people">
+      <div class="people-wrap">
+        <div class="people-title">Escritores y Lectores</div>
+        <div class="people-sub">Sigue a quienes inspiran tu escritura</div>
+        <input class="people-search" type="text" placeholder="Buscar por nombre o @handle…" oninput="filterPeople(this.value)">
+        <div class="people-list" id="people-list"><div class="loading">Cargando escritores</div></div>
+      </div>
+    </div>
+
+    <!-- ── PERFIL ── -->
+    <div class="view" id="view-profile">
+      <div class="prof-banner">
+        <div class="prof-banner-bg"></div>
+        <div class="prof-banner-stars"></div>
+        <div class="prof-banner-overlay"></div>
+      </div>
+      <div class="prof-infobar">
+        <div class="prof-av-lg" id="prof-av">…</div>
+        <div class="prof-meta">
+          <div class="prof-name" id="prof-name">—</div>
+          <div class="prof-handle" id="prof-handle">—</div>
+          <div class="prof-bio" id="prof-bio">—</div>
+        </div>
+        <div class="prof-actions">
+          <button class="pbtn pbtn-ink" onclick="toast('✎ Editor de perfil próximamente')">✎ Editar</button>
+        </div>
+      </div>
+      <div class="prof-stats">
+        <div class="prof-stat"><div class="prof-stat-num" id="ps-libros">—</div><div class="prof-stat-lbl">Libros</div></div>
+        <div class="prof-stat"><div class="prof-stat-num" id="ps-seg">—</div><div class="prof-stat-lbl">Seguidores</div></div>
+        <div class="prof-stat"><div class="prof-stat-num" id="ps-sig">—</div><div class="prof-stat-lbl">Siguiendo</div></div>
+        <div class="prof-stat"><div class="prof-stat-num gold" id="ps-oruns">—</div><div class="prof-stat-lbl">Oruns</div></div>
+        <div class="prof-stat"><div class="prof-stat-num blue" id="ps-glimmers">—</div><div class="prof-stat-lbl">Glimmers</div></div>
+      </div>
+      <div class="prof-tabs-row">
+        <div class="ptab active" onclick="profTab(this,'libros')">Libros</div>
+        <div class="ptab" onclick="profTab(this,'actividad')">Actividad</div>
+      </div>
+      <div class="ptab-pane active" id="ptab-libros">
+        <div class="books-grid" id="profile-grid" style="padding:0"></div>
+      </div>
+      <div class="ptab-pane" id="ptab-actividad">
+        <div style="font-style:italic;color:var(--fog);padding:20px 0">Historial próximamente…</div>
+      </div>
+    </div>
+
+  </div><!-- app-body -->
+</div><!-- screen-app -->
+
+<!-- NOTIF PANEL -->
+<div class="notif-panel" id="notif-panel">
+  <div class="notif-head">
+    <div class="notif-head-title">Notificaciones</div>
+    <div class="notif-clear" onclick="clearNotifs()">Marcar como leídas</div>
+  </div>
+  <div class="notif-list" id="notif-list"></div>
+</div>
+
+<!-- GLIMMER MODAL -->
+<div class="modal-bg" id="glimmer-modal">
+  <div class="modal-box">
+    <div class="modal-title">Dar Glimmer ✦</div>
+    <div class="modal-sub">Elige cuántos Oruns enviar al autor</div>
+    <div class="glimmer-opts">
+      <div class="gl-opt sel" onclick="selGlimmer(this,1)">1<span>Orun</span></div>
+      <div class="gl-opt"    onclick="selGlimmer(this,2)">2<span>Oruns</span></div>
+      <div class="gl-opt"    onclick="selGlimmer(this,3)">3<span>Oruns</span></div>
+      <div class="gl-opt"    onclick="selGlimmer(this,5)">5<span>Oruns</span></div>
+    </div>
+    <div class="gl-bal">Tienes <strong id="gl-balance">—</strong> Glimmers esta semana</div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeModal('glimmer-modal')">Cancelar</button>
+      <button class="modal-confirm" onclick="sendGlimmer()">Enviar ✦</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initAuth, login, logout, registro, getPerfil, getToken, getOruns, getGlimmers, actualizarOruns, actualizarGlimmers, estaLogueado } from './js/services/auth.js';
+import { getFeed, getExplorar, crearPost, seguir, dejarSeguir, darGlimmer, getRanking, getNotificaciones, leerNotificaciones, getLibrosPerfil } from './js/services/api.js';
+
+// ── Estado ─────────────────────────────────────────────────────
+const S = {
+  view: 'feed',
+  notifOpen: false,
+  glimmerPostId: null,
+  glimmerAmt: 1,
+  posts: [],
+  people: [],
+  notifs: [],
+  genreFilter: null,
+};
+
+// ── Colores de avatares ─────────────────────────────────────────
+const AV_COLORS = ['pav1','pav2','pav3','pav4','pav5'];
+function avColor(str) { let h=0; for(const c of (str||'')) h=(h*31+c.charCodeAt(0))&0xffff; return AV_COLORS[h % AV_COLORS.length]; }
+function initials(name) { return (name||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase(); }
+
+// ── Arranque ────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', async () => {
+  const sesion = await initAuth();
+  if (sesion) launchApp();
+});
+
+// ── AUTH UI ─────────────────────────────────────────────────────
+window.authTab = (tab) => {
+  document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.auth-panel').forEach(p => p.classList.remove('active'));
+  document.querySelector(`.auth-tab[onclick="authTab('${tab}')"]`).classList.add('active');
+  document.getElementById('auth-' + tab).classList.add('active');
+  showAuthError('');
+};
+
+const selectedGenres = new Set();
+window.toggleGenre = (el, g) => { el.classList.toggle('on'); selectedGenres.has(g) ? selectedGenres.delete(g) : selectedGenres.add(g); };
+
+window.doLogin = async () => {
+  const email = document.getElementById('login-email').value.trim();
+  const pass  = document.getElementById('login-pass').value;
+  if (!email || !pass) { showAuthError('Completa todos los campos'); return; }
+  showAuthError('');
+  try {
+    await login(email, pass);
+    launchApp();
+  } catch(e) { showAuthError(e.message || 'Credenciales incorrectas'); }
+};
+
+window.doRegister = async () => {
+  const name   = document.getElementById('reg-name').value.trim();
+  const handle = document.getElementById('reg-handle').value.trim().replace('@','');
+  const email  = document.getElementById('reg-email').value.trim();
+  const pass   = document.getElementById('reg-pass').value;
+  if (!name || !handle || !email || !pass) { showAuthError('Completa todos los campos'); return; }
+  if (pass.length < 6) { showAuthError('La contraseña debe tener al menos 6 caracteres'); return; }
+  showAuthError('');
+  try {
+    await registro({ email, password: pass, username: handle, display_name: name, generos: [...selectedGenres] });
+    // Auto-login después del registro
+    await login(email, pass);
+    launchApp();
+  } catch(e) { showAuthError(e.message || 'Error al crear la cuenta'); }
+};
+
+window.doLogout = async () => {
+  await logout();
+};
+
+function showAuthError(msg) {
+  const el = document.getElementById('auth-error');
+  if (msg) { el.textContent = msg; el.classList.add('show'); }
+  else { el.classList.remove('show'); }
+}
+
+// ── LANZAR APP ──────────────────────────────────────────────────
+function launchApp() {
+  document.getElementById('screen-auth').classList.remove('active');
+  document.getElementById('screen-app').classList.add('active');
+  updateUserUI();
+  loadFeed();
+  loadRanking();
+  loadNotifs();
+  toast('✦ Bienvenido a ORAK Universe');
+}
+
+function updateUserUI() {
+  const p = getPerfil();
+  if (!p) return;
+  const { display_name, username, oruns, glimmers_week, nivel, xp } = p;
+  const ini = initials(display_name || username);
+  const pct = Math.min(99, Math.round((xp % 500) / 500 * 100));
+  _set('topbar-av',    ini);
+  _set('comp-av',      ini);
+  _set('prof-av',      ini);
+  _set('orun-display', (oruns||0).toLocaleString());
+  _set('glimmer-display', glimmers_week || 0);
+  _set('eco-name',     display_name || username);
+  _set('eco-lvl',      `Nivel ${nivel || 1}`);
+  _set('eco-oruns',    (oruns||0).toLocaleString());
+  _set('eco-glimmers', `${glimmers_week||0}/10`);
+  _set('eco-pct',      `${pct}%`);
+  document.getElementById('eco-fill').style.width = pct + '%';
+  _set('prof-name',    display_name || username);
+  _set('prof-handle',  `@${username}`);
+  _set('prof-bio',     p.bio || 'Sin bio todavía');
+  _set('ps-oruns',     (oruns||0).toLocaleString());
+  _set('ps-glimmers',  glimmers_week || 0);
+}
+
+function _set(id, val) { const el = document.getElementById(id); if(el) el.textContent = val ?? ''; }
+
+// ── NAVEGACIÓN ──────────────────────────────────────────────────
+window.goView = (view) => {
+  S.view = view;
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.tnav').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.snav-item').forEach(s => s.classList.remove('active'));
+  document.getElementById('view-' + view)?.classList.add('active');
+  document.getElementById('tnav-' + view)?.classList.add('active');
+  document.getElementById('snav-' + view)?.classList.add('active');
+  closeNotifPanel();
+  if (view === 'explore' && !document.getElementById('books-grid').children.length) loadExplore();
+  if (view === 'people'  && !S.people.length) loadPeople();
+  if (view === 'profile') loadProfile();
+};
+
+// ── FEED ────────────────────────────────────────────────────────
+async function loadFeed() {
+  try {
+    const data = await getFeed(getToken());
+    S.posts = data;
+    renderFeed(data);
+  } catch(e) {
+    document.getElementById('feed-posts').innerHTML = `<div class="loading" style="color:#e08080">Error al cargar el feed — ${e.message}</div>`;
+  }
+}
+
+function renderFeed(posts) {
+  const c = document.getElementById('feed-posts');
+  if (!posts.length) { c.innerHTML = '<div class="loading">Sin publicaciones aún — sé el primero</div>'; return; }
+  c.innerHTML = posts.map((p, i) => postHTML(p, i)).join('');
+}
+
+function postHTML(p, i) {
+  const av  = avColor(p.autor_id);
+  const ini = initials(p.autor_nombre || p.autor_handle);
+  const badgeMap = { nuevo_libro:'pb-libro Nuevo Libro', capitulo:'pb-update Capítulo', fork:'pb-fork Fork', colaboracion:'pb-collab Colaboración', reflexion:'pb-libro Nota', compartido:'pb-glimmer Compartido' };
+  const [bc, bt] = (badgeMap[p.tipo] || 'pb-libro Publicación').split(' ');
+  const book = p.libro_id ? `
+    <div class="book-preview">
+      <div class="bp-banner bpb${(p.libro_id%4)+1}">${p.libro_titulo || 'Sin título'}</div>
+      <div class="bp-foot"><div class="bp-stats"><span>${p.libro_genero||''}</span></div><div class="bp-cta">Leer →</div></div>
+    </div>` : '';
+  return `<div class="post" style="animation-delay:${i*.06}s" id="post-${p.id}">
+    <div class="post-head">
+      <div class="pav ${av}">${ini}</div>
+      <div class="post-meta">
+        <div class="post-name">${p.autor_nombre || p.autor_handle}</div>
+        <div class="post-handle">@${p.autor_handle} · ${p.autor_oruns||0} Oruns</div>
+      </div>
+      <div class="post-time">${timeAgo(p.creado_en)}</div>
+      <span class="post-badge ${bc}">${bt}</span>
+    </div>
+    <div class="post-body"><div class="post-text">${p.texto}</div>${book}</div>
+    <div class="post-actions">
+      <button class="pact" id="like-${p.id}" onclick="toggleLike(${p.id})">✦ ${p.glimmers||0}</button>
+      <button class="pact" onclick="openGlimmer(${p.id})">⬡ Dar Glimmer</button>
+      <button class="pact" onclick="toast('⇄ Fork próximamente')">⇄ ${p.forks||0} Forks</button>
+      <button class="pact" onclick="toast('✎ Notas próximamente')">✎ ${p.notas||0} Notas</button>
+      <button class="pact" onclick="sharePost(${p.id})">◈ Compartir</button>
+    </div>
+  </div>`;
+}
+
+window.toggleLike = (id) => {
+  const btn = document.getElementById('like-' + id);
+  if (!btn) return;
+  btn.classList.toggle('liked');
+  const p = S.posts.find(x => x.id === id);
+  if (p) { p.glimmers = (p.glimmers||0) + (btn.classList.contains('liked') ? 1 : -1); btn.textContent = `✦ ${p.glimmers}`; }
+};
+
+window.submitPost = async () => {
+  const texto = document.getElementById('comp-text').value.trim();
+  const tipo  = document.getElementById('comp-type').value;
+  if (!texto) { toast('Escribe algo primero…'); return; }
+  try {
+    await crearPost({ tipo, texto }, getToken());
+    document.getElementById('comp-text').value = '';
+    actualizarOruns(50);
+    updateUserUI();
+    toast('✦ Publicado · +50 Oruns');
+    await loadFeed();
+  } catch(e) { toast(e.message, 'err'); }
+};
+
+window.sharePost = async (id) => {
+  const p = S.posts.find(x => x.id === id);
+  if (!p) return;
+  try {
+    await crearPost({ tipo:'compartido', texto:`Compartiendo: ${p.texto.slice(0,120)}…`, ref_post_id: id }, getToken());
+    toast('◈ Compartido en tu feed');
+    await loadFeed();
+  } catch(e) { toast(e.message,'err'); }
+};
+
+// ── EXPLORAR ────────────────────────────────────────────────────
+async function loadExplore(genero) {
+  const c = document.getElementById('books-grid');
+  c.innerHTML = '<div class="loading">Cargando libros</div>';
+  try {
+    const data = await getExplorar(genero);
+    renderBooks('books-grid', data);
+  } catch(e) { c.innerHTML = `<div class="loading" style="color:#e08080">${e.message}</div>`; }
+}
+
+function renderBooks(containerId, books) {
+  const c = document.getElementById(containerId);
+  if (!c) return;
+  const spines = ['bs1','bs2','bs3','bs4','bs5'];
+  if (!books.length) { c.innerHTML = '<div class="loading">Sin libros en esta categoría</div>'; return; }
+  c.innerHTML = books.map((b, i) => `
+    <div class="bcard" style="animation-delay:${i*.05}s">
+      <div class="bcard-spine ${spines[i%5]}">
+        <div class="bcard-ttl">${b.titulo}</div>
+        <div class="bcard-vis ${b.es_publico?'vis-pub':'vis-pri'}">${b.es_publico?'Público':'Privado'}</div>
+      </div>
+      <div class="bcard-body">
+        <div class="bcard-name">${b.titulo}</div>
+        <div class="bcard-desc">${b.descripcion||'Sin descripción'}</div>
+        <div class="bcard-foot">
+          <div class="btags"><span class="btag">${b.genero||'—'}</span></div>
+          <div class="bcard-gl">✦ ${b.glimmers||0}</div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+window.filterGenre = (el, genero) => {
+  document.querySelectorAll('.gpill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  S.genreFilter = genero;
+  loadExplore(genero);
+};
+
+// ── ESCRITORES ──────────────────────────────────────────────────
+async function loadPeople() {
+  try {
+    const data = await fetch('/api/social/ranking?limite=20').then(r=>r.json());
+    S.people = data;
+    renderPeople(data);
+  } catch(e) { document.getElementById('people-list').innerHTML = `<div class="loading" style="color:#e08080">${e.message}</div>`; }
+}
+
+function renderPeople(list, filter='') {
+  const filtered = filter ? list.filter(p => (p.display_name||'').toLowerCase().includes(filter.toLowerCase()) || (p.username||'').toLowerCase().includes(filter.toLowerCase())) : list;
+  const meId = getPerfil()?.id;
+  document.getElementById('people-list').innerHTML = filtered.filter(p => p.id !== meId).map((p, i) => {
+    const av  = avColor(p.id);
+    const ini = initials(p.display_name || p.username);
+    return `<div class="person-card" style="animation-delay:${i*.04}s" id="pcard-${p.id}">
+      <div class="person-av ${av}">${ini}</div>
+      <div class="person-info">
+        <div class="person-name">${p.display_name || p.username}</div>
+        <div class="person-handle">@${p.username}</div>
+        <div class="person-stats">
+          <span class="pstat-sm">⬡ <strong>${(p.oruns||0).toLocaleString()}</strong> Oruns</span>
+          <span class="pstat-sm">📚 <strong>${p.libros_publicados||0}</strong> libros</span>
+          <span class="pstat-sm">◷ <strong>${p.seguidores||0}</strong> seguidores</span>
+        </div>
+      </div>
+      <div class="person-btns">
+        <button class="follow-btn" id="fw-${p.id}" onclick="toggleFollow('${p.id}',this)">+ Seguir</button>
+        <button class="reader-btn" id="rd-${p.id}" onclick="toggleReader('${p.id}',this)">❋ Lector fiel</button>
+      </div>
+    </div>`;
+  }).join('') || '<div class="loading">No se encontraron escritores</div>';
+}
+
+window.filterPeople = (v) => renderPeople(S.people, v);
+
+window.toggleFollow = async (id, btn) => {
+  const on = btn.classList.contains('on');
+  try {
+    if (on) { await dejarSeguir(id, getToken()); btn.classList.remove('on'); btn.textContent = '+ Seguir'; toast('Dejaste de seguir'); }
+    else     { await seguir(id, getToken()); btn.classList.add('on'); btn.textContent = '✓ Siguiendo'; actualizarOruns(5); updateUserUI(); toast('✦ Siguiendo · +5 Oruns'); }
+  } catch(e) { toast(e.message,'err'); }
+};
+
+window.toggleReader = async (id, btn) => {
+  const on = btn.classList.contains('on');
+  if (!on) {
+    try {
+      await fetch('/api/social/lectores-fieles', { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+getToken()}, body: JSON.stringify({receptor_id:id}) });
+      btn.classList.add('on'); btn.textContent = '✓ Lector fiel'; actualizarOruns(10); updateUserUI(); toast('❋ Invitación enviada · +10 Oruns');
+    } catch(e) { toast(e.message,'err'); }
+  }
+};
+
+// ── PERFIL ──────────────────────────────────────────────────────
+async function loadProfile() {
+  const p = getPerfil();
+  if (!p) return;
+  updateUserUI();
+  _set('ps-seg', p.seguidores_count || '—');
+  _set('ps-sig', p.siguiendo_count  || '—');
+  _set('ps-libros', p.libros_count  || '—');
+  try {
+    const libros = await getLibrosPerfil(p.username);
+    renderBooks('profile-grid', libros);
+  } catch { renderBooks('profile-grid', []); }
+}
+
+window.profTab = (el, tab) => {
+  document.querySelectorAll('.ptab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.ptab-pane').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('ptab-' + tab)?.classList.add('active');
+};
+
+// ── RANKING ─────────────────────────────────────────────────────
+async function loadRanking() {
+  try {
+    const data = await getRanking();
+    const pos = ['g','s','b','',''];
+    document.getElementById('rank-list').innerHTML = data.slice(0,5).map((p,i) => `
+      <div class="rank-item">
+        <div class="rank-pos ${pos[i]||''}">#${i+1}</div>
+        <div class="rank-av ${avColor(p.id)}">${initials(p.display_name||p.username)}</div>
+        <div class="rank-info">
+          <div class="rank-name">${p.display_name||p.username}</div>
+          <div class="rank-score">⬡ ${(p.oruns||0).toLocaleString()}</div>
+        </div>
+      </div>`).join('');
+    // Sugeridos: primeros 3 del ranking que no sean yo
+    const meId = getPerfil()?.id;
+    const sugs = data.filter(p => p.id !== meId).slice(0,3);
+    document.getElementById('sug-list').innerHTML = sugs.map(p => `
+      <div class="sug-item">
+        <div class="sug-av ${avColor(p.id)}">${initials(p.display_name||p.username)}</div>
+        <div class="sug-info">
+          <div class="sug-name">${p.display_name||p.username}</div>
+          <div class="sug-meta">⬡ ${(p.oruns||0).toLocaleString()} · ${p.libros_publicados||0} libros</div>
+        </div>
+        <button class="sug-btn" id="sb-${p.id}" onclick="quickFollow('${p.id}',this)">Seguir</button>
+      </div>`).join('');
+  } catch { document.getElementById('rank-list').innerHTML = ''; }
+}
+
+window.quickFollow = async (id, btn) => {
+  try {
+    await seguir(id, getToken());
+    btn.classList.add('done'); btn.textContent = '✓';
+    actualizarOruns(5); updateUserUI(); toast('✦ Siguiendo · +5 Oruns');
+  } catch(e) { toast(e.message,'err'); }
+};
+
+// ── NOTIFICACIONES ──────────────────────────────────────────────
+async function loadNotifs() {
+  try {
+    const data = await getNotificaciones(getToken());
+    S.notifs = data;
+    const unread = data.filter(n => !n.leida).length;
+    const dot = document.getElementById('notif-dot');
+    const badge = document.getElementById('snav-badge');
+    if (unread) { dot.classList.add('show'); badge.textContent = unread; badge.style.display = 'inline'; }
+    else        { dot.classList.remove('show'); badge.style.display = 'none'; }
+    const icoMap = { glimmer:'ni-g ✦', fork:'ni-f ⇄', follow:'ni-fw ◷', lector_fiel:'ni-c ❋', collab:'ni-c ◈' };
+    document.getElementById('notif-list').innerHTML = data.slice(0,20).map(n => {
+      const [cls, ico] = (icoMap[n.tipo]||'ni-g ●').split(' ');
+      return `<div class="notif-item ${n.leida?'':'unread'}">
+        <div class="notif-ico ${cls}">${ico}</div>
+        <div><div class="notif-text">${n.cuerpo||n.titulo}</div><div class="notif-time">${timeAgo(n.creado_en)}</div></div>
+      </div>`;
+    }).join('') || '<div style="padding:16px;font-style:italic;color:var(--fog);font-size:.85rem;text-align:center">Sin notificaciones</div>';
+  } catch { /* silencioso */ }
+}
+
+window.toggleNotif = () => {
+  S.notifOpen = !S.notifOpen;
+  document.getElementById('notif-panel').classList.toggle('open', S.notifOpen);
+};
+window.clearNotifs = async () => {
+  try { await leerNotificaciones(getToken()); document.getElementById('notif-dot').classList.remove('show'); document.getElementById('snav-badge').style.display='none'; toast('✓ Todo leído'); } catch{}
+};
+function closeNotifPanel() { S.notifOpen = false; document.getElementById('notif-panel').classList.remove('open'); }
+
+// ── GLIMMER MODAL ────────────────────────────────────────────────
+window.openGlimmer = (postId) => {
+  if (getGlimmers() <= 0) { toast('Sin Glimmers esta semana · Se recargan el lunes'); return; }
+  S.glimmerPostId = postId; S.glimmerAmt = 1;
+  document.querySelectorAll('.gl-opt').forEach((o,i) => o.classList.toggle('sel', i===0));
+  _set('gl-balance', getGlimmers());
+  document.getElementById('glimmer-modal').classList.add('open');
+};
+window.selGlimmer = (el, val) => { document.querySelectorAll('.gl-opt').forEach(o => o.classList.remove('sel')); el.classList.add('sel'); S.glimmerAmt = val; };
+window.sendGlimmer = async () => {
+  try {
+    await darGlimmer({ post_id: S.glimmerPostId, cantidad: S.glimmerAmt }, getToken());
+    actualizarOruns(-S.glimmerAmt); actualizarGlimmers(-1); updateUserUI();
+    closeModal('glimmer-modal');
+    toast(`✦ ${S.glimmerAmt} Glimmer${S.glimmerAmt>1?'s':''} enviado${S.glimmerAmt>1?'s':''}`);
+    await loadFeed();
+  } catch(e) { toast(e.message,'err'); closeModal('glimmer-modal'); }
+};
+window.closeModal = (id) => document.getElementById(id).classList.remove('open');
+
+// ── TOAST ────────────────────────────────────────────────────────
+let _tt;
+window.toast = (msg, type='') => {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.className = 'toast' + (type?' '+type:'') + ' show';
+  clearTimeout(_tt); _tt = setTimeout(() => el.classList.remove('show'), 2800);
+};
+
+// ── HELPERS ──────────────────────────────────────────────────────
+function timeAgo(iso) {
+  if (!iso) return '';
+  const diff = (Date.now() - new Date(iso)) / 1000;
+  if (diff < 60)   return 'ahora';
+  if (diff < 3600) return `hace ${Math.floor(diff/60)}m`;
+  if (diff < 86400)return `hace ${Math.floor(diff/3600)}h`;
+  return `hace ${Math.floor(diff/86400)}d`;
+}
+
+// Cerrar notif al click fuera
+document.addEventListener('click', e => {
+  if (S.notifOpen && !document.getElementById('notif-panel').contains(e.target) && !document.getElementById('notif-btn').contains(e.target))
+    closeNotifPanel();
+});
+document.getElementById('glimmer-modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal('glimmer-modal'); });
+</script>
+</body>
+</html>
