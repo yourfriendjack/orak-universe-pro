@@ -66,7 +66,8 @@ async def serve_api_js():
 
 @router.get("/", response_class=HTMLResponse)
 async def web_app():
-    content = _read(os.path.join(FRONTEND_DIR, "index.html"))
+    # Redirigir a auth si no hay sesión — el frontend maneja el redirect
+    content = _read(os.path.join(FRONTEND_DIR, "auth.html"))
     if not content:
         return HTMLResponse("<h1>Frontend no encontrado</h1>", status_code=404)
     return HTMLResponse(_inject_config(content))

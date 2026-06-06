@@ -307,6 +307,7 @@ function initials(name) { return (name||'?').split(' ').map(w=>w[0]).join('').sl
 // ── Arranque ────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', async () => {
   const sesion = await initAuth();
+  if (!sesion) { window.location.href = "/"; return; }
   if (sesion) launchApp();
 });
 

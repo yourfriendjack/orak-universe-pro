@@ -52,7 +52,7 @@ export async function logout() {
     await apiPost('/api/auth/logout', {}, getToken());
   } catch { /* continuar aunque falle */ }
   _limpiarSesion();
-  window.location.reload();
+  window.location.href = "/";
 }
 
 // ── Actualizar perfil ────────────────────────────────────────────
