@@ -19,7 +19,7 @@ from backend.utils.middleware import SlashEncoderMiddleware
 from backend.api.routes import libros, personajes, mundo, universo, web, pdf
 
 # ── Routers nuevos — red social ───────────────────────────────────────────────
-from backend.api.routes import auth, social
+from backend.api.routes import auth, social, libros_social
 from backend.api.routes import capitulos as caps_router
 
 cfg = get_settings()
@@ -55,7 +55,8 @@ app.add_middleware(
 # Red social
 app.include_router(auth.router,         prefix="/api")   # /api/auth/...
 app.include_router(social.router,       prefix="/api")   # /api/social/...
-app.include_router(caps_router.router,  prefix="/api")   # /api/libros/{id}/capitulos
+app.include_router(caps_router.router,  prefix="/api")
+app.include_router(libros_social.router)   # /api/libros/{id}/capitulos
 
 # Worldbuilding (compatibilidad total)
 app.include_router(universo.router)

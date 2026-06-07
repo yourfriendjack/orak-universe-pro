@@ -92,3 +92,10 @@ async def web_auth():
     if not content:
         return HTMLResponse("<h1>Auth no encontrado</h1>", status_code=404)
     return HTMLResponse(_inject_config(content))
+@router.get("/editor", response_class=HTMLResponse)
+@router.get("/editor.html", response_class=HTMLResponse)
+async def web_editor():
+    content = _read(os.path.join(FRONTEND_DIR, "editor.html"))
+    if not content:
+        return HTMLResponse("<h1>Editor no encontrado</h1>", status_code=404)
+    return HTMLResponse(_inject_config(content))

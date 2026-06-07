@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nuevo Libro — ORAK Universe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/orak-social.css">
+<style>
+body{background:var(--page);display:block;}
+
+/* ── TOPBAR ── */
+.editor-top{
+  position:sticky;top:0;z-index:100;
+  height:54px;background:rgba(250,247,242,.95);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--fog);
+  display:flex;align-items:center;gap:14px;padding:0 28px;
+}
+.back-link{
+  display:flex;align-items:center;gap:6px;
+  font-family:'JetBrains Mono',monospace;font-size:.65rem;
+  color:var(--fog);cursor:pointer;transition:color .15s;text-decoration:none;
+}
+.back-link:hover{color:var(--amber-dim);}
+.editor-title{
+  font-family:'Cinzel',serif;font-size:1rem;font-weight:600;
+  letter-spacing:.04em;flex:1;
+}
+.save-btn{
+  font-family:'JetBrains Mono',monospace;font-size:.65rem;letter-spacing:.06em;
+  text-transform:uppercase;padding:7px 18px;background:var(--amber);
+  color:#fff;border:none;border-radius:4px;cursor:pointer;transition:all .15s;
+}
+.save-btn:hover{background:var(--amber-dim);}
+.save-btn:disabled{background:var(--fog);cursor:not-allowed;}
+.status-dot{
+  font-family:'JetBrains Mono',monospace;font-size:.58rem;
+  color:var(--fog);display:flex;align-items:center;gap:5px;
+}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--fog);}
+.dot.saved{background:var(--green);}
+.dot.saving{background:var(--amber);animation:pulse .8s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+
+/* ── LAYOUT ── */
+.editor-shell{
+  display:grid;grid-template-columns:280px 1fr 260px;
+  min-height:calc(100vh - 54px);
+}
+
+/* ── PANEL IZQUIERDO — Config libro ── */
+.editor-left{
+  border-right:1px solid var(--fog);padding:28px 22px;
+  position:sticky;top:54px;height:calc(100vh - 54px);overflow-y:auto;
+}
+.el-section{margin-bottom:26px;}
+.el-label{
+  font-family:'JetBrains Mono',monospace;font-size:.58rem;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--fog);margin-bottom:8px;
+}
+.el-input{
+  width:100%;background:var(--mist);border:1px solid var(--fog);
+  border-radius:5px;padding:9px 12px;font-family:'Crimson Pro',serif;
+  font-size:.95rem;color:var(--ink);outline:none;transition:all .15s;
+}
+.el-input:focus{border-color:var(--amber);background:#fff;}
+.el-input::placeholder{color:var(--fog);font-style:italic;}
+.el-textarea{
+  width:100%;background:var(--mist);border:1px solid var(--fog);
+  border-radius:5px;padding:9px 12px;font-family:'Crimson Pro',serif;
+  font-size:.92rem;color:var(--ink);outline:none;transition:all .15s;
+  resize:none;min-height:80px;line-height:1.5;
+}
+.el-textarea:focus{border-color:var(--amber);background:#fff;}
+.el-select{
+  width:100%;background:var(--mist);border:1px solid var(--fog);
+  border-radius:5px;padding:9px 12px;font-family:'JetBrains Mono',monospace;
+  font-size:.68rem;color:var(--ink);outline:none;cursor:pointer;
+}
+.el-select:focus{border-color:var(--amber);}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;}
+.toggle-lbl{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--ink);}
+.toggle{
+  width:38px;height:20px;border-radius:10px;background:var(--fog);
+  position:relative;cursor:pointer;transition:background .2s;flex-shrink:0;
+}
+.toggle.on{background:var(--amber);}
+.toggle::after{
+  content:'';position:absolute;top:3px;left:3px;
+  width:14px;height:14px;border-radius:50%;background:#fff;
+  transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2);
+}
+.toggle.on::after{transform:translateX(18px);}
+
+/* Portada preview */
+.cover-preview{
+  width:100%;aspect-ratio:2/3;border-radius:6px;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Cinzel',serif;font-size:.8rem;font-weight:600;
+  color:rgba(232,197,90,.8);letter-spacing:.06em;text-align:center;
+  padding:12px;position:relative;cursor:pointer;
+  transition:filter .2s;
+}
+.cover-preview:hover{filter:brightness(1.15);}
+.cp-1{background:linear-gradient(160deg,#1a0e0a,#0d1520);}
+.cp-2{background:linear-gradient(160deg,#0a1a10,#1a3d25);}
+.cp-3{background:linear-gradient(160deg,#1a100a,#3d2810);}
+.cp-4{background:linear-gradient(160deg,#100814,#28103a);}
+.cp-5{background:linear-gradient(160deg,#0e1808,#1e3010);}
+.cover-change{
+  position:absolute;bottom:8px;left:50%;transform:translateX(-50%);
+  font-family:'JetBrains Mono',monospace;font-size:.52rem;letter-spacing:.08em;
+  text-transform:uppercase;color:rgba(232,197,90,.5);
+}
+
+/* ── PANEL CENTRAL — Editor ── */
+.editor-main{
+  display:flex;flex-direction:column;
+  min-height:calc(100vh - 54px);
+}
+
+/* Tabs capítulos */
+.chapter-tabs{
+  display:flex;align-items:center;gap:0;
+  border-bottom:1px solid var(--fog);padding:0 28px;
+  background:var(--page);overflow-x:auto;
+  scrollbar-width:none;
+}
+.chapter-tabs::-webkit-scrollbar{display:none;}
+.ctab{
+  font-family:'JetBrains Mono',monospace;font-size:.62rem;letter-spacing:.05em;
+  text-transform:uppercase;padding:12px 16px 10px;
+  cursor:pointer;color:var(--fog);border-bottom:2px solid transparent;
+  transition:all .15s;white-space:nowrap;flex-shrink:0;
+}
+.ctab:hover{color:var(--ink);}
+.ctab.active{color:var(--amber-dim);border-bottom-color:var(--amber);}
+.ctab-add{
+  font-family:'JetBrains Mono',monospace;font-size:.7rem;
+  color:var(--fog);cursor:pointer;padding:12px 14px 10px;
+  transition:color .15s;flex-shrink:0;
+}
+.ctab-add:hover{color:var(--amber);}
+
+/* Area escritura */
+.writing-area{flex:1;padding:40px 60px;max-width:800px;margin:0 auto;width:100%;}
+.chapter-title-input{
+  width:100%;border:none;outline:none;background:transparent;
+  font-family:'Cinzel',serif;font-size:1.6rem;font-weight:600;
+  letter-spacing:.04em;color:var(--ink);margin-bottom:20px;
+  border-bottom:1px solid var(--mist);padding-bottom:14px;
+  transition:border-color .15s;
+}
+.chapter-title-input:focus{border-bottom-color:var(--amber);}
+.chapter-title-input::placeholder{color:var(--fog);}
+.chapter-body{
+  width:100%;border:none;outline:none;background:transparent;
+  font-family:'Crimson Pro',serif;font-size:1.08rem;line-height:1.85;
+  color:#2a2620;resize:none;min-height:500px;
+}
+.chapter-body::placeholder{color:var(--fog);font-style:italic;}
+
+/* Contador palabras */
+.word-count{
+  text-align:right;padding:8px 60px;
+  font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--fog);
+  border-top:1px solid var(--mist);
+}
+
+/* ── PANEL DERECHO — Info ── */
+.editor-right{
+  border-left:1px solid var(--fog);padding:24px 18px;
+  position:sticky;top:54px;height:calc(100vh - 54px);overflow-y:auto;
+}
+.er-block{margin-bottom:22px;}
+.er-label{
+  font-family:'JetBrains Mono',monospace;font-size:.56rem;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--fog);margin-bottom:10px;
+}
+
+/* Stats del libro */
+.book-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.bs-item{
+  background:var(--mist);border-radius:6px;padding:10px;text-align:center;
+}
+.bs-num{font-family:'Cinzel',serif;font-size:1.2rem;font-weight:600;}
+.bs-lbl{font-family:'JetBrains Mono',monospace;font-size:.52rem;letter-spacing:.08em;text-transform:uppercase;color:var(--fog);margin-top:2px;}
+
+/* Lista capítulos */
+.chapter-list-side{display:flex;flex-direction:column;gap:6px;}
+.cl-item{
+  display:flex;align-items:center;gap:8px;padding:8px 10px;
+  border-radius:5px;cursor:pointer;transition:background .15s;
+  border:1px solid transparent;
+}
+.cl-item:hover{background:var(--mist);}
+.cl-item.active{background:rgba(200,134,10,.06);border-color:rgba(200,134,10,.2);}
+.cl-num{font-family:'Cinzel',serif;font-size:.7rem;font-weight:700;color:var(--fog);width:18px;text-align:center;}
+.cl-title{font-size:.85rem;flex:1;}
+.cl-status{font-family:'JetBrains Mono',monospace;font-size:.52rem;padding:2px 5px;border-radius:3px;}
+.st-done{background:rgba(45,107,58,.12);color:#3a7a50;}
+.st-wip{background:rgba(200,134,10,.1);color:var(--amber-dim);}
+.st-draft{background:var(--mist);color:var(--fog);}
+.cl-add{
+  display:flex;align-items:center;gap:6px;padding:8px 10px;
+  font-family:'JetBrains Mono',monospace;font-size:.6rem;
+  color:var(--fog);cursor:pointer;transition:color .15s;
+  text-transform:uppercase;letter-spacing:.05em;
+}
+.cl-add:hover{color:var(--amber-dim);}
+
+/* Toast */
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--ink);color:var(--gold);font-family:'JetBrains Mono',monospace;font-size:.68rem;letter-spacing:.05em;padding:9px 18px;border-radius:4px;z-index:999;opacity:0;transition:all .28s;pointer-events:none;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast.err{background:#3a1010;color:#e08080;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<header class="editor-top">
+  <a class="back-link" href="/index-social.html">← Feed</a>
+  <div class="editor-title" id="editor-title">Nuevo Libro</div>
+  <div class="status-dot"><div class="dot" id="status-dot"></div><span id="status-text">Sin guardar</span></div>
+  <button class="save-btn" id="save-btn" onclick="guardarTodo()">✦ Guardar</button>
+</header>
+
+<div class="editor-shell">
+
+  <!-- ── IZQUIERDA — Config ── -->
+  <div class="editor-left">
+
+    <!-- Portada -->
+    <div class="el-section">
+      <div class="el-label">Portada</div>
+      <div class="cover-preview cp-1" id="cover-preview" onclick="cambiarPortada()">
+        <span id="cover-title-preview">Sin título</span>
+        <div class="cover-change">Cambiar estilo</div>
+      </div>
+    </div>
+
+    <!-- Título -->
+    <div class="el-section">
+      <div class="el-label">Título del libro</div>
+      <input class="el-input" type="text" id="libro-titulo" placeholder="El título de tu universo"
+        oninput="onTituloChange(this.value)">
+    </div>
+
+    <!-- Descripción -->
+    <div class="el-section">
+      <div class="el-label">Sinopsis</div>
+      <textarea class="el-textarea" id="libro-desc" placeholder="De qué trata tu historia…" rows="4"></textarea>
+    </div>
+
+    <!-- Género -->
+    <div class="el-section">
+      <div class="el-label">Género</div>
+      <select class="el-select" id="libro-genero">
+        <option value="fantasía">Fantasía</option>
+        <option value="sci-fi">Sci-Fi</option>
+        <option value="terror">Terror</option>
+        <option value="histórico">Histórico</option>
+        <option value="distopía">Distopía</option>
+        <option value="mitología">Mitología</option>
+        <option value="romance">Romance</option>
+        <option value="thriller">Thriller</option>
+        <option value="aventura">Aventura</option>
+        <option value="otro">Otro</option>
+      </select>
+    </div>
+
+    <!-- Visibilidad -->
+    <div class="el-section">
+      <div class="el-label">Visibilidad</div>
+      <div class="toggle-row">
+        <span class="toggle-lbl" id="vis-label">Público</span>
+        <div class="toggle on" id="vis-toggle" onclick="toggleVis()"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── CENTRO — Editor ── -->
+  <div class="editor-main">
+    <div class="chapter-tabs" id="chapter-tabs">
+      <!-- tabs generados por JS -->
+      <div class="ctab-add" onclick="nuevoCapitulo()">+ Capítulo</div>
+    </div>
+    <div class="writing-area">
+      <input class="chapter-title-input" type="text" id="cap-titulo"
+        placeholder="Título del capítulo…" oninput="onCapChange()">
+      <textarea class="chapter-body" id="cap-body"
+        placeholder="Escribe tu historia aquí…&#10;&#10;Cada palabra construye un universo."
+        oninput="onCapChange()"></textarea>
+    </div>
+    <div class="word-count" id="word-count">0 palabras</div>
+  </div>
+
+  <!-- ── DERECHA — Info ── -->
+  <div class="editor-right">
+
+    <div class="er-block">
+      <div class="er-label">Estadísticas</div>
+      <div class="book-stats">
+        <div class="bs-item"><div class="bs-num" id="stat-caps">0</div><div class="bs-lbl">Capítulos</div></div>
+        <div class="bs-item"><div class="bs-num" id="stat-words">0</div><div class="bs-lbl">Palabras</div></div>
+        <div class="bs-item"><div class="bs-num" id="stat-chars">0</div><div class="bs-lbl">Chars</div></div>
+        <div class="bs-item"><div class="bs-num" id="stat-mins">0</div><div class="bs-lbl">Min lectura</div></div>
+      </div>
+    </div>
+
+    <div class="er-block">
+      <div class="er-label">Capítulos</div>
+      <div class="chapter-list-side" id="chapter-list-side"></div>
+    </div>
+
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+// ── Estado ──────────────────────────────────────────────────────
+const S = {
+  libroId:    null,
+  esPublico:  true,
+  portadaIdx: 1,
+  capActual:  0,
+  guardando:  false,
+  capitulos: [
+    { numero:1, titulo:'', contenido:'', estado:'borrador', palabras:0 }
+  ],
+};
+
+const TOKEN = JSON.parse(localStorage.getItem('orak_sesion') || '{}')?.access_token;
+if (!TOKEN) window.location.href = '/';
+
+// ── Init ─────────────────────────────────────────────────────────
+renderTabs();
+renderSideList();
+updateStats();
+
+// ── Portada ──────────────────────────────────────────────────────
+window.cambiarPortada = () => {
+  S.portadaIdx = (S.portadaIdx % 5) + 1;
+  document.getElementById('cover-preview').className = `cover-preview cp-${S.portadaIdx}`;
+};
+
+window.onTituloChange = (val) => {
+  document.getElementById('editor-title').textContent = val || 'Nuevo Libro';
+  document.getElementById('cover-title-preview').textContent = val || 'Sin título';
+};
+
+// ── Tabs ─────────────────────────────────────────────────────────
+function renderTabs() {
+  const container = document.getElementById('chapter-tabs');
+  const addBtn = container.querySelector('.ctab-add');
+  container.querySelectorAll('.ctab').forEach(t => t.remove());
+  S.capitulos.forEach((c, i) => {
+    const tab = document.createElement('div');
+    tab.className = 'ctab' + (i === S.capActual ? ' active' : '');
+    tab.textContent = c.titulo || `Capítulo ${c.numero}`;
+    tab.onclick = () => switchCap(i);
+    container.insertBefore(tab, addBtn);
+  });
+}
+
+function switchCap(idx) {
+  // Guardar contenido actual antes de cambiar
+  S.capitulos[S.capActual].titulo    = document.getElementById('cap-titulo').value;
+  S.capitulos[S.capActual].contenido = document.getElementById('cap-body').value;
+  S.capitulos[S.capActual].palabras  = contarPalabras(S.capitulos[S.capActual].contenido);
+  S.capActual = idx;
+  const c = S.capitulos[idx];
+  document.getElementById('cap-titulo').value = c.titulo;
+  document.getElementById('cap-body').value   = c.contenido;
+  updateWordCount();
+  updateStats();
+  renderTabs();
+  renderSideList();
+}
+
+window.nuevoCapitulo = () => {
+  S.capitulos[S.capActual].titulo    = document.getElementById('cap-titulo').value;
+  S.capitulos[S.capActual].contenido = document.getElementById('cap-body').value;
+  const num = S.capitulos.length + 1;
+  S.capitulos.push({ numero:num, titulo:'', contenido:'', estado:'borrador', palabras:0 });
+  S.capActual = S.capitulos.length - 1;
+  document.getElementById('cap-titulo').value = '';
+  document.getElementById('cap-body').value   = '';
+  renderTabs();
+  renderSideList();
+  updateStats();
+  document.getElementById('cap-titulo').focus();
+};
+
+// ── Side list ────────────────────────────────────────────────────
+function renderSideList() {
+  const stMap = { completo:'st-done Completo', en_progreso:'st-wip En progreso', borrador:'st-draft Borrador' };
+  document.getElementById('chapter-list-side').innerHTML =
+    S.capitulos.map((c,i) => {
+      const [cls,lbl] = (stMap[c.estado]||'st-draft Borrador').split(' ');
+      return `<div class="cl-item ${i===S.capActual?'active':''}" onclick="switchCap(${i})">
+        <div class="cl-num">${c.numero}</div>
+        <div class="cl-title">${c.titulo||`Capítulo ${c.numero}`}</div>
+        <div class="cl-status ${cls}">${lbl}</div>
+      </div>`;
+    }).join('') +
+    `<div class="cl-add" onclick="nuevoCapitulo()">+ Añadir capítulo</div>`;
+}
+
+// ── Contadores ───────────────────────────────────────────────────
+function contarPalabras(txt) {
+  return txt.trim() ? txt.trim().split(/\s+/).length : 0;
+}
+
+function updateWordCount() {
+  const txt = document.getElementById('cap-body').value;
+  const w   = contarPalabras(txt);
+  document.getElementById('word-count').textContent = `${w.toLocaleString()} palabras en este capítulo`;
+}
+
+function updateStats() {
+  const totalWords = S.capitulos.reduce((s,c) => s + (c.palabras || contarPalabras(c.contenido)), 0);
+  const totalChars = S.capitulos.reduce((s,c) => s + c.contenido.length, 0);
+  document.getElementById('stat-caps').textContent  = S.capitulos.length;
+  document.getElementById('stat-words').textContent = totalWords.toLocaleString();
+  document.getElementById('stat-chars').textContent = totalChars.toLocaleString();
+  document.getElementById('stat-mins').textContent  = Math.ceil(totalWords / 200);
+}
+
+window.onCapChange = () => {
+  const c = S.capitulos[S.capActual];
+  c.titulo    = document.getElementById('cap-titulo').value;
+  c.contenido = document.getElementById('cap-body').value;
+  c.palabras  = contarPalabras(c.contenido);
+  c.estado    = c.palabras > 100 ? 'en_progreso' : 'borrador';
+  updateWordCount();
+  updateStats();
+  renderSideList();
+  setStatus('saving');
+};
+
+// ── Visibilidad ───────────────────────────────────────────────────
+window.toggleVis = () => {
+  S.esPublico = !S.esPublico;
+  document.getElementById('vis-toggle').classList.toggle('on', S.esPublico);
+  document.getElementById('vis-label').textContent = S.esPublico ? 'Público' : 'Privado';
+};
+
+// ── Status ────────────────────────────────────────────────────────
+function setStatus(st) {
+  const dot  = document.getElementById('status-dot');
+  const text = document.getElementById('status-text');
+  dot.className  = 'dot ' + st;
+  text.textContent = st === 'saved' ? 'Guardado' : st === 'saving' ? 'Sin guardar…' : 'Sin guardar';
+}
+
+// ── Guardar todo ──────────────────────────────────────────────────
+window.guardarTodo = async () => {
+  const titulo = document.getElementById('libro-titulo').value.trim();
+  if (!titulo) { toast('Pon un título al libro primero', 'err'); document.getElementById('libro-titulo').focus(); return; }
+
+  // Guardar cap actual
+  S.capitulos[S.capActual].titulo    = document.getElementById('cap-titulo').value;
+  S.capitulos[S.capActual].contenido = document.getElementById('cap-body').value;
+  S.capitulos[S.capActual].palabras  = contarPalabras(S.capitulos[S.capActual].contenido);
+
+  const btn = document.getElementById('save-btn');
+  btn.disabled = true; btn.textContent = 'Guardando…';
+
+  try {
+    // 1. Crear o actualizar el libro
+    if (!S.libroId) {
+      const r = await fetch('/v2/libros', {
+        method: 'POST',
+        headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+TOKEN },
+        body: JSON.stringify({
+          titulo:      titulo,
+          descripcion: document.getElementById('libro-desc').value,
+          genero:      document.getElementById('libro-genero').value,
+          es_publico:  S.esPublico,
+        })
+      });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.detail?.mensaje || d.detail || 'Error al crear libro');
+      S.libroId = d.datos?.libro?.id;
+      toast('✦ Libro creado · +100 Oruns');
+    } else {
+      await fetch(`/v2/libros/${S.libroId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+TOKEN },
+        body: JSON.stringify({
+          titulo:      titulo,
+          descripcion: document.getElementById('libro-desc').value,
+          genero:      document.getElementById('libro-genero').value,
+          es_publico:  S.esPublico,
+        })
+      });
+    }
+
+    // 2. Guardar capítulos
+    if (S.libroId) {
+      for (const cap of S.capitulos) {
+        if (!cap.titulo && !cap.contenido) continue;
+        await fetch(`/api/libros/${S.libroId}/capitulos`, {
+          method: 'POST',
+          headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+TOKEN },
+          body: JSON.stringify({
+            titulo:    cap.titulo || `Capítulo ${cap.numero}`,
+            contenido: cap.contenido,
+            estado:    cap.estado || 'borrador',
+            es_publico: S.esPublico,
+          })
+        });
+      }
+    }
+
+    setStatus('saved');
+    toast('✦ Todo guardado correctamente');
+  } catch(e) {
+    toast(e.message, 'err');
+  } finally {
+    btn.disabled = false; btn.textContent = '✦ Guardar';
+  }
+};
+
+// ── Toast ─────────────────────────────────────────────────────────
+let _tt;
+window.toast = (msg, type='') => {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.className = 'toast' + (type?' '+type:'') + ' show';
+  clearTimeout(_tt); _tt = setTimeout(() => el.classList.remove('show'), 2800);
+};
+</script>
+</body>
+</html>
