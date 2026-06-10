@@ -23,8 +23,8 @@ async def listar_libros(
     sb = get_supabase()
     offset = (pagina - 1) * limite
     q = sb.table("libros")\
-          .select("id,titulo,datos,genero,portada_url,es_publico,glimmers,lectores,forks_count,creado_en,autor_id,perfiles!libros_autor_id_fkey(username,display_name)")\
-          .eq("es_publico", True)
+      .select("id,titulo,datos,genero,portada_url,es_publico,glimmers,lectores,forks_count,creado_en,autor_id,autor:perfiles!libros_autor_id_fkey(username,display_name)")\
+      .eq("es_publico", True)
     if genero:
         q = q.eq("genero", genero)
     res = q.order("creado_en", desc=True).range(offset, offset+limite-1).execute()
@@ -58,6 +58,7 @@ async def crear_libro(datos: LibroIn, usuario=Depends(get_current_user)):
         error("Ya tienes un libro con ese título")
 
     # Datos del worldbuilding en JSONB (compatibilidad con orak_core)
+    wb = getattr(datos, "worldbuilding", None) or {}
     datos_json = {
         "descripcion": datos.descripcion,
         "historia":    "",
@@ -68,6 +69,10 @@ async def crear_libro(datos: LibroIn, usuario=Depends(get_current_user)):
         "relaciones":  [],
         "aportes":     [],
         "comentarios": [],
+        "personajes":  wb.get("personajes",[]) if wb else [],
+        "lugares":     wb.get("lugares",[]) if wb else [],
+        "facciones":   wb.get("facciones",[]) if wb else [],
+        "eventos":     wb.get("eventos",[]) if wb else [],
     }
 
     res = sb.table("libros").insert({
@@ -103,7 +108,7 @@ async def crear_libro(datos: LibroIn, usuario=Depends(get_current_user)):
 async def obtener_libro(libro_id: int):
     sb = get_supabase()
     res = sb.table("libros")\
-            .select("*, perfiles!libros_autor_id_fkey(username,display_name)")\
+            .select("*, autor:perfiles!libros_autor_id_fkey(username,display_name,avatar_url)")\
             .eq("id", libro_id)\
             .single()\
             .execute()
