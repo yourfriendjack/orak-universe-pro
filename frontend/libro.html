@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Libro — ORAK Universe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0e0d0b;--page:#faf7f2;--parchment:#f5f0e8;
+  --mist:#e8e3d8;--fog:#cdc7b8;--deep:#12100d;
+  --amber:#c8860a;--amber-dim:#7a5006;--gold:#e8c55a;--rust:#8b3a1f;
+  --glimmer:#a8d4e8;--orun:#d4a843;
+  --fa:#8b1f2f;--fb:#1f3a8b;--fc:#2d6b3a;
+  --shadow:rgba(14,13,11,.1);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--deep);color:var(--page);font-family:'Crimson Pro',Georgia,serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(ellipse 60% 40% at 20% 10%,rgba(200,134,10,.06) 0%,transparent 70%),radial-gradient(ellipse 40% 60% at 80% 80%,rgba(139,58,31,.05) 0%,transparent 70%);}
+
+/* ── TOPBAR ── */
+.topbar{position:sticky;top:0;z-index:200;background:rgba(18,16,13,.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(205,199,184,.1);display:flex;align-items:center;gap:14px;padding:0 24px;height:52px;}
+.back-btn{display:flex;align-items:center;gap:5px;font-family:'JetBrains Mono',monospace;font-size:.65rem;color:rgba(205,199,184,.5);cursor:pointer;transition:color .15s;text-decoration:none;}
+.back-btn:hover{color:var(--gold);}
+.breadcrumb{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:rgba(205,199,184,.4);}
+.breadcrumb strong{color:var(--gold);font-weight:500;}
+.topbar-actions{margin-left:auto;display:flex;gap:8px;}
+.tbtn{font-family:'JetBrains Mono',monospace;font-size:.62rem;letter-spacing:.05em;text-transform:uppercase;padding:6px 14px;border-radius:4px;cursor:pointer;transition:all .15s;border:none;}
+.tbtn-ghost{background:rgba(255,255,255,.05);color:rgba(205,199,184,.6);border:1px solid rgba(205,199,184,.12);}
+.tbtn-ghost:hover{background:rgba(255,255,255,.1);color:var(--page);}
+.tbtn-amber{background:var(--amber);color:var(--deep);font-weight:500;}
+.tbtn-amber:hover{background:var(--gold);transform:translateY(-1px);}
+.tbtn-fork{background:rgba(139,58,31,.2);color:#e07050;border:1px solid rgba(139,58,31,.3);}
+.tbtn-fork:hover{background:rgba(139,58,31,.35);}
+
+/* ── HERO ── */
+.hero{position:relative;min-height:300px;display:flex;align-items:flex-end;overflow:hidden;}
+.hero-bg{position:absolute;inset:0;}
+.hero-bg::after{content:'';position:absolute;bottom:0;left:0;right:0;height:160px;background:linear-gradient(to top,var(--deep),transparent);}
+.hero-stars{position:absolute;inset:0;background-image:radial-gradient(1.5px 1.5px at 8% 15%,rgba(232,197,90,.9) 0%,transparent 100%),radial-gradient(1px 1px at 22% 35%,rgba(232,197,90,.5) 0%,transparent 100%),radial-gradient(2px 2px at 38% 8%,rgba(168,212,232,.8) 0%,transparent 100%),radial-gradient(1px 1px at 55% 45%,rgba(232,197,90,.4) 0%,transparent 100%),radial-gradient(1.5px 1.5px at 68% 20%,rgba(168,212,232,.6) 0%,transparent 100%),radial-gradient(1px 1px at 78% 55%,rgba(232,197,90,.7) 0%,transparent 100%),radial-gradient(1px 1px at 90% 12%,rgba(232,197,90,.5) 0%,transparent 100%),radial-gradient(1px 1px at 15% 70%,rgba(168,212,232,.4) 0%,transparent 100%);}
+.hero-content{position:relative;z-index:1;padding:36px 44px 32px;width:100%;}
+.hero-genre{display:inline-flex;align-items:center;gap:5px;font-family:'JetBrains Mono',monospace;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--amber);border:1px solid rgba(200,134,10,.25);padding:3px 9px;border-radius:3px;background:rgba(200,134,10,.07);margin-bottom:14px;}
+.hero-title{font-family:'Cinzel',serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:900;letter-spacing:.04em;line-height:1.1;text-shadow:0 2px 20px rgba(0,0,0,.5);}
+.hero-desc{font-style:italic;font-size:1rem;color:rgba(250,247,242,.55);margin-top:8px;max-width:560px;line-height:1.6;font-weight:300;}
+.hero-meta{display:flex;align-items:center;gap:18px;margin-top:18px;flex-wrap:wrap;}
+.author-chip{display:flex;align-items:center;gap:8px;cursor:pointer;}
+.author-av{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--amber),var(--rust));display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-size:.65rem;font-weight:700;color:#fff;}
+.author-name{font-family:'Cinzel',serif;font-size:.82rem;font-weight:600;}
+.author-handle{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--amber);}
+.meta-sep{color:rgba(255,255,255,.15);}
+.meta-pill{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:rgba(250,247,242,.45);display:flex;align-items:center;gap:3px;}
+.meta-pill strong{color:var(--page);}
+.vis-chip{font-family:'JetBrains Mono',monospace;font-size:.58rem;text-transform:uppercase;letter-spacing:.06em;padding:2px 8px;border-radius:3px;}
+.vc-pub{background:rgba(168,212,232,.12);color:var(--glimmer);border:1px solid rgba(168,212,232,.2);}
+.vc-pri{background:rgba(139,58,31,.12);color:#c06040;border:1px solid rgba(139,58,31,.2);}
+
+/* ── STATS BAR ── */
+.stats-bar{display:flex;border-bottom:1px solid rgba(205,199,184,.08);background:rgba(255,255,255,.02);}
+.sb-cell{flex:1;padding:14px;text-align:center;border-right:1px solid rgba(205,199,184,.08);cursor:pointer;transition:background .15s;}
+.sb-cell:last-child{border-right:none;}
+.sb-cell:hover{background:rgba(255,255,255,.03);}
+.sb-num{font-family:'Cinzel',serif;font-size:1.3rem;font-weight:600;}
+.sb-num.amber{color:var(--orun);}
+.sb-num.blue{color:var(--glimmer);}
+.sb-lbl{font-family:'JetBrains Mono',monospace;font-size:.56rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(205,199,184,.3);margin-top:2px;}
+
+/* ── SHELL ── */
+.book-shell{display:grid;grid-template-columns:210px 1fr 250px;min-height:calc(100vh - 52px - 300px - 56px);}
+
+/* ── NAV IZQUIERDO ── */
+.book-nav{border-right:1px solid rgba(205,199,184,.08);padding:24px 0;position:sticky;top:52px;height:calc(100vh - 52px);overflow-y:auto;}
+.bnav-lbl{font-family:'JetBrains Mono',monospace;font-size:.56rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(205,199,184,.25);padding:0 18px 6px;margin-top:18px;}
+.bnav-item{display:flex;align-items:center;gap:9px;padding:9px 18px;font-size:.88rem;color:rgba(250,247,242,.55);cursor:pointer;transition:all .15s;border-left:2px solid transparent;}
+.bnav-item:hover{color:var(--page);background:rgba(255,255,255,.03);}
+.bnav-item.active{color:var(--gold);border-left-color:var(--amber);background:rgba(200,134,10,.07);}
+.bnav-count{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:.58rem;color:rgba(205,199,184,.25);background:rgba(255,255,255,.04);padding:1px 6px;border-radius:10px;}
+
+/* ── CONTENIDO ── */
+.book-content{padding:32px 36px;overflow-y:auto;height:calc(100vh - 52px);}
+.bview{display:none;}
+.bview.active{display:block;}
+.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;padding-bottom:14px;border-bottom:1px solid rgba(205,199,184,.08);}
+.section-title{font-family:'Cinzel',serif;font-size:1.25rem;font-weight:600;letter-spacing:.04em;}
+.section-sub{font-style:italic;font-size:.82rem;color:rgba(205,199,184,.4);margin-top:2px;}
+
+/* Capítulos */
+.chapter-list{display:flex;flex-direction:column;gap:0;}
+.ch-item{display:flex;align-items:center;gap:14px;padding:15px 0;border-bottom:1px solid rgba(205,199,184,.06);cursor:pointer;transition:all .15s;}
+.ch-item:hover{padding-left:8px;}
+.ch-item:hover .ch-num{color:var(--gold);}
+.ch-num{font-family:'Cinzel',serif;font-size:.72rem;font-weight:900;color:rgba(205,199,184,.2);width:32px;text-align:right;flex-shrink:0;transition:color .15s;letter-spacing:.05em;}
+.ch-sep{width:1px;height:38px;background:rgba(205,199,184,.08);flex-shrink:0;}
+.ch-info{flex:1;}
+.ch-title{font-family:'Cinzel',serif;font-size:.92rem;font-weight:600;letter-spacing:.03em;}
+.ch-preview{font-style:italic;font-size:.8rem;color:rgba(205,199,184,.4);margin-top:3px;line-height:1.4;}
+.ch-meta{display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0;}
+.ch-words{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:rgba(205,199,184,.25);}
+.ch-status{font-family:'JetBrains Mono',monospace;font-size:.52rem;text-transform:uppercase;letter-spacing:.07em;padding:2px 6px;border-radius:3px;}
+.st-done{background:rgba(45,107,58,.18);color:#6aba80;}
+.st-wip{background:rgba(200,134,10,.12);color:var(--amber);}
+.st-draft{background:rgba(205,199,184,.07);color:rgba(205,199,184,.4);}
+
+/* Personajes */
+.char-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px;}
+.char-card{border:1px solid rgba(205,199,184,.08);border-radius:7px;overflow:hidden;cursor:pointer;transition:all .2s;background:rgba(255,255,255,.02);}
+.char-card:hover{border-color:rgba(200,134,10,.35);transform:translateY(-2px);background:rgba(200,134,10,.03);}
+.char-portrait{height:90px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+.cpp1{background:linear-gradient(160deg,#1a0814,#3d1028);}
+.cpp2{background:linear-gradient(160deg,#081420,#102840);}
+.cpp3{background:linear-gradient(160deg,#0e1808,#1e3010);}
+.cpp4{background:linear-gradient(160deg,#180e08,#3a1808);}
+.cpp5{background:linear-gradient(160deg,#100814,#28103a);}
+.char-ini{font-family:'Cinzel',serif;font-size:2.2rem;font-weight:900;color:rgba(232,197,90,.2);}
+.char-stripe{position:absolute;bottom:0;left:0;right:0;height:3px;}
+.cs-a{background:var(--fa);}
+.cs-b{background:var(--fb);}
+.cs-c{background:var(--fc);}
+.cs-n{background:rgba(205,199,184,.15);}
+.char-body{padding:10px 12px;}
+.char-name{font-family:'Cinzel',serif;font-size:.82rem;font-weight:600;letter-spacing:.03em;}
+.char-role{font-style:italic;font-size:.75rem;color:rgba(205,199,184,.4);margin-top:2px;}
+.char-foot{display:flex;align-items:center;justify-content:space-between;margin-top:8px;padding-top:7px;border-top:1px solid rgba(205,199,184,.07);}
+.char-faction{font-family:'JetBrains Mono',monospace;font-size:.52rem;text-transform:uppercase;letter-spacing:.07em;padding:2px 6px;border-radius:3px;}
+.cf-a{background:rgba(139,31,47,.18);color:#e07080;}
+.cf-b{background:rgba(31,58,139,.18);color:#80a0e0;}
+.cf-c{background:rgba(45,107,58,.18);color:#80c090;}
+.cf-n{background:rgba(205,199,184,.07);color:rgba(205,199,184,.35);}
+.char-alive{font-family:'JetBrains Mono',monospace;font-size:.52rem;color:rgba(205,199,184,.3);}
+.char-alive.dead{text-decoration:line-through;color:rgba(205,199,184,.15);}
+
+/* Worldbuilding vacío */
+.wb-empty{text-align:center;padding:48px 20px;font-style:italic;color:rgba(205,199,184,.25);font-size:.95rem;}
+.wb-empty-icon{font-size:2rem;margin-bottom:12px;opacity:.3;}
+
+/* Facciones */
+.factions-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;}
+.faction-card{border-radius:7px;overflow:hidden;border:1px solid rgba(205,199,184,.08);cursor:pointer;transition:all .2s;}
+.faction-card:hover{transform:translateY(-2px);}
+.fc-head{padding:18px 16px 14px;position:relative;}
+.fch-a{background:linear-gradient(160deg,#200810,#3a1020);}
+.fch-b{background:linear-gradient(160deg,#081028,#102040);}
+.fch-c{background:linear-gradient(160deg,#081408,#102818);}
+.fc-name{font-family:'Cinzel',serif;font-size:.92rem;font-weight:900;letter-spacing:.06em;}
+.fc-motto{font-style:italic;font-size:.72rem;color:rgba(250,247,242,.45);margin-top:3px;}
+.fc-body{padding:12px 16px;background:rgba(255,255,255,.02);border-top:1px solid rgba(205,199,184,.07);}
+.fc-stat{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:.6rem;color:rgba(205,199,184,.4);padding:2px 0;}
+.fc-stat strong{color:var(--page);}
+.fc-bar{height:3px;background:rgba(255,255,255,.05);border-radius:2px;margin-top:10px;overflow:hidden;}
+.fc-fill{height:100%;border-radius:2px;}
+.ff-a{background:linear-gradient(90deg,var(--fa),#e06070);}
+.ff-b{background:linear-gradient(90deg,var(--fb),#6080e0);}
+.ff-c{background:linear-gradient(90deg,var(--fc),#60b070);}
+
+/* Timeline */
+.timeline{position:relative;padding-left:26px;}
+.timeline::before{content:'';position:absolute;left:7px;top:8px;bottom:8px;width:1px;background:linear-gradient(to bottom,var(--amber),rgba(200,134,10,.1));}
+.tl-event{position:relative;margin-bottom:22px;animation:fadeUp .4s ease both;}
+.tl-event::before{content:'';position:absolute;left:-23px;top:5px;width:7px;height:7px;border-radius:50%;background:var(--amber);border:2px solid var(--deep);box-shadow:0 0 0 2px rgba(200,134,10,.25);}
+.tl-year{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--amber);letter-spacing:.1em;margin-bottom:3px;}
+.tl-title{font-family:'Cinzel',serif;font-size:.88rem;font-weight:600;letter-spacing:.03em;}
+.tl-desc{font-style:italic;font-size:.8rem;color:rgba(205,199,184,.45);margin-top:3px;line-height:1.5;}
+
+/* Forks */
+.forks-list{display:flex;flex-direction:column;gap:14px;}
+.fork-card{border:1px solid rgba(205,199,184,.08);border-radius:7px;overflow:hidden;cursor:pointer;transition:border-color .2s;background:rgba(255,255,255,.02);}
+.fork-card:hover{border-color:rgba(200,134,10,.3);}
+.fork-head{display:flex;align-items:center;gap:12px;padding:14px 16px;}
+.fork-spine{width:40px;height:52px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-size:.55rem;font-weight:600;color:rgba(232,197,90,.7);text-align:center;padding:4px;flex-shrink:0;}
+.fork-info{flex:1;}
+.fork-title{font-family:'Cinzel',serif;font-size:.88rem;font-weight:600;}
+.fork-author{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--amber);margin-top:2px;}
+.fork-desc{font-style:italic;font-size:.78rem;color:rgba(205,199,184,.4);margin-top:4px;}
+.fork-cta{font-family:'JetBrains Mono',monospace;font-size:.58rem;text-transform:uppercase;letter-spacing:.06em;color:rgba(200,134,10,.5);flex-shrink:0;}
+
+/* Panel derecho */
+.book-panel{border-left:1px solid rgba(205,199,184,.08);padding:24px 18px;position:sticky;top:52px;height:calc(100vh - 52px);overflow-y:auto;}
+.bp-block{margin-bottom:24px;}
+.bp-label{font-family:'JetBrains Mono',monospace;font-size:.56rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(205,199,184,.25);margin-bottom:10px;}
+
+/* Progreso */
+.prog-item{margin-bottom:11px;}
+.prog-head{display:flex;justify-content:space-between;margin-bottom:5px;}
+.prog-name{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:rgba(205,199,184,.45);}
+.prog-val{font-family:'Cinzel',serif;font-size:.72rem;color:var(--page);}
+.prog-bar{height:3px;background:rgba(255,255,255,.05);border-radius:2px;overflow:hidden;}
+.prog-fill{height:100%;border-radius:2px;transition:width 1s ease;}
+.pf-gold{background:linear-gradient(90deg,var(--amber-dim),var(--gold));}
+.pf-blue{background:linear-gradient(90deg,#3a70b0,var(--glimmer));}
+.pf-green{background:linear-gradient(90deg,#2a603a,#60b070);}
+
+/* Actividad */
+.act-list{display:flex;flex-direction:column;gap:10px;}
+.act-item{display:flex;gap:7px;font-size:.78rem;}
+.act-ico{width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,.04);display:flex;align-items:center;justify-content:center;font-size:.68rem;flex-shrink:0;margin-top:1px;}
+.act-text{color:rgba(205,199,184,.5);line-height:1.4;}
+.act-text strong{color:var(--page);font-weight:400;}
+.act-time{font-family:'JetBrains Mono',monospace;font-size:.55rem;color:rgba(205,199,184,.2);margin-top:1px;}
+
+/* Toast / Modal */
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--deep);color:var(--gold);border:1px solid rgba(200,134,10,.2);font-family:'JetBrains Mono',monospace;font-size:.67rem;letter-spacing:.05em;padding:9px 18px;border-radius:5px;z-index:999;opacity:0;transition:all .28s;pointer-events:none;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast.err{background:#1a0808;color:#e08080;border-color:rgba(139,31,31,.3);}
+
+.loading{display:flex;align-items:center;justify-content:center;padding:48px;font-family:'JetBrains Mono',monospace;font-size:.7rem;color:rgba(205,199,184,.3);}
+.loading::after{content:'';width:14px;height:14px;border:2px solid rgba(205,199,184,.2);border-top-color:var(--amber);border-radius:50%;margin-left:8px;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:rgba(205,199,184,.12);border-radius:2px;}
+::-webkit-scrollbar-thumb:hover{background:rgba(200,134,10,.35);}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <a class="back-btn" href="/index-social.html">← Feed</a>
+  <span style="color:rgba(205,199,184,.2)">·</span>
+  <div class="breadcrumb" id="breadcrumb"><strong>Cargando…</strong></div>
+  <div class="topbar-actions">
+    <button class="tbtn tbtn-ghost" id="btn-glimmer" onclick="openGlimmer()">✦ Dar Glimmer</button>
+    <button class="tbtn tbtn-fork"  id="btn-fork"    onclick="hacerFork()">⇄ Fork</button>
+    <button class="tbtn tbtn-amber" id="btn-edit"    onclick="irEditor()" style="display:none">✎ Editar</button>
+  </div>
+</header>
+
+<!-- HERO -->
+<div class="hero" id="hero">
+  <div class="hero-bg" id="hero-bg"></div>
+  <div class="hero-stars"></div>
+  <div class="hero-content">
+    <div class="hero-genre" id="hero-genre">◆ Cargando</div>
+    <div class="hero-title" id="hero-title">…</div>
+    <div class="hero-desc"  id="hero-desc">…</div>
+    <div class="hero-meta"  id="hero-meta"></div>
+  </div>
+</div>
+
+<!-- STATS BAR -->
+<div class="stats-bar">
+  <div class="sb-cell"><div class="sb-num" id="sb-glimmers">—</div><div class="sb-lbl">Glimmers</div></div>
+  <div class="sb-cell"><div class="sb-num" id="sb-forks">—</div><div class="sb-lbl">Forks</div></div>
+  <div class="sb-cell"><div class="sb-num amber" id="sb-caps">—</div><div class="sb-lbl">Capítulos</div></div>
+  <div class="sb-cell"><div class="sb-num" id="sb-lectores">—</div><div class="sb-lbl">Lectores</div></div>
+  <div class="sb-cell"><div class="sb-num blue" id="sb-words">—</div><div class="sb-lbl">Palabras</div></div>
+</div>
+
+<!-- SHELL -->
+<div class="book-shell">
+
+  <!-- NAV -->
+  <nav class="book-nav">
+    <div class="bnav-lbl">Contenido</div>
+    <div class="bnav-item active" onclick="switchView('capitulos',this)">◫ Capítulos <span class="bnav-count" id="nc-caps">0</span></div>
+    <div class="bnav-item" onclick="switchView('personajes',this)">◷ Personajes <span class="bnav-count" id="nc-chars">0</span></div>
+    <div class="bnav-lbl">Worldbuilding</div>
+    <div class="bnav-item" onclick="switchView('lugares',this)">◈ Lugares <span class="bnav-count" id="nc-places">0</span></div>
+    <div class="bnav-item" onclick="switchView('facciones',this)">◆ Facciones <span class="bnav-count" id="nc-factions">0</span></div>
+    <div class="bnav-item" onclick="switchView('timeline',this)">◎ Timeline <span class="bnav-count" id="nc-events">0</span></div>
+    <div class="bnav-lbl">Social</div>
+    <div class="bnav-item" onclick="switchView('forks',this)">⇄ Forks <span class="bnav-count" id="nc-forks">0</span></div>
+    <div class="bnav-item" onclick="switchView('notas',this)">✎ Notas</div>
+  </nav>
+
+  <!-- CONTENIDO -->
+  <div class="book-content">
+
+    <!-- CAPÍTULOS -->
+    <div class="bview active" id="bview-capitulos">
+      <div class="section-head">
+        <div><div class="section-title">Capítulos</div><div class="section-sub" id="caps-sub">Cargando…</div></div>
+      </div>
+      <div class="chapter-list" id="chapter-list"><div class="loading">Cargando capítulos</div></div>
+    </div>
+
+    <!-- PERSONAJES -->
+    <div class="bview" id="bview-personajes">
+      <div class="section-head">
+        <div><div class="section-title">Personajes</div><div class="section-sub">Los habitantes de este universo</div></div>
+      </div>
+      <div id="chars-container"><div class="loading">Cargando</div></div>
+    </div>
+
+    <!-- LUGARES -->
+    <div class="bview" id="bview-lugares">
+      <div class="section-head">
+        <div><div class="section-title">Lugares</div><div class="section-sub">Los escenarios del universo</div></div>
+      </div>
+      <div id="places-container"><div class="loading">Cargando</div></div>
+    </div>
+
+    <!-- FACCIONES -->
+    <div class="bview" id="bview-facciones">
+      <div class="section-head">
+        <div><div class="section-title">Facciones</div><div class="section-sub">Las fuerzas en conflicto</div></div>
+      </div>
+      <div id="factions-container"><div class="loading">Cargando</div></div>
+    </div>
+
+    <!-- TIMELINE -->
+    <div class="bview" id="bview-timeline">
+      <div class="section-head">
+        <div><div class="section-title">Línea de Tiempo</div><div class="section-sub">La historia del universo</div></div>
+      </div>
+      <div id="timeline-container"><div class="loading">Cargando</div></div>
+    </div>
+
+    <!-- FORKS -->
+    <div class="bview" id="bview-forks">
+      <div class="section-head">
+        <div><div class="section-title">Forks</div><div class="section-sub">Universos alternativos creados por la comunidad</div></div>
+      </div>
+      <div class="forks-list" id="forks-container"><div class="loading">Cargando</div></div>
+    </div>
+
+    <!-- NOTAS -->
+    <div class="bview" id="bview-notas">
+      <div class="section-head">
+        <div><div class="section-title">Notas</div><div class="section-sub">Comentarios de la comunidad</div></div>
+      </div>
+      <div id="notas-container"><div class="loading">Cargando</div></div>
+    </div>
+
+  </div>
+
+  <!-- PANEL DERECHO -->
+  <aside class="book-panel">
+    <div class="bp-block">
+      <div class="bp-label">Progreso</div>
+      <div class="prog-item">
+        <div class="prog-head"><span class="prog-name">Capítulos</span><span class="prog-val" id="pr-caps">0/0</span></div>
+        <div class="prog-bar"><div class="prog-fill pf-gold" id="pr-caps-bar" style="width:0%"></div></div>
+      </div>
+      <div class="prog-item">
+        <div class="prog-head"><span class="prog-name">Personajes</span><span class="prog-val" id="pr-chars">0</span></div>
+        <div class="prog-bar"><div class="prog-fill pf-blue" id="pr-chars-bar" style="width:0%"></div></div>
+      </div>
+      <div class="prog-item">
+        <div class="prog-head"><span class="prog-name">Worldbuilding</span><span class="prog-val" id="pr-wb">0%</span></div>
+        <div class="prog-bar"><div class="prog-fill pf-green" id="pr-wb-bar" style="width:0%"></div></div>
+      </div>
+    </div>
+    <div class="bp-block">
+      <div class="bp-label">Actividad reciente</div>
+      <div class="act-list" id="act-list"><div style="font-style:italic;font-size:.78rem;color:rgba(205,199,184,.25)">Sin actividad aún</div></div>
+    </div>
+  </aside>
+
+</div>
+
+<!-- MODAL GLIMMER -->
+<div style="display:none;position:fixed;inset:0;z-index:500;background:rgba(14,13,11,.6);backdrop-filter:blur(4px);align-items:center;justify-content:center;" id="glimmer-modal">
+  <div style="background:var(--page);border-radius:10px;padding:26px 30px;width:300px;animation:fadeUp .22s ease both;">
+    <div style="font-family:'Cinzel',serif;font-size:1rem;font-weight:600;margin-bottom:4px;color:var(--ink);">Dar Glimmer ✦</div>
+    <div style="font-style:italic;font-size:.85rem;color:var(--fog);margin-bottom:16px;">Elige cuántos Oruns enviar</div>
+    <div style="display:flex;gap:7px;justify-content:center;margin-bottom:16px;" id="gl-opts">
+      <div onclick="selGL(this,1)" style="width:50px;height:50px;border-radius:6px;border:2px solid var(--fog);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-size:1rem;font-weight:700;cursor:pointer;gap:2px;transition:all .15s;" class="gl-o sel-gl">1<span style="font-family:'JetBrains Mono',monospace;font-size:.5rem;color:var(--fog)">Orun</span></div>
+      <div onclick="selGL(this,2)" style="width:50px;height:50px;border-radius:6px;border:2px solid var(--fog);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-size:1rem;font-weight:700;cursor:pointer;gap:2px;transition:all .15s;" class="gl-o">2<span style="font-family:'JetBrains Mono',monospace;font-size:.5rem;color:var(--fog)">Oruns</span></div>
+      <div onclick="selGL(this,3)" style="width:50px;height:50px;border-radius:6px;border:2px solid var(--fog);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-size:1rem;font-weight:700;cursor:pointer;gap:2px;transition:all .15s;" class="gl-o">3<span style="font-family:'JetBrains Mono',monospace;font-size:.5rem;color:var(--fog)">Oruns</span></div>
+      <div onclick="selGL(this,5)" style="width:50px;height:50px;border-radius:6px;border:2px solid var(--fog);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-size:1rem;font-weight:700;cursor:pointer;gap:2px;transition:all .15s;" class="gl-o">5<span style="font-family:'JetBrains Mono',monospace;font-size:.5rem;color:var(--fog)">Oruns</span></div>
+    </div>
+    <div style="display:flex;gap:7px;">
+      <button onclick="closeGlimmer()" style="flex:1;padding:8px;border:1px solid var(--fog);border-radius:5px;background:none;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--fog);">Cancelar</button>
+      <button onclick="sendGlimmer()" style="flex:2;padding:8px;background:var(--amber);color:#fff;border:none;border-radius:5px;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:.62rem;">Enviar ✦</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── Config ──────────────────────────────────────────────────────
+const TOKEN   = JSON.parse(localStorage.getItem('orak_sesion')||'{}')?.access_token;
+const ME_ID   = JSON.parse(localStorage.getItem('orak_sesion')||'{}')?.perfil?.id;
+if (!TOKEN) window.location.href = '/';
+
+// Leer libro_id de la URL: /libro?id=123
+const params  = new URLSearchParams(location.search);
+const LIBRO_ID = parseInt(params.get('id'));
+if (!LIBRO_ID) { window.location.href = '/index-social.html'; }
+
+let LIBRO = null;
+let GL_AMT = 1;
+const BG_COLORS = [
+  'linear-gradient(160deg,#1a0e0a 0%,#0d1520 40%,#0a120a 100%)',
+  'linear-gradient(160deg,#0a1a10 0%,#1a3d25 100%)',
+  'linear-gradient(160deg,#1a100a 0%,#3d2810 100%)',
+  'linear-gradient(160deg,#100814 0%,#28103a 100%)',
+  'linear-gradient(160deg,#0e1808 0%,#1e3010 100%)',
+];
+
+// ── Arranque ────────────────────────────────────────────────────
+(async () => {
+  await cargarLibro();
+  await cargarCapitulos();
+})();
+
+// ── Cargar libro ────────────────────────────────────────────────
+async function cargarLibro() {
+  try {
+    const r = await fetch(`/v2/libros/${LIBRO_ID}`);
+    if (!r.ok) throw new Error('Libro no encontrado');
+    LIBRO = await r.json();
+    renderHero();
+    renderStats();
+    renderProgreso();
+    cargarForks();
+  } catch(e) {
+    toast(e.message, 'err');
+  }
+}
+
+function renderHero() {
+  const d   = LIBRO.datos || {};
+  const idx = LIBRO_ID % 5;
+  document.getElementById('hero-bg').style.background   = BG_COLORS[idx];
+  document.getElementById('breadcrumb').innerHTML        = `<strong>${LIBRO.titulo}</strong>`;
+  document.getElementById('hero-genre').textContent      = `◆ ${LIBRO.genero || 'Sin género'}`;
+  document.getElementById('hero-title').textContent      = LIBRO.titulo;
+  document.getElementById('hero-desc').textContent       = d.descripcion || 'Sin sinopsis todavía.';
+  document.title = `${LIBRO.titulo} — ORAK Universe`;
+
+  const per = LIBRO.perfiles || {};
+  const ini = initials(per.display_name || per.username || '?');
+  document.getElementById('hero-meta').innerHTML = `
+    <div class="author-chip">
+      <div class="author-av">${ini}</div>
+      <div>
+        <div class="author-name">${per.display_name || per.username || '—'}</div>
+        <div class="author-handle">@${per.username || '—'}</div>
+      </div>
+    </div>
+    <span class="meta-sep">·</span>
+    <div class="vis-chip ${LIBRO.es_publico ? 'vc-pub':'vc-pri'}">${LIBRO.es_publico ? '◎ Público':'◉ Privado'}</div>`;
+
+  // Mostrar botón editar si es mío
+  if (LIBRO.autor_id === ME_ID) {
+    document.getElementById('btn-edit').style.display = 'inline-flex';
+    document.getElementById('btn-fork').style.display = 'none';
+  }
+}
+
+function renderStats() {
+  document.getElementById('sb-glimmers').textContent = LIBRO.glimmers || 0;
+  document.getElementById('sb-forks').textContent    = LIBRO.forks_count || 0;
+  document.getElementById('sb-lectores').textContent = LIBRO.lectores || 0;
+  document.getElementById('nc-forks').textContent    = LIBRO.forks_count || 0;
+}
+
+// ── Capítulos ───────────────────────────────────────────────────
+async function cargarCapitulos() {
+  try {
+    const r = await fetch(`/api/libros/${LIBRO_ID}/capitulos`);
+    const caps = await r.json();
+    const totalWords = caps.reduce((s,c) => s + (c.palabras||0), 0);
+    const done       = caps.filter(c => c.estado === 'completo').length;
+
+    document.getElementById('sb-caps').textContent  = caps.length;
+    document.getElementById('sb-words').textContent = totalWords.toLocaleString();
+    document.getElementById('nc-caps').textContent  = caps.length;
+    document.getElementById('caps-sub').textContent = `${totalWords.toLocaleString()} palabras · ${caps.length} capítulos`;
+
+    const stMap = { completo:'st-done Completo', en_progreso:'st-wip En progreso', borrador:'st-draft Borrador' };
+    document.getElementById('chapter-list').innerHTML = caps.length
+      ? caps.map((c,i) => {
+          const [cls,lbl] = (stMap[c.estado]||'st-draft Borrador').split(' ');
+          const prev = c.contenido ? c.contenido.slice(0,80)+'…' : 'Sin contenido todavía';
+          return `<div class="ch-item" style="animation-delay:${i*.06}s" data-cap="${c.numero}">
+            <div class="ch-num">${toRoman(c.numero)}</div>
+            <div class="ch-sep"></div>
+            <div class="ch-info">
+              <div class="ch-title">${c.titulo || `Capítulo ${c.numero}`}</div>
+              <div class="ch-preview">${prev}</div>
+            </div>
+            <div class="ch-meta">
+              <div class="ch-words">${(c.palabras||0).toLocaleString()} palabras</div>
+              <div class="ch-status ${cls}">${lbl}</div>
+            </div>
+          </div>`;
+        }).join('')
+      : '<div class="wb-empty"><div class="wb-empty-icon">◫</div>Sin capítulos publicados aún</div>';
+
+    // Progreso
+    const pct = caps.length ? Math.round(done/caps.length*100) : 0;
+    document.getElementById('pr-caps').textContent     = `${done}/${caps.length}`;
+    document.getElementById('pr-caps-bar').style.width = pct + '%';
+
+    // Worldbuilding
+    renderWorldbuilding();
+  } catch(e) { console.error(e); }
+}
+
+// ── Worldbuilding desde JSONB ────────────────────────────────────
+function renderWorldbuilding() {
+  if (!LIBRO) return;
+  const d = LIBRO.datos || {};
+
+  // Personajes
+  const chars = d.personajes || [];
+  document.getElementById('nc-chars').textContent = chars.length;
+  const cpColors = ['cpp1','cpp2','cpp3','cpp4','cpp5'];
+  const cfColors = ['cf-a','cf-b','cf-c','cf-n'];
+  document.getElementById('chars-container').innerHTML = chars.length
+    ? `<div class="char-grid">${chars.map((c,i) => {
+        const ini = (c.nombre||'?')[0].toUpperCase();
+        const cp  = cpColors[i%5];
+        const cf  = cfColors[i%4];
+        return `<div class="char-card">
+          <div class="char-portrait ${cp}">
+            <div class="char-ini">${ini}</div>
+            <div class="char-stripe cs-n"></div>
+          </div>
+          <div class="char-body">
+            <div class="char-name">${c.nombre}</div>
+            <div class="char-role">${c.rol||'Sin rol'}</div>
+            <div class="char-foot">
+              <div class="char-faction ${cf}">${c.raza||'Sin facción'}</div>
+              <div class="char-alive ${c.muerte?'dead':''}">${c.muerte?'Muerto':'Vivo'}</div>
+            </div>
+          </div>
+        </div>`;
+      }).join('')}</div>`
+    : `<div class="wb-empty"><div class="wb-empty-icon">◷</div>Sin personajes todavía<br><small>Agrégalos desde el editor de worldbuilding</small></div>`;
+
+  const charPct = Math.min(100, chars.length * 10);
+  document.getElementById('pr-chars').textContent     = chars.length;
+  document.getElementById('pr-chars-bar').style.width = charPct + '%';
+
+  // Lugares
+  const lugares = d.lugares || [];
+  document.getElementById('nc-places').textContent = lugares.length;
+  document.getElementById('places-container').innerHTML = lugares.length
+    ? `<div style="display:flex;flex-direction:column;gap:10px;">${lugares.map(l => `
+        <div style="border:1px solid rgba(205,199,184,.08);border-radius:6px;padding:14px 16px;background:rgba(255,255,255,.02);">
+          <div style="font-family:'Cinzel',serif;font-size:.9rem;font-weight:600;">${l.nombre}</div>
+          <div style="font-style:italic;font-size:.8rem;color:rgba(205,199,184,.4);margin-top:3px;">${l.descripcion||l.tipo||'Sin descripción'}</div>
+        </div>`).join('')}</div>`
+    : `<div class="wb-empty"><div class="wb-empty-icon">◈</div>Sin lugares definidos</div>`;
+
+  // Facciones
+  const facciones = d.facciones || [];
+  document.getElementById('nc-factions').textContent = facciones.length;
+  const fchColors = ['fch-a','fch-b','fch-c'];
+  const ffColors  = ['ff-a','ff-b','ff-c'];
+  document.getElementById('factions-container').innerHTML = facciones.length
+    ? `<div class="factions-grid">${facciones.map((f,i) => `
+        <div class="faction-card">
+          <div class="fc-head ${fchColors[i%3]}">
+            <div class="fc-name">${f.nombre}</div>
+            <div class="fc-motto">${f.descripcion||'Sin lema'}</div>
+          </div>
+          <div class="fc-body">
+            <div class="fc-stat"><span>Tipo</span><strong>${f.tipo||'—'}</strong></div>
+            <div class="fc-bar"><div class="fc-fill ${ffColors[i%3]}" style="width:${50+i*10}%"></div></div>
+          </div>
+        </div>`).join('')}</div>`
+    : `<div class="wb-empty"><div class="wb-empty-icon">◆</div>Sin facciones definidas</div>`;
+
+  // Eventos / Timeline
+  const eventos = d.eventos || [];
+  document.getElementById('nc-events').textContent = eventos.length;
+  document.getElementById('timeline-container').innerHTML = eventos.length
+    ? `<div class="timeline">${eventos.map((e,i) => `
+        <div class="tl-event" style="animation-delay:${i*.07}s">
+          <div class="tl-year">Año ${e.año||'?'}</div>
+          <div class="tl-title">${e.descripcion}</div>
+          ${e.personaje ? `<div class="tl-desc">Personaje clave: ${e.personaje}</div>` : ''}
+        </div>`).join('')}</div>`
+    : `<div class="wb-empty"><div class="wb-empty-icon">◎</div>Sin eventos en la línea de tiempo</div>`;
+
+  // Worldbuilding %
+  const wbItems = chars.length + lugares.length + facciones.length + eventos.length;
+  const wbPct   = Math.min(100, wbItems * 5);
+  document.getElementById('pr-wb').textContent     = wbPct + '%';
+  document.getElementById('pr-wb-bar').style.width = wbPct + '%';
+}
+
+// ── Forks ───────────────────────────────────────────────────────
+async function cargarForks() {
+  try {
+    const r    = await fetch(`/v2/libros?limite=10`);
+    const all  = await r.json();
+    const forks= all.filter(l => l.fork_de === LIBRO_ID);
+    document.getElementById('nc-forks').textContent = forks.length;
+    const spines = ['bpb1','bpb2','bpb3','bpb4'];
+    document.getElementById('forks-container').innerHTML = forks.length
+      ? forks.map((f,i) => {
+          const per = f.perfiles || {};
+          return `<div class="fork-card" onclick="window.location.href='/libro?id=${f.id}'">
+            <div class="fork-head">
+              <div class="fork-spine cpp${(i%5)+1}" style="font-size:.55rem;font-weight:600;color:rgba(232,197,90,.7);text-align:center;padding:4px;">${f.titulo}</div>
+              <div class="fork-info">
+                <div class="fork-title">${f.titulo}</div>
+                <div class="fork-author">@${per.username||'—'}</div>
+                <div class="fork-desc">${(f.datos?.descripcion||'Sin descripción').slice(0,80)}…</div>
+              </div>
+              <div class="fork-cta">Ver →</div>
+            </div>
+          </div>`;
+        }).join('')
+      : `<div class="wb-empty"><div class="wb-empty-icon">⇄</div>Sin forks todavía<br><small>Sé el primero en bifurcar este universo</small></div>`;
+  } catch { document.getElementById('forks-container').innerHTML = ''; }
+}
+
+// ── Notas ────────────────────────────────────────────────────────
+async function cargarNotas() {
+  document.getElementById('notas-container').innerHTML = `<div class="wb-empty"><div class="wb-empty-icon">✎</div>Notas próximamente</div>`;
+}
+
+// ── Navegación ───────────────────────────────────────────────────
+window.switchView = (name, el) => {
+  document.querySelectorAll('.bview').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.bnav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('bview-'+name)?.classList.add('active');
+  el.classList.add('active');
+  if (name === 'notas') cargarNotas();
+};
+
+// ── Glimmer ──────────────────────────────────────────────────────
+window.openGlimmer = () => {
+  const m = document.getElementById('glimmer-modal');
+  m.style.display = 'flex';
+};
+window.closeGlimmer = () => {
+  document.getElementById('glimmer-modal').style.display = 'none';
+};
+window.selGL = (el, val) => {
+  document.querySelectorAll('.gl-o').forEach(o => {
+    o.style.borderColor = 'var(--fog)'; o.style.background = 'transparent'; o.style.color = 'var(--ink)';
+  });
+  el.style.borderColor = 'var(--amber)'; el.style.background = 'rgba(200,134,10,.08)'; el.style.color = 'var(--amber-dim)';
+  GL_AMT = val;
+};
+window.sendGlimmer = async () => {
+  try {
+    const r = await fetch('/api/social/glimmers', {
+      method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},
+      body: JSON.stringify({ libro_id: LIBRO_ID, cantidad: GL_AMT })
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.detail?.mensaje || d.detail || 'Error');
+    LIBRO.glimmers = (LIBRO.glimmers||0) + GL_AMT;
+    document.getElementById('sb-glimmers').textContent = LIBRO.glimmers;
+    closeGlimmer();
+    toast(`✦ ${GL_AMT} Glimmer${GL_AMT>1?'s':''} enviado${GL_AMT>1?'s':''}`);
+  } catch(e) { closeGlimmer(); toast(e.message,'err'); }
+};
+
+// ── Fork ─────────────────────────────────────────────────────────
+window.hacerFork = async () => {
+  try {
+    const r = await fetch(`/v2/libros/${LIBRO_ID}/fork`, {
+      method:'POST', headers:{'Authorization':'Bearer '+TOKEN}
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.detail?.mensaje || d.detail || 'Error al forkear');
+    toast('⇄ Fork creado · +50 Oruns');
+    setTimeout(() => window.location.href = `/libro?id=${d.datos.libro_id}`, 1500);
+  } catch(e) { toast(e.message,'err'); }
+};
+
+// ── Editor ───────────────────────────────────────────────────────
+window.irEditor = () => { window.location.href = `/editor?id=${LIBRO_ID}`; };
+
+// ── Helpers ──────────────────────────────────────────────────────
+function initials(name) { return (name||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase(); }
+function toRoman(n) {
+  const v=[1000,900,500,400,100,90,50,40,10,9,5,4,1];
+  const s=['M','CM','D','CD','C','XC','L','XL','X','IX','V','IV','I'];
+  let r=''; v.forEach((val,i)=>{ while(n>=val){r+=s[i];n-=val;} }); return r;
+}
+function renderProgreso() {}
+
+
+// ── Lectura ───────────────────────────────────────────────────────
+let CAPS_CACHE = [];
+let CAP_ACTUAL = 0;
+
+window.abrirCapitulo = async (numero) => {
+  console.log("abrirCapitulo llamado:", numero);
+  try {
+    if (!CAPS_CACHE.length) {
+      const r = await fetch(`/api/libros/${LIBRO_ID}/capitulos`);
+      CAPS_CACHE = await r.json();
+    }
+    const idx = CAPS_CACHE.findIndex(c => c.numero === numero);
+    CAP_ACTUAL = idx >= 0 ? idx : 0;
+    mostrarCap();
+    document.getElementById('reading-overlay').classList.add('open');
+  } catch(e) { toast(e.message,'err'); }
+};
+
+function mostrarCap() {
+  const c = CAPS_CACHE[CAP_ACTUAL];
+  if (!c) return;
+  document.getElementById('reading-title').textContent     = LIBRO?.titulo || '—';
+  document.getElementById('reading-cap-title').textContent = c.titulo || `Capítulo ${c.numero}`;
+  document.getElementById('reading-text').textContent      = c.contenido || 'Sin contenido todavía.';
+  document.getElementById('reading-words').textContent     = `${(c.palabras||0).toLocaleString()} palabras`;
+  document.getElementById('btn-prev').disabled = CAP_ACTUAL === 0;
+  document.getElementById('btn-next').disabled = CAP_ACTUAL === CAPS_CACHE.length - 1;
+  document.getElementById('reading-overlay').scrollTo(0,0);
+}
+
+window.navCap = (dir) => {
+  CAP_ACTUAL = Math.max(0, Math.min(CAPS_CACHE.length-1, CAP_ACTUAL + dir));
+  mostrarCap();
+};
+
+window.cerrarLectura = () => {
+  document.getElementById('reading-overlay').classList.remove('open');
+};
+
+// Event delegation para capítulos
+document.addEventListener('click', e => {
+  const item = e.target.closest('.ch-item');
+  if (item && item.dataset.cap) {
+    window.abrirCapitulo(parseInt(item.dataset.cap));
+  }
+});
+
+let _tt;
+window.toast = (msg, type='') => {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.className = 'toast'+(type?' '+type:'')+' show';
+  clearTimeout(_tt); _tt = setTimeout(()=>el.classList.remove('show'), 2800);
+};
+
+// Cerrar modal con click fuera
+document.getElementById('glimmer-modal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeGlimmer();
+});
+</script>
+</body>
+</html>
+<style>
+.reading-overlay{display:none;position:fixed;inset:0;z-index:400;background:var(--page);overflow-y:auto;}
+.reading-overlay.open{display:block;}
+.reading-top{position:sticky;top:0;background:rgba(250,247,242,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--fog);display:flex;align-items:center;gap:14px;padding:0 28px;height:52px;}
+.reading-back{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--fog);cursor:pointer;transition:color .15s;}
+.reading-back:hover{color:var(--amber-dim);}
+.reading-title{font-family:'Cinzel',serif;font-size:.95rem;font-weight:600;flex:1;}
+.reading-body{max-width:680px;margin:0 auto;padding:52px 28px 80px;}
+.reading-cap-title{font-family:'Cinzel',serif;font-size:1.8rem;font-weight:600;letter-spacing:.04em;margin-bottom:32px;color:var(--ink);}
+.reading-text{font-family:'Crimson Pro',serif;font-size:1.15rem;line-height:1.9;color:#2a2620;white-space:pre-wrap;}
+.reading-nav{display:flex;justify-content:space-between;margin-top:48px;padding-top:24px;border-top:1px solid var(--fog);}
+.rnav-btn{font-family:'JetBrains Mono',monospace;font-size:.65rem;text-transform:uppercase;letter-spacing:.06em;padding:8px 16px;border-radius:4px;border:1px solid var(--fog);background:none;cursor:pointer;color:var(--ink);transition:all .15s;}
+.rnav-btn:hover{border-color:var(--amber);color:var(--amber-dim);}
+.rnav-btn:disabled{opacity:.3;cursor:not-allowed;}
+</style>
+
+<div class="reading-overlay" id="reading-overlay">
+  <div class="reading-top">
+    <div class="reading-back" onclick="cerrarLectura()">← Volver al libro</div>
+    <div class="reading-title" id="reading-title">—</div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--fog);" id="reading-words">— palabras</div>
+  </div>
+  <div class="reading-body">
+    <div class="reading-cap-title" id="reading-cap-title">—</div>
+    <div class="reading-text" id="reading-text">—</div>
+    <div class="reading-nav">
+      <button class="rnav-btn" id="btn-prev" onclick="navCap(-1)">← Capítulo anterior</button>
+      <button class="rnav-btn" id="btn-next" onclick="navCap(1)">Siguiente capítulo →</button>
+    </div>
+  </div>
+</div>
+
+

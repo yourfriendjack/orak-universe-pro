@@ -16,7 +16,7 @@ router = APIRouter(prefix="/libros", tags=["Capítulos"])
 async def listar_capitulos(libro_id: int):
     sb = get_supabase()
     res = sb.table("capitulos")\
-        .select("id,numero,titulo,palabras,estado,es_publico,creado_en")\
+        .select("id,numero,titulo,contenido,palabras,estado,es_publico,creado_en")\
         .eq("libro_id", libro_id)\
         .order("numero")\
         .execute()

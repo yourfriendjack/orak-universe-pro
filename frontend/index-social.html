@@ -435,7 +435,7 @@ function postHTML(p, i) {
   const badgeMap = { nuevo_libro:'pb-libro Nuevo Libro', capitulo:'pb-update Capítulo', fork:'pb-fork Fork', colaboracion:'pb-collab Colaboración', reflexion:'pb-libro Nota', compartido:'pb-glimmer Compartido' };
   const [bc, bt] = (badgeMap[p.tipo] || 'pb-libro Publicación').split(' ');
   const book = p.libro_id ? `
-    <div class="book-preview">
+    <div class="book-preview" data-libro-id="${p.libro_id||''}">
       <div class="bp-banner bpb${(p.libro_id%4)+1}">${p.libro_titulo || 'Sin título'}</div>
       <div class="bp-foot"><div class="bp-stats"><span>${p.libro_genero||''}</span></div><div class="bp-cta">Leer →</div></div>
     </div>` : '';
@@ -508,7 +508,7 @@ function renderBooks(containerId, books) {
   const spines = ['bs1','bs2','bs3','bs4','bs5'];
   if (!books.length) { c.innerHTML = '<div class="loading">Sin libros en esta categoría</div>'; return; }
   c.innerHTML = books.map((b, i) => `
-    <div class="bcard" style="animation-delay:${i*.05}s">
+    <div class="bcard" style="animation-delay:${i*.05}s;cursor:pointer" data-libro-id="${b.id}">
       <div class="bcard-spine ${spines[i%5]}">
         <div class="bcard-ttl">${b.titulo}</div>
         <div class="bcard-vis ${b.es_publico?'vis-pub':'vis-pri'}">${b.es_publico?'Público':'Privado'}</div>
@@ -712,6 +712,18 @@ function timeAgo(iso) {
 }
 
 // Cerrar notif al click fuera
+document.addEventListener('click', e => {
+  const bc = e.target.closest('.bcard');
+  if (bc && bc.dataset.libroId) {
+    window.location.href = '/libro?id=' + bc.dataset.libroId;
+    return;
+  }
+  const bp = e.target.closest('.book-preview');
+  if (bp && bp.dataset.libroId) {
+    window.location.href = '/libro?id=' + bp.dataset.libroId;
+    return;
+  }
+});
 document.addEventListener('click', e => {
   if (S.notifOpen && !document.getElementById('notif-panel').contains(e.target) && !document.getElementById('notif-btn').contains(e.target))
     closeNotifPanel();

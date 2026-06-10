@@ -23,7 +23,7 @@ async def listar_libros(
     sb = get_supabase()
     offset = (pagina - 1) * limite
     q = sb.table("libros")\
-          .select("id,titulo,datos,genero,portada_url,es_publico,glimmers,lectores,forks_count,creado_en,autor_id,perfiles(username,display_name)")\
+          .select("id,titulo,datos,genero,portada_url,es_publico,glimmers,lectores,forks_count,creado_en,autor_id,perfiles!libros_autor_id_fkey(username,display_name)")\
           .eq("es_publico", True)
     if genero:
         q = q.eq("genero", genero)
@@ -103,7 +103,7 @@ async def crear_libro(datos: LibroIn, usuario=Depends(get_current_user)):
 async def obtener_libro(libro_id: int):
     sb = get_supabase()
     res = sb.table("libros")\
-            .select("*, perfiles(username,display_name,avatar_url)")\
+            .select("*, perfiles!libros_autor_id_fkey(username,display_name)")\
             .eq("id", libro_id)\
             .single()\
             .execute()

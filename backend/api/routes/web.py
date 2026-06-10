@@ -99,3 +99,9 @@ async def web_editor():
     if not content:
         return HTMLResponse("<h1>Editor no encontrado</h1>", status_code=404)
     return HTMLResponse(_inject_config(content))
+@router.get("/libro", response_class=HTMLResponse)
+async def web_libro():
+    content = _read(os.path.join(FRONTEND_DIR, "libro.html"))
+    if not content:
+        return HTMLResponse("<h1>No encontrado</h1>", status_code=404)
+    return HTMLResponse(_inject_config(content))
