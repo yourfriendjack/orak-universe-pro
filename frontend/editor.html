@@ -269,6 +269,14 @@ body{background:var(--page);display:block;}
 .tl-del:hover{color:var(--rust);}
 .wb-empty{text-align:center;padding:40px;font-style:italic;color:var(--fog);font-size:.95rem;}
 
+
+.ch-del-btn{font-family:'JetBrains Mono',monospace;font-size:.55rem;padding:2px 7px;border-radius:3px;border:1px solid rgba(139,58,31,.2);background:rgba(139,58,31,.05);color:#c06040;cursor:pointer;transition:all .15s;margin-left:6px;}
+.ch-del-btn:hover{background:rgba(139,58,31,.15);border-color:var(--rust);}
+.danger-zone{margin-top:28px;padding-top:18px;border-top:1px solid rgba(139,58,31,.2);}
+.danger-title{font-family:'JetBrains Mono',monospace;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:#c06040;margin-bottom:10px;}
+.danger-btn{width:100%;padding:9px;background:rgba(139,58,31,.08);border:1px solid rgba(139,58,31,.2);border-radius:5px;font-family:'JetBrains Mono',monospace;font-size:.62rem;letter-spacing:.06em;text-transform:uppercase;color:#c06040;cursor:pointer;transition:all .15s;}
+.danger-btn:hover{background:rgba(139,58,31,.18);border-color:var(--rust);}
+
 </style>
 </head>
 <body>
@@ -342,6 +350,13 @@ body{background:var(--page);display:block;}
         <span class="toggle-lbl" id="vis-label">Público</span>
         <div class="toggle on" id="vis-toggle" onclick="toggleVis()"></div>
       </div>
+    </div>
+
+
+    <!-- Zona de peligro -->
+    <div class="danger-zone" id="danger-zone" style="display:none">
+      <div class="danger-title">⚠ Zona de peligro</div>
+      <button class="danger-btn" onclick="confirmarBorrarLibro()">✕ Eliminar este libro</button>
     </div>
 
   </div>
@@ -576,6 +591,7 @@ function renderSideList() {
         <div class="cl-num">${c.numero}</div>
         <div class="cl-title">${c.titulo||`Capítulo ${c.numero}`}</div>
         <div class="cl-status ${cls}">${lbl}</div>
+        ${i>0||S.capitulos.length>1?`<button class="ch-del-btn" onclick="event.stopPropagation();confirmarBorrarCap(${i})">✕</button>`:''}
       </div>`;
     }).join('') +
     `<div class="cl-add" onclick="nuevoCapitulo()">+ Añadir capítulo</div>`;
@@ -673,20 +689,36 @@ window.guardarTodo = async () => {
       });
     }
 
-    // 2. Guardar capítulos
+    // 2. Guardar capítulos — solo los nuevos (sin id)
     if (S.libroId) {
       for (const cap of S.capitulos) {
         if (!cap.titulo && !cap.contenido) continue;
-        await fetch(`/api/libros/${S.libroId}/capitulos`, {
-          method: 'POST',
-          headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+TOKEN },
-          body: JSON.stringify({
-            titulo:    cap.titulo || `Capítulo ${cap.numero}`,
-            contenido: cap.contenido,
-            estado:    cap.estado || 'borrador',
-            es_publico: S.esPublico,
-          })
-        });
+        if (cap.id) {
+          // Capítulo existente — actualizar
+          await fetch(`/api/libros/${S.libroId}/capitulos/${cap.numero}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+TOKEN },
+            body: JSON.stringify({
+              titulo:    cap.titulo || `Capítulo ${cap.numero}`,
+              contenido: cap.contenido,
+              estado:    cap.estado || 'borrador',
+            })
+          });
+        } else {
+          // Capítulo nuevo — crear
+          const rc = await fetch(`/api/libros/${S.libroId}/capitulos`, {
+            method: 'POST',
+            headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+TOKEN },
+            body: JSON.stringify({
+              titulo:    cap.titulo || `Capítulo ${cap.numero}`,
+              contenido: cap.contenido,
+              estado:    cap.estado || 'borrador',
+              es_publico: S.esPublico,
+            })
+          });
+          const dc = await rc.json();
+          if (dc.datos?.capitulo?.id) cap.id = dc.datos.capitulo.id;
+        }
       }
     }
 
@@ -851,6 +883,90 @@ window.guardarTodo = async () => {
   await _origGuardar();
 };
 
+
+// ── Cargar libro existente si viene ?id= ──────────────────────────
+const _params   = new URLSearchParams(location.search);
+const _libroId  = parseInt(_params.get('id'));
+if (_libroId) {
+  S.libroId = _libroId;
+  document.getElementById('editor-title').textContent = 'Cargando…';
+  (async () => {
+    try {
+      const r1    = await fetch('/v2/libros/' + _libroId);
+      if (!r1.ok) throw new Error('Libro no encontrado');
+      const libro = await r1.json();
+      document.getElementById('libro-titulo').value               = libro.titulo || '';
+      document.getElementById('libro-desc').value                 = libro.datos?.descripcion || '';
+      document.getElementById('libro-genero').value               = libro.genero || 'fantasía';
+      document.getElementById('editor-title').textContent         = libro.titulo || 'Editor';
+      document.getElementById('cover-title-preview').textContent  = libro.titulo || 'Sin título';
+      S.esPublico = libro.es_publico !== false;
+      document.getElementById('vis-toggle').classList.toggle('on', S.esPublico);
+      document.getElementById('vis-label').textContent = S.esPublico ? 'Público' : 'Privado';
+      const d = libro.datos || {};
+      if (d.personajes?.length)  { WB.personajes = d.personajes;  renderChars();     updateWbCounts(); }
+      if (d.lugares?.length)     { WB.lugares     = d.lugares;     renderLugares();   updateWbCounts(); }
+      if (d.facciones?.length)   { WB.facciones   = d.facciones;   renderFacciones(); updateWbCounts(); }
+      if (d.eventos?.length)     { WB.eventos      = d.eventos;     renderEventos();   updateWbCounts(); }
+      const r2   = await fetch('/api/libros/' + _libroId + '/capitulos');
+      const caps = await r2.json();
+      if (caps.length) {
+        S.capitulos = caps.map(c => ({ numero:c.numero, titulo:c.titulo||'', contenido:c.contenido||'', estado:c.estado||'borrador', palabras:c.palabras||0, id:c.id }));
+        S.capActual = 0;
+        document.getElementById('cap-titulo').value = S.capitulos[0].titulo;
+        document.getElementById('cap-body').value   = S.capitulos[0].contenido;
+        renderTabs(); renderSideList(); updateStats(); updateWordCount();
+      }
+      setStatus('saved');
+      toast('✦ Libro cargado');
+      document.getElementById('danger-zone').style.display='block';
+    } catch(e) { toast(e.message,'err'); }
+  })();
+}
+
+
+// ── Borrar capítulo ────────────────────────────────────────────────
+window.confirmarBorrarCap = async (idx) => {
+  const cap = S.capitulos[idx];
+  if (!confirm(`¿Eliminar "${cap.titulo || 'Capítulo '+cap.numero}"? Esta acción no se puede deshacer.`)) return;
+  if (cap.id && S.libroId) {
+    try {
+      await fetch(`/api/libros/${S.libroId}/capitulos/${cap.numero}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': 'Bearer ' + TOKEN }
+      });
+    } catch(e) { toast('Error al eliminar: ' + e.message, 'err'); return; }
+  }
+  S.capitulos.splice(idx, 1);
+  // Renumerar
+  S.capitulos.forEach((c,i) => c.numero = i+1);
+  S.capActual = Math.min(S.capActual, S.capitulos.length-1);
+  if (S.capitulos.length === 0) {
+    S.capitulos = [{ numero:1, titulo:'', contenido:'', estado:'borrador', palabras:0 }];
+    S.capActual = 0;
+  }
+  document.getElementById('cap-titulo').value = S.capitulos[S.capActual].titulo;
+  document.getElementById('cap-body').value   = S.capitulos[S.capActual].contenido;
+  renderTabs(); renderSideList(); updateStats();
+  toast('Capítulo eliminado');
+};
+
+// ── Borrar libro ───────────────────────────────────────────────────
+window.confirmarBorrarLibro = async () => {
+  const titulo = document.getElementById('libro-titulo').value || 'este libro';
+  if (!confirm(`¿Eliminar "${titulo}" permanentemente? Se borrarán todos los capítulos. Esta acción no se puede deshacer.`)) return;
+  if (!S.libroId) { window.location.href = '/index-social.html'; return; }
+  try {
+    const r = await fetch(`/v2/libros/${S.libroId}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': 'Bearer ' + TOKEN }
+    });
+    if (!r.ok) throw new Error('Error al eliminar');
+    toast('Libro eliminado');
+    window.location.href = '/index-social.html';
+  } catch(e) { toast(e.message, 'err'); }
+};
+
 let _tt;
 window.toast = (msg, type='') => {
   const el = document.getElementById('toast');
@@ -858,5 +974,9 @@ window.toast = (msg, type='') => {
   clearTimeout(_tt); _tt = setTimeout(() => el.classList.remove('show'), 2800);
 };
 </script>
+
+
+
 </body>
 </html>
+</script>
