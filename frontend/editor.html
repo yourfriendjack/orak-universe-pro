@@ -216,6 +216,59 @@ body{background:var(--page);display:block;}
 .toast.err{background:#3a1010;color:#e08080;}
 
 @keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+/* ── TABS PRINCIPALES ── */
+.main-tabs{display:flex;border-bottom:2px solid var(--fog);padding:0 28px;background:var(--page);position:sticky;top:54px;z-index:50;}
+.main-tab{font-family:'JetBrains Mono',monospace;font-size:.65rem;letter-spacing:.08em;text-transform:uppercase;padding:12px 20px 10px;cursor:pointer;color:var(--fog);border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s;}
+.main-tab:hover{color:var(--ink);}
+.main-tab.active{color:var(--amber-dim);border-bottom-color:var(--amber);}
+.main-panel{display:none;flex:1;}
+.main-panel.active{display:flex;flex-direction:column;}
+
+/* ── WORLDBUILDING ── */
+.wb-shell{display:grid;grid-template-columns:200px 1fr;height:calc(100vh - 108px);}
+.wb-nav{border-right:1px solid var(--fog);padding:20px 0;overflow-y:auto;}
+.wb-nav-item{display:flex;align-items:center;gap:8px;padding:9px 18px;font-size:.9rem;color:var(--ink);cursor:pointer;transition:all .15s;border-left:2px solid transparent;}
+.wb-nav-item:hover{background:var(--mist);}
+.wb-nav-item.active{border-left-color:var(--amber);background:rgba(200,134,10,.06);color:var(--amber-dim);font-weight:600;}
+.wb-nav-count{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--fog);background:var(--mist);padding:1px 6px;border-radius:10px;}
+.wb-content{padding:28px 32px;overflow-y:auto;}
+.wb-view{display:none;}
+.wb-view.active{display:block;}
+.wb-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--fog);}
+.wb-title{font-family:'Cinzel',serif;font-size:1.2rem;font-weight:600;letter-spacing:.04em;}
+.wb-add-btn{font-family:'JetBrains Mono',monospace;font-size:.62rem;letter-spacing:.06em;text-transform:uppercase;padding:7px 14px;background:var(--ink);color:var(--gold);border:none;border-radius:4px;cursor:pointer;transition:all .15s;}
+.wb-add-btn:hover{background:#2a2820;}
+.wb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;}
+.wb-card{border:1px solid var(--fog);border-radius:7px;padding:14px;background:#fff;position:relative;transition:all .2s;animation:fadeUp .3s ease both;}
+.wb-card:hover{border-color:var(--amber);box-shadow:0 3px 12px var(--shadow);}
+.wb-card-name{font-family:'Cinzel',serif;font-size:.9rem;font-weight:600;margin-bottom:3px;}
+.wb-card-sub{font-style:italic;font-size:.78rem;color:var(--fog);margin-bottom:8px;}
+.wb-card-tags{display:flex;gap:4px;flex-wrap:wrap;}
+.wb-tag{font-family:'JetBrains Mono',monospace;font-size:.52rem;padding:2px 6px;border-radius:3px;background:var(--mist);color:var(--amber-dim);}
+.wb-card-del{position:absolute;top:8px;right:8px;background:none;border:none;cursor:pointer;color:var(--fog);font-size:.85rem;transition:color .15s;}
+.wb-card-del:hover{color:var(--rust);}
+.wb-form{border:1px solid rgba(200,134,10,.3);border-radius:7px;padding:16px;background:rgba(200,134,10,.04);margin-bottom:16px;display:none;}
+.wb-form.open{display:block;}
+.wb-form-title{font-family:'Cinzel',serif;font-size:.9rem;font-weight:600;margin-bottom:12px;color:var(--amber-dim);}
+.wb-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.wb-form-full{grid-column:1/-1;}
+.wf-label{font-family:'JetBrains Mono',monospace;font-size:.58rem;letter-spacing:.08em;text-transform:uppercase;color:var(--fog);margin-bottom:4px;}
+.wf-input{width:100%;background:#fff;border:1px solid var(--fog);border-radius:4px;padding:8px 10px;font-family:'Crimson Pro',serif;font-size:.95rem;color:var(--ink);outline:none;transition:all .15s;}
+.wf-input:focus{border-color:var(--amber);}
+.wb-form-actions{display:flex;gap:8px;margin-top:12px;justify-content:flex-end;}
+.wf-cancel{font-family:'JetBrains Mono',monospace;font-size:.62rem;padding:7px 14px;border:1px solid var(--fog);border-radius:4px;background:none;cursor:pointer;color:var(--fog);}
+.wf-save{font-family:'JetBrains Mono',monospace;font-size:.62rem;padding:7px 14px;background:var(--amber);color:#fff;border:none;border-radius:4px;cursor:pointer;}
+.tl-list{display:flex;flex-direction:column;gap:0;}
+.tl-item{display:flex;align-items:flex-start;gap:14px;padding:14px 0;border-bottom:1px solid var(--mist);}
+.tl-year-badge{font-family:'Cinzel',serif;font-size:.78rem;font-weight:700;color:var(--amber-dim);background:rgba(200,134,10,.08);border:1px solid rgba(200,134,10,.2);padding:3px 8px;border-radius:4px;flex-shrink:0;min-width:70px;text-align:center;}
+.tl-info{flex:1;}
+.tl-desc{font-size:.92rem;color:var(--ink);}
+.tl-char{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--fog);margin-top:3px;}
+.tl-del{background:none;border:none;cursor:pointer;color:var(--fog);font-size:.85rem;transition:color .15s;flex-shrink:0;}
+.tl-del:hover{color:var(--rust);}
+.wb-empty{text-align:center;padding:40px;font-style:italic;color:var(--fog);font-size:.95rem;}
+
 </style>
 </head>
 <body>
@@ -227,6 +280,16 @@ body{background:var(--page);display:block;}
   <div class="status-dot"><div class="dot" id="status-dot"></div><span id="status-text">Sin guardar</span></div>
   <button class="save-btn" id="save-btn" onclick="guardarTodo()">✦ Guardar</button>
 </header>
+
+
+<!-- TABS PRINCIPALES -->
+<div class="main-tabs">
+  <div class="main-tab active" id="mtab-escritura" onclick="switchMainTab('escritura')">✎ Escritura</div>
+  <div class="main-tab" id="mtab-worldbuilding" onclick="switchMainTab('worldbuilding')">◈ Worldbuilding</div>
+</div>
+
+<!-- PANEL ESCRITURA -->
+<div class="main-panel active" id="panel-escritura">
 
 <div class="editor-shell">
 
@@ -320,6 +383,111 @@ body{background:var(--page);display:block;}
   </div>
 
 </div>
+
+</div><!-- /panel-escritura -->
+
+</div><!-- /panel-escritura -->
+
+<!-- PANEL WORLDBUILDING -->
+<div class="main-panel" id="panel-worldbuilding">
+  <div class="wb-shell">
+    <nav class="wb-nav">
+      <div class="wb-nav-item active" onclick="switchWbView('personajes',this)">◷ Personajes<span class="wb-nav-count" id="wc-chars">0</span></div>
+      <div class="wb-nav-item" onclick="switchWbView('lugares',this)">◈ Lugares<span class="wb-nav-count" id="wc-places">0</span></div>
+      <div class="wb-nav-item" onclick="switchWbView('facciones',this)">◆ Facciones<span class="wb-nav-count" id="wc-factions">0</span></div>
+      <div class="wb-nav-item" onclick="switchWbView('eventos',this)">◎ Timeline<span class="wb-nav-count" id="wc-events">0</span></div>
+    </nav>
+    <div class="wb-content">
+
+      <!-- PERSONAJES -->
+      <div class="wb-view active" id="wbv-personajes">
+        <div class="wb-header">
+          <div class="wb-title">Personajes</div>
+          <button class="wb-add-btn" onclick="toggleForm('form-char')">+ Añadir</button>
+        </div>
+        <div class="wb-form" id="form-char">
+          <div class="wb-form-title">Nuevo personaje</div>
+          <div class="wb-form-grid">
+            <div><div class="wf-label">Nombre</div><input class="wf-input" id="cf-nombre" placeholder="Nombre del personaje"></div>
+            <div><div class="wf-label">Rol</div><input class="wf-input" id="cf-rol" placeholder="Protagonista, villano…"></div>
+            <div><div class="wf-label">Raza / Especie</div><input class="wf-input" id="cf-raza" placeholder="Humano, élfico…"></div>
+            <div><div class="wf-label">Año de nacimiento</div><input class="wf-input" type="number" id="cf-nac" placeholder="0"></div>
+            <div class="wb-form-full"><div class="wf-label">Descripción</div><input class="wf-input" id="cf-desc" placeholder="Breve descripción…"></div>
+          </div>
+          <div class="wb-form-actions">
+            <button class="wf-cancel" onclick="toggleForm('form-char')">Cancelar</button>
+            <button class="wf-save" onclick="addPersonaje()">Guardar</button>
+          </div>
+        </div>
+        <div class="wb-grid" id="chars-grid"><div class="wb-empty">Sin personajes todavía</div></div>
+      </div>
+
+      <!-- LUGARES -->
+      <div class="wb-view" id="wbv-lugares">
+        <div class="wb-header">
+          <div class="wb-title">Lugares</div>
+          <button class="wb-add-btn" onclick="toggleForm('form-lugar')">+ Añadir</button>
+        </div>
+        <div class="wb-form" id="form-lugar">
+          <div class="wb-form-title">Nuevo lugar</div>
+          <div class="wb-form-grid">
+            <div><div class="wf-label">Nombre</div><input class="wf-input" id="lf-nombre" placeholder="Nombre del lugar"></div>
+            <div><div class="wf-label">Tipo</div><input class="wf-input" id="lf-tipo" placeholder="Ciudad, planeta, región…"></div>
+            <div class="wb-form-full"><div class="wf-label">Descripción</div><input class="wf-input" id="lf-desc" placeholder="Breve descripción…"></div>
+          </div>
+          <div class="wb-form-actions">
+            <button class="wf-cancel" onclick="toggleForm('form-lugar')">Cancelar</button>
+            <button class="wf-save" onclick="addLugar()">Guardar</button>
+          </div>
+        </div>
+        <div class="wb-grid" id="lugares-grid"><div class="wb-empty">Sin lugares todavía</div></div>
+      </div>
+
+      <!-- FACCIONES -->
+      <div class="wb-view" id="wbv-facciones">
+        <div class="wb-header">
+          <div class="wb-title">Facciones</div>
+          <button class="wb-add-btn" onclick="toggleForm('form-faccion')">+ Añadir</button>
+        </div>
+        <div class="wb-form" id="form-faccion">
+          <div class="wb-form-title">Nueva facción</div>
+          <div class="wb-form-grid">
+            <div><div class="wf-label">Nombre</div><input class="wf-input" id="ff-nombre" placeholder="Nombre de la facción"></div>
+            <div><div class="wf-label">Tipo</div><input class="wf-input" id="ff-tipo" placeholder="Imperio, gremio, culto…"></div>
+            <div class="wb-form-full"><div class="wf-label">Descripción / Lema</div><input class="wf-input" id="ff-desc" placeholder="Descripción o lema…"></div>
+          </div>
+          <div class="wb-form-actions">
+            <button class="wf-cancel" onclick="toggleForm('form-faccion')">Cancelar</button>
+            <button class="wf-save" onclick="addFaccion()">Guardar</button>
+          </div>
+        </div>
+        <div class="wb-grid" id="facciones-grid"><div class="wb-empty">Sin facciones todavía</div></div>
+      </div>
+
+      <!-- TIMELINE -->
+      <div class="wb-view" id="wbv-eventos">
+        <div class="wb-header">
+          <div class="wb-title">Línea de Tiempo</div>
+          <button class="wb-add-btn" onclick="toggleForm('form-evento')">+ Añadir</button>
+        </div>
+        <div class="wb-form" id="form-evento">
+          <div class="wb-form-title">Nuevo evento</div>
+          <div class="wb-form-grid">
+            <div><div class="wf-label">Año</div><input class="wf-input" type="number" id="ef-anio" placeholder="0"></div>
+            <div><div class="wf-label">Personaje clave</div><input class="wf-input" id="ef-char" placeholder="Opcional…"></div>
+            <div class="wb-form-full"><div class="wf-label">¿Qué ocurrió?</div><input class="wf-input" id="ef-desc" placeholder="Descripción del evento…"></div>
+          </div>
+          <div class="wb-form-actions">
+            <button class="wf-cancel" onclick="toggleForm('form-evento')">Cancelar</button>
+            <button class="wf-save" onclick="addEvento()">Guardar</button>
+          </div>
+        </div>
+        <div class="tl-list" id="eventos-list"><div class="wb-empty">Sin eventos todavía</div></div>
+      </div>
+
+    </div>
+  </div>
+</div><!-- /panel-worldbuilding -->
 
 <div class="toast" id="toast"></div>
 
@@ -484,6 +652,7 @@ window.guardarTodo = async () => {
           descripcion: document.getElementById('libro-desc').value,
           genero:      document.getElementById('libro-genero').value,
           es_publico:  S.esPublico,
+          worldbuilding: window._wb_data || null,
         })
       });
       const d = await r.json();
@@ -499,6 +668,7 @@ window.guardarTodo = async () => {
           descripcion: document.getElementById('libro-desc').value,
           genero:      document.getElementById('libro-genero').value,
           es_publico:  S.esPublico,
+          worldbuilding: window._wb_data || null,
         })
       });
     }
@@ -530,6 +700,157 @@ window.guardarTodo = async () => {
 };
 
 // ── Toast ─────────────────────────────────────────────────────────
+
+// ── WORLDBUILDING ─────────────────────────────────────────────────
+const WB = { personajes:[], lugares:[], facciones:[], eventos:[] };
+
+window.switchMainTab = (tab) => {
+  document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.main-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('mtab-'+tab).classList.add('active');
+  document.getElementById('panel-'+tab).classList.add('active');
+};
+
+window.switchWbView = (view, el) => {
+  document.querySelectorAll('.wb-view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.wb-nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('wbv-'+view).classList.add('active');
+  el.classList.add('active');
+};
+
+window.toggleForm = (id) => {
+  const f = document.getElementById(id);
+  f.classList.toggle('open');
+};
+
+function updateWbCounts() {
+  document.getElementById('wc-chars').textContent    = WB.personajes.length;
+  document.getElementById('wc-places').textContent   = WB.lugares.length;
+  document.getElementById('wc-factions').textContent = WB.facciones.length;
+  document.getElementById('wc-events').textContent   = WB.eventos.length;
+}
+
+function renderChars() {
+  const c = document.getElementById('chars-grid');
+  c.innerHTML = WB.personajes.length
+    ? WB.personajes.map((p,i) => `
+      <div class="wb-card">
+        <button class="wb-card-del" onclick="delItem('personajes',${i})">✕</button>
+        <div class="wb-card-name">${p.nombre}</div>
+        <div class="wb-card-sub">${p.rol||'Sin rol'}</div>
+        <div class="wb-card-tags">
+          ${p.raza?`<span class="wb-tag">${p.raza}</span>`:''}
+          ${p.nacimiento?`<span class="wb-tag">Año ${p.nacimiento}</span>`:''}
+        </div>
+      </div>`).join('')
+    : '<div class="wb-empty">Sin personajes todavía</div>';
+}
+
+function renderLugares() {
+  const c = document.getElementById('lugares-grid');
+  c.innerHTML = WB.lugares.length
+    ? WB.lugares.map((l,i) => `
+      <div class="wb-card">
+        <button class="wb-card-del" onclick="delItem('lugares',${i})">✕</button>
+        <div class="wb-card-name">${l.nombre}</div>
+        <div class="wb-card-sub">${l.descripcion||'Sin descripción'}</div>
+        <div class="wb-card-tags">${l.tipo?`<span class="wb-tag">${l.tipo}</span>`:''}</div>
+      </div>`).join('')
+    : '<div class="wb-empty">Sin lugares todavía</div>';
+}
+
+function renderFacciones() {
+  const c = document.getElementById('facciones-grid');
+  c.innerHTML = WB.facciones.length
+    ? WB.facciones.map((f,i) => `
+      <div class="wb-card">
+        <button class="wb-card-del" onclick="delItem('facciones',${i})">✕</button>
+        <div class="wb-card-name">${f.nombre}</div>
+        <div class="wb-card-sub">${f.descripcion||'Sin descripción'}</div>
+        <div class="wb-card-tags">${f.tipo?`<span class="wb-tag">${f.tipo}</span>`:''}</div>
+      </div>`).join('')
+    : '<div class="wb-empty">Sin facciones todavía</div>';
+}
+
+function renderEventos() {
+  const sorted = [...WB.eventos].sort((a,b) => (a.año||0)-(b.año||0));
+  const c = document.getElementById('eventos-list');
+  c.innerHTML = sorted.length
+    ? sorted.map((e,i) => `
+      <div class="tl-item">
+        <div class="tl-year-badge">Año ${e.año||'?'}</div>
+        <div class="tl-info">
+          <div class="tl-desc">${e.descripcion}</div>
+          ${e.personaje?`<div class="tl-char">Personaje: ${e.personaje}</div>`:''}
+        </div>
+        <button class="tl-del" onclick="delItem('eventos',${WB.eventos.indexOf(e)})">✕</button>
+      </div>`).join('')
+    : '<div class="wb-empty">Sin eventos todavía</div>';
+}
+
+window.addPersonaje = () => {
+  const nombre = document.getElementById('cf-nombre').value.trim();
+  if (!nombre) { toast('El nombre es obligatorio','err'); return; }
+  WB.personajes.push({
+    nombre, rol: document.getElementById('cf-rol').value,
+    raza: document.getElementById('cf-raza').value,
+    nacimiento: parseInt(document.getElementById('cf-nac').value)||0,
+    descripcion: document.getElementById('cf-desc').value,
+    muerte: null,
+  });
+  ['cf-nombre','cf-rol','cf-raza','cf-nac','cf-desc'].forEach(id => document.getElementById(id).value='');
+  toggleForm('form-char');
+  renderChars(); updateWbCounts(); setStatus('saving');
+  toast(`◷ ${nombre} agregado`);
+};
+
+window.addLugar = () => {
+  const nombre = document.getElementById('lf-nombre').value.trim();
+  if (!nombre) { toast('El nombre es obligatorio','err'); return; }
+  WB.lugares.push({ nombre, tipo: document.getElementById('lf-tipo').value, descripcion: document.getElementById('lf-desc').value });
+  ['lf-nombre','lf-tipo','lf-desc'].forEach(id => document.getElementById(id).value='');
+  toggleForm('form-lugar');
+  renderLugares(); updateWbCounts(); setStatus('saving');
+  toast(`◈ ${nombre} agregado`);
+};
+
+window.addFaccion = () => {
+  const nombre = document.getElementById('ff-nombre').value.trim();
+  if (!nombre) { toast('El nombre es obligatorio','err'); return; }
+  WB.facciones.push({ nombre, tipo: document.getElementById('ff-tipo').value, descripcion: document.getElementById('ff-desc').value });
+  ['ff-nombre','ff-tipo','ff-desc'].forEach(id => document.getElementById(id).value='');
+  toggleForm('form-faccion');
+  renderFacciones(); updateWbCounts(); setStatus('saving');
+  toast(`◆ ${nombre} agregado`);
+};
+
+window.addEvento = () => {
+  const desc = document.getElementById('ef-desc').value.trim();
+  if (!desc) { toast('La descripción es obligatoria','err'); return; }
+  WB.eventos.push({ año: parseInt(document.getElementById('ef-anio').value)||0, descripcion: desc, personaje: document.getElementById('ef-char').value });
+  ['ef-anio','ef-desc','ef-char'].forEach(id => document.getElementById(id).value='');
+  toggleForm('form-evento');
+  renderEventos(); updateWbCounts(); setStatus('saving');
+  toast(`◎ Evento agregado`);
+};
+
+window.delItem = (type, idx) => {
+  WB[type].splice(idx,1);
+  if(type==='personajes') renderChars();
+  else if(type==='lugares') renderLugares();
+  else if(type==='facciones') renderFacciones();
+  else renderEventos();
+  updateWbCounts(); setStatus('saving');
+};
+
+// Incluir WB en el guardado
+const _origGuardar = window.guardarTodo;
+window.guardarTodo = async () => {
+  // Inyectar worldbuilding en datos_json antes de guardar
+  window._wb_data = WB;
+  await _origGuardar();
+};
+
 let _tt;
 window.toast = (msg, type='') => {
   const el = document.getElementById('toast');
