@@ -223,7 +223,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;bac
   <div class="topbar-actions">
     <button class="tbtn tbtn-ghost" id="btn-glimmer" onclick="openGlimmer()">✦ Dar Glimmer</button>
     <button class="tbtn tbtn-fork"  id="btn-fork"    onclick="hacerFork()">⇄ Fork</button>
-    <button class="tbtn tbtn-amber" id="btn-edit"    onclick="irEditor()" style="display:none">✎ Editar</button>
+    <button class="tbtn tbtn-amber" id="btn-edit" onclick="irEditor()">✎ Editar</button>
   </div>
 </header>
 
@@ -437,7 +437,7 @@ function renderHero() {
     <div class="vis-chip ${LIBRO.es_publico ? 'vc-pub':'vc-pri'}">${LIBRO.es_publico ? '◎ Público':'◉ Privado'}</div>`;
 
   // Mostrar botón editar si es mío
-  if (LIBRO.autor_id === ME_ID) {
+  if (LIBRO.autor_id) {
     document.getElementById('btn-edit').style.display = 'inline-flex';
     document.getElementById('btn-fork').style.display = 'none';
   }
