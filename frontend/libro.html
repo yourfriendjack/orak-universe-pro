@@ -211,6 +211,77 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;bac
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:rgba(205,199,184,.12);border-radius:2px;}
 ::-webkit-scrollbar-thumb:hover{background:rgba(200,134,10,.35);}
+
+/* ── VISTA DE LECTURA ── */
+.reading-overlay{display:none;position:fixed;inset:0;z-index:400;overflow-y:auto;}
+.reading-overlay.light{background:linear-gradient(180deg,#faf7f0 0%,#f5f0e6 100%);}
+.reading-overlay.light::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:1;opacity:.5;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
+}
+.reading-overlay .reading-top,.reading-overlay .reading-body{position:relative;z-index:2;}
+.reading-overlay.open{display:block;}
+.reading-top{position:sticky;top:0;background:rgba(250,247,242,.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--fog);display:flex;align-items:center;gap:14px;padding:0 28px;height:52px;z-index:10;}
+.reading-back{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--fog);cursor:pointer;transition:color .15s;}
+.reading-back:hover{color:var(--amber-dim);}
+.reading-title{font-family:'Cinzel',serif;font-size:.95rem;font-weight:600;flex:1;color:var(--ink);}
+.reading-words{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--fog);}
+.reading-body{max-width:680px;margin:0 auto;padding:52px 28px 80px;}
+.reading-book-header{text-align:center;padding:0 0 44px;margin-bottom:44px;border-bottom:1px solid var(--fog);}
+.rbh-title{font-family:'Cinzel',serif;font-size:1.4rem;font-weight:900;letter-spacing:.08em;color:var(--ink);margin-bottom:8px;}
+.rbh-author{font-family:'JetBrains Mono',monospace;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--amber-dim);}
+.reading-cap-title{font-family:'Cinzel',serif;font-size:1.8rem;font-weight:600;letter-spacing:.04em;margin-bottom:32px;color:var(--ink);}
+.reading-text{font-family:'Crimson Pro',serif;font-size:1.15rem;line-height:1.9;color:#2a2620;white-space:pre-wrap;}
+.reading-ornament{text-align:center;font-size:.9rem;letter-spacing:.3em;margin:48px 0 40px;opacity:.25;color:var(--ink);}
+.reading-cap-footer{text-align:center;padding:20px 0 36px;opacity:.3;}
+.rcf-num{font-family:'Cinzel',serif;font-size:1.4rem;font-weight:900;letter-spacing:.1em;color:var(--ink);}
+.rcf-book{font-family:'JetBrains Mono',monospace;font-size:.56rem;letter-spacing:.12em;text-transform:uppercase;margin-top:4px;color:var(--fog);}
+.reading-nav{display:flex;justify-content:space-between;margin-top:20px;padding-top:24px;border-top:1px solid var(--fog);}
+.rnav-btn{font-family:'JetBrains Mono',monospace;font-size:.65rem;text-transform:uppercase;letter-spacing:.06em;padding:8px 16px;border-radius:4px;border:1px solid var(--fog);background:none;cursor:pointer;color:var(--ink);transition:all .15s;}
+.rnav-btn:hover{border-color:var(--amber);color:var(--amber-dim);}
+.rnav-btn:disabled{opacity:.3;cursor:not-allowed;}
+
+
+/* ── CONTROLES DE LECTURA ── */
+.reading-overlay.dark{background:#0e0c0a;}
+.reading-overlay.dark .reading-top{background:rgba(14,12,10,.96);border-bottom-color:rgba(255,255,255,.07);}
+.reading-overlay.dark .reading-title{color:#e8e3d8;}
+.reading-overlay.dark .reading-words{color:rgba(212,207,197,.35);}
+.reading-overlay.dark .reading-book-header{border-bottom-color:rgba(255,255,255,.08);}
+.reading-overlay.dark .rbh-title{color:#e8e3d8;}
+.reading-overlay.dark .rbh-author{color:rgba(200,134,10,.6);}
+.reading-overlay.dark .reading-cap-title{color:#e8e3d8;}
+.reading-overlay.dark .reading-text{color:#c8c3b8;}
+.reading-overlay.dark .reading-ornament{color:#e8e3d8;}
+.reading-overlay.dark .reading-cap-footer{opacity:.25;}
+.reading-overlay.dark .rcf-num{color:#e8e3d8;}
+.reading-overlay.dark .rcf-book{color:rgba(212,207,197,.3);}
+.reading-overlay.dark .reading-nav{border-top-color:rgba(255,255,255,.08);}
+.reading-overlay.dark .rnav-btn{border-color:rgba(255,255,255,.1);color:#d4cfc5;}
+.reading-overlay.dark .rnav-btn:hover{border-color:var(--amber);color:var(--amber);}
+
+.reading-controls{display:flex;align-items:center;gap:6px;}
+.rc-btn{font-family:'JetBrains Mono',monospace;font-size:.62rem;padding:5px 9px;border-radius:4px;cursor:pointer;transition:all .15s;border:1px solid var(--fog);background:none;color:var(--ink);}
+.rc-btn:hover{border-color:var(--amber);color:var(--amber-dim);}
+.reading-overlay.dark .rc-btn{border-color:rgba(255,255,255,.1);color:#d4cfc5;}
+.reading-overlay.dark .rc-btn:hover{border-color:var(--amber);color:var(--amber);}
+
+.reading-body.size-sm .reading-text{font-size:1rem;}
+.reading-body.size-md .reading-text{font-size:1.15rem;}
+.reading-body.size-lg .reading-text{font-size:1.32rem;}
+.reading-body.size-sm{max-width:600px;}
+.reading-body.size-md{max-width:680px;}
+.reading-body.size-lg{max-width:760px;}
+
+.reading-progress{height:2px;background:rgba(200,134,10,.12);position:sticky;top:52px;z-index:9;}
+.reading-progress-fill{height:100%;background:var(--amber);width:0%;transition:width .15s;}
+
+.reading-page-num{
+  font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--fog);
+  text-align:center;margin-top:6px;
+}
+.reading-overlay.dark .reading-page-num{color:rgba(212,207,197,.3);}
+
 </style>
 </head>
 <body>
@@ -223,7 +294,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;bac
   <div class="topbar-actions">
     <button class="tbtn tbtn-ghost" id="btn-glimmer" onclick="openGlimmer()">✦ Dar Glimmer</button>
     <button class="tbtn tbtn-fork"  id="btn-fork"    onclick="hacerFork()">⇄ Fork</button>
-    <button class="tbtn tbtn-amber" id="btn-edit" onclick="irEditor()">✎ Editar</button>
+    <button class="tbtn tbtn-amber" id="btn-edit"    onclick="irEditor()" style="display:none">✎ Editar</button>
   </div>
 </header>
 
@@ -369,6 +440,38 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;bac
   </div>
 </div>
 
+
+<div class="reading-overlay" id="reading-overlay">
+  <div class="reading-top">
+    <div class="reading-back" onclick="cerrarLectura()">← Volver al libro</div>
+    <div class="reading-title" id="reading-title">—</div>
+    <div class="reading-controls">
+      <span class="reading-words" id="reading-words">— palabras</span>
+      <button class="rc-btn" onclick="cambiarTamano()" title="Tamaño de texto">Aa</button>
+      <button class="rc-btn" id="modo-btn" onclick="toggleModoOscuro()" title="Modo nocturno">☽</button>
+    </div>
+  </div>
+  <div class="reading-progress"><div class="reading-progress-fill" id="reading-progress"></div></div>
+  <div class="reading-body size-md" id="reading-body">
+    <div class="reading-book-header">
+      <div class="rbh-title" id="rbh-title">—</div>
+      <div class="rbh-author" id="rbh-author">—</div>
+    </div>
+    <div class="reading-cap-title" id="reading-cap-title">—</div>
+    <div class="reading-text" id="reading-text">—</div>
+    <div class="reading-ornament">— ✦ —</div>
+    <div class="reading-cap-footer">
+      <div class="rcf-num" id="rcf-num">I</div>
+      <div class="rcf-book" id="rcf-book">—</div>
+    </div>
+    <div class="reading-nav">
+      <button class="rnav-btn" id="btn-prev" onclick="navCap(-1)">← Capítulo anterior</button>
+      <button class="rnav-btn" id="btn-next" onclick="navCap(1)">Siguiente capítulo →</button>
+    </div>
+    <div class="reading-page-num" id="reading-page-num">1 / 1</div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -437,7 +540,7 @@ function renderHero() {
     <div class="vis-chip ${LIBRO.es_publico ? 'vc-pub':'vc-pri'}">${LIBRO.es_publico ? '◎ Público':'◉ Privado'}</div>`;
 
   // Mostrar botón editar si es mío
-  if (LIBRO.autor_id) {
+  if (LIBRO.autor_id === ME_ID) {
     document.getElementById('btn-edit').style.display = 'inline-flex';
     document.getElementById('btn-fork').style.display = 'none';
   }
@@ -675,38 +778,51 @@ function toRoman(n) {
 function renderProgreso() {}
 
 
-// ── Lectura ───────────────────────────────────────────────────────
+// ── LECTURA ───────────────────────────────────────────────────────
 let CAPS_CACHE = [];
 let CAP_ACTUAL = 0;
 
+document.addEventListener('click', e => {
+  const item = e.target.closest('.ch-item');
+  if (item && item.dataset.cap) window.abrirCapitulo(parseInt(item.dataset.cap));
+});
+
 window.abrirCapitulo = async (numero) => {
-  console.log("abrirCapitulo llamado:", numero);
   try {
     if (!CAPS_CACHE.length) {
-      const r = await fetch(`/api/libros/${LIBRO_ID}/capitulos`);
+      const r = await fetch('/api/libros/' + LIBRO_ID + '/capitulos');
       CAPS_CACHE = await r.json();
     }
     const idx = CAPS_CACHE.findIndex(c => c.numero === numero);
     CAP_ACTUAL = idx >= 0 ? idx : 0;
     mostrarCap();
-    document.getElementById('reading-overlay').classList.add('open');
+    document.getElementById('reading-overlay').classList.add('open','light');
   } catch(e) { toast(e.message,'err'); }
 };
 
 function mostrarCap() {
   const c = CAPS_CACHE[CAP_ACTUAL];
   if (!c) return;
-  document.getElementById('reading-title').textContent     = LIBRO?.titulo || '—';
+  const titulo = LIBRO?.titulo || '—';
+  const autor  = LIBRO?.autor?.display_name || LIBRO?.autor?.username || '—';
+  const romano = toRoman(c.numero);
+  document.getElementById('reading-title').textContent     = titulo;
+  document.getElementById('rbh-title').textContent         = titulo;
+  document.getElementById('rbh-author').textContent        = autor;
   document.getElementById('reading-cap-title').textContent = c.titulo || `Capítulo ${c.numero}`;
   document.getElementById('reading-text').textContent      = c.contenido || 'Sin contenido todavía.';
   document.getElementById('reading-words').textContent     = `${(c.palabras||0).toLocaleString()} palabras`;
   document.getElementById('btn-prev').disabled = CAP_ACTUAL === 0;
   document.getElementById('btn-next').disabled = CAP_ACTUAL === CAPS_CACHE.length - 1;
+  document.getElementById('rcf-num').textContent  = romano;
+  document.getElementById('rcf-book').textContent = titulo;
+  document.getElementById('reading-page-num').textContent = `${CAP_ACTUAL+1} / ${CAPS_CACHE.length}`;
   document.getElementById('reading-overlay').scrollTo(0,0);
+  _actualizarProgreso();
 }
 
 window.navCap = (dir) => {
-  CAP_ACTUAL = Math.max(0, Math.min(CAPS_CACHE.length-1, CAP_ACTUAL + dir));
+  CAP_ACTUAL = Math.max(0, Math.min(CAPS_CACHE.length-1, CAP_ACTUAL+dir));
   mostrarCap();
 };
 
@@ -714,12 +830,34 @@ window.cerrarLectura = () => {
   document.getElementById('reading-overlay').classList.remove('open');
 };
 
-// Event delegation para capítulos
-document.addEventListener('click', e => {
-  const item = e.target.closest('.ch-item');
-  if (item && item.dataset.cap) {
-    window.abrirCapitulo(parseInt(item.dataset.cap));
-  }
+
+// ── Controles de lectura ────────────────────────────────────────────
+const _sizes = ['size-sm','size-md','size-lg'];
+let _sizeIdx = 1;
+window.cambiarTamano = () => {
+  const body = document.getElementById('reading-body');
+  body.classList.remove(..._sizes);
+  _sizeIdx = (_sizeIdx+1) % _sizes.length;
+  body.classList.add(_sizes[_sizeIdx]);
+};
+
+let _darkMode = false;
+window.toggleModoOscuro = () => {
+  _darkMode = !_darkMode;
+  document.getElementById('reading-overlay').classList.toggle('dark', _darkMode);
+  document.getElementById('modo-btn').textContent = _darkMode ? '☀' : '☽';
+};
+
+function _actualizarProgreso() {
+  const o = document.getElementById('reading-overlay');
+  const total = o.scrollHeight - o.clientHeight;
+  const fill = document.getElementById('reading-progress');
+  if (fill) fill.style.width = (total > 0 ? Math.round(o.scrollTop/total*100) : 0) + '%';
+}
+
+window.addEventListener('load', () => {
+  const o = document.getElementById('reading-overlay');
+  if (o) o.addEventListener('scroll', _actualizarProgreso);
 });
 
 let _tt;
@@ -736,36 +874,3 @@ document.getElementById('glimmer-modal').addEventListener('click', e => {
 </script>
 </body>
 </html>
-<style>
-.reading-overlay{display:none;position:fixed;inset:0;z-index:400;background:var(--page);overflow-y:auto;}
-.reading-overlay.open{display:block;}
-.reading-top{position:sticky;top:0;background:rgba(250,247,242,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--fog);display:flex;align-items:center;gap:14px;padding:0 28px;height:52px;}
-.reading-back{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--fog);cursor:pointer;transition:color .15s;}
-.reading-back:hover{color:var(--amber-dim);}
-.reading-title{font-family:'Cinzel',serif;font-size:.95rem;font-weight:600;flex:1;}
-.reading-body{max-width:680px;margin:0 auto;padding:52px 28px 80px;}
-.reading-cap-title{font-family:'Cinzel',serif;font-size:1.8rem;font-weight:600;letter-spacing:.04em;margin-bottom:32px;color:var(--ink);}
-.reading-text{font-family:'Crimson Pro',serif;font-size:1.15rem;line-height:1.9;color:#2a2620;white-space:pre-wrap;}
-.reading-nav{display:flex;justify-content:space-between;margin-top:48px;padding-top:24px;border-top:1px solid var(--fog);}
-.rnav-btn{font-family:'JetBrains Mono',monospace;font-size:.65rem;text-transform:uppercase;letter-spacing:.06em;padding:8px 16px;border-radius:4px;border:1px solid var(--fog);background:none;cursor:pointer;color:var(--ink);transition:all .15s;}
-.rnav-btn:hover{border-color:var(--amber);color:var(--amber-dim);}
-.rnav-btn:disabled{opacity:.3;cursor:not-allowed;}
-</style>
-
-<div class="reading-overlay" id="reading-overlay">
-  <div class="reading-top">
-    <div class="reading-back" onclick="cerrarLectura()">← Volver al libro</div>
-    <div class="reading-title" id="reading-title">—</div>
-    <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--fog);" id="reading-words">— palabras</div>
-  </div>
-  <div class="reading-body">
-    <div class="reading-cap-title" id="reading-cap-title">—</div>
-    <div class="reading-text" id="reading-text">—</div>
-    <div class="reading-nav">
-      <button class="rnav-btn" id="btn-prev" onclick="navCap(-1)">← Capítulo anterior</button>
-      <button class="rnav-btn" id="btn-next" onclick="navCap(1)">Siguiente capítulo →</button>
-    </div>
-  </div>
-</div>
-
-
