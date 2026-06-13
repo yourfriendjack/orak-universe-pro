@@ -240,10 +240,14 @@
       </div>
       <div class="prof-tabs-row">
         <div class="ptab active" onclick="profTab(this,'libros')">Libros</div>
+        <div class="ptab" onclick="profTab(this,'publicaciones')">Publicaciones</div>
         <div class="ptab" onclick="profTab(this,'actividad')">Actividad</div>
       </div>
       <div class="ptab-pane active" id="ptab-libros">
         <div class="books-grid" id="profile-grid" style="padding:0"></div>
+      </div>
+      <div class="ptab-pane" id="ptab-publicaciones">
+        <div class="feed-posts" id="profile-posts" style="padding:0"></div>
       </div>
       <div class="ptab-pane" id="ptab-actividad">
         <div style="font-style:italic;color:var(--fog);padding:20px 0">Historial próximamente…</div>
@@ -610,6 +614,12 @@ async function loadProfile() {
     const libros = await getLibrosPerfil(p.username);
     renderBooks('profile-grid', libros);
   } catch { renderBooks('profile-grid', []); }
+
+  try {
+    const posts = await fetch('/api/social/feed/usuario/' + p.username).then(r=>r.json());
+    const c = document.getElementById('profile-posts');
+    c.innerHTML = posts.length ? posts.map((post,i) => postHTML(post,i)).join('') : '<div class="loading">Sin publicaciones todavía</div>';
+  } catch { document.getElementById('profile-posts').innerHTML = '<div class="loading">Error al cargar</div>'; }
 }
 
 window.profTab = (el, tab) => {

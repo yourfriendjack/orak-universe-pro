@@ -66,6 +66,22 @@ async def get_explorar(
     return res.data or []
 
 
+@router.get("/feed/usuario/{username}")
+async def get_posts_usuario(username: str, limite: int = Query(20, le=50)):
+    """Posts publicados por un usuario específico (su muro)."""
+    sb = get_supabase()
+    perfil = sb.table("perfiles").select("id").eq("username", username).single().execute()
+    if not perfil.data:
+        error("Usuario no encontrado")
+    res = sb.table("vista_feed")\
+        .select("*")\
+        .eq("autor_id", perfil.data["id"])\
+        .order("creado_en", desc=True)\
+        .limit(limite)\
+        .execute()
+    return res.data or []
+
+
 @router.post("/posts", response_model=OkResponse)
 async def crear_post(datos: PostIn, usuario = Depends(get_current_user)):
     """Crear un post en el feed."""
