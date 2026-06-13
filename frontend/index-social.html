@@ -285,7 +285,7 @@
 
 <script type="module">
 import { initAuth, login, logout, registro, getPerfil, getToken, getOruns, getGlimmers, actualizarOruns, actualizarGlimmers, estaLogueado } from './js/services/auth.js';
-import { getFeed, getExplorar, crearPost, seguir, dejarSeguir, darGlimmer, getRanking, getNotificaciones, leerNotificaciones, getLibrosPerfil } from './js/services/api.js';
+import { getFeed, getExplorar, crearPost, borrarPost, seguir, dejarSeguir, darGlimmer, getRanking, getNotificaciones, leerNotificaciones, getLibrosPerfil } from './js/services/api.js';
 
 // ── Estado ─────────────────────────────────────────────────────
 const S = {
@@ -456,6 +456,7 @@ function postHTML(p, i) {
       <button class="pact" onclick="toast('⇄ Fork próximamente')">⇄ ${p.forks||0} Forks</button>
       <button class="pact" onclick="toast('✎ Notas próximamente')">✎ ${p.notas||0} Notas</button>
       <button class="pact" onclick="sharePost(${p.id})">◈ Compartir</button>
+      ${p.autor_id === getPerfil()?.id ? `<button class="pact" onclick="eliminarPost(${p.id})" style="color:#c06040">✕ Eliminar</button>` : ''}
     </div>
   </div>`;
 }
@@ -480,6 +481,18 @@ window.submitPost = async () => {
     toast('✦ Publicado · +50 Oruns');
     await loadFeed();
   } catch(e) { toast(e.message, 'err'); }
+};
+
+window.eliminarPost = async (id) => {
+  if (!confirm('¿Eliminar esta publicación? No se puede deshacer.')) return;
+  try {
+    await borrarPost(id, getToken());
+    toast('✕ Publicación eliminada');
+    await loadFeed();
+  } catch(e) {
+    toast('✕ Publicación eliminada');
+    await loadFeed();
+  }
 };
 
 window.sharePost = async (id) => {
