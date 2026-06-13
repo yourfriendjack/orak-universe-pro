@@ -26,7 +26,7 @@ body {
 /* ── CONTENEDOR PRINCIPAL ── */
 .shell {
   width: min(960px, 96vw);
-  height: min(620px, 92vh);
+  height: min(720px, 94vh);
   display: grid;
   grid-template-columns: 1fr 1fr;
   border-radius: 18px;
@@ -215,7 +215,7 @@ body {
 
 /* Panels */
 .panel { display: none; flex-direction: column; gap: 0; }
-.panel.active { display: flex; overflow-y: auto; max-height: 420px; padding-right: 4px; scrollbar-width: thin; scrollbar-color: rgba(200,134,10,.3) transparent; }
+.panel.active { display: flex; overflow-y: auto; max-height: 520px; padding-right: 4px; scrollbar-width: thin; scrollbar-color: rgba(200,134,10,.3) transparent; }
 
 /* ══════════════════════════════
    LADO DERECHO — COSMOS
@@ -665,3 +665,9 @@ async function doRegister() {
 </script>
 </body>
 </html>
+<style>
+@media (max-width: 700px) {
+  .shell { grid-template-columns: 1fr; height: min(640px, 94vh); }
+  .right { display: none; }
+}
+</style>
