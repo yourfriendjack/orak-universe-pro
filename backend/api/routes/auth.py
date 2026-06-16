@@ -4,7 +4,7 @@ backend/api/routes/auth.py
 Registro, login, perfil propio, actualizar perfil.
 Usa Supabase Auth como proveedor.
 """
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from backend.database.supabase_client import get_supabase
 from backend.models.schemas import RegisterIn, LoginIn, PerfilUpdate, OkResponse
 from backend.api.deps import get_current_user
@@ -116,6 +116,60 @@ async def actualizar_perfil(datos: PerfilUpdate, usuario = Depends(get_current_u
       .eq("id", usuario["id"])\
       .execute()
     return ok("Perfil actualizado")
+
+
+@router.post("/me/avatar", response_model=OkResponse)
+async def subir_avatar(file: UploadFile = File(...), usuario = Depends(get_current_user)):
+    """Sube una imagen de avatar a Supabase Storage y actualiza el perfil."""
+    sb = get_supabase()
+    ext = file.filename.split(".")[-1].lower() if "." in file.filename else "jpg"
+    if ext not in ("jpg","jpeg","png","webp","gif"):
+        error("Formato de imagen no soportado")
+
+    contenido = await file.read()
+    if len(contenido) > 5 * 1024 * 1024:
+        error("La imagen no puede superar 5MB")
+
+    path = f"avatars/{usuario['id']}.{ext}"
+    try:
+        sb.storage.from_("avatares").upload(
+            path, contenido,
+            file_options={"content-type": file.content_type, "upsert": "true"}
+        )
+    except Exception as e:
+        error(f"Error al subir imagen: {str(e)}")
+
+    public_url = sb.storage.from_("avatares").get_public_url(path)
+    sb.table("perfiles").update({"avatar_url": public_url}).eq("id", usuario["id"]).execute()
+
+    return ok("Avatar actualizado", {"avatar_url": public_url})
+
+
+@router.post("/me/banner", response_model=OkResponse)
+async def subir_banner(file: UploadFile = File(...), usuario = Depends(get_current_user)):
+    """Sube una imagen de banner a Supabase Storage y actualiza el perfil."""
+    sb = get_supabase()
+    ext = file.filename.split(".")[-1].lower() if "." in file.filename else "jpg"
+    if ext not in ("jpg","jpeg","png","webp","gif"):
+        error("Formato de imagen no soportado")
+
+    contenido = await file.read()
+    if len(contenido) > 8 * 1024 * 1024:
+        error("La imagen no puede superar 8MB")
+
+    path = f"banners/{usuario['id']}.{ext}"
+    try:
+        sb.storage.from_("avatares").upload(
+            path, contenido,
+            file_options={"content-type": file.content_type, "upsert": "true"}
+        )
+    except Exception as e:
+        error(f"Error al subir imagen: {str(e)}")
+
+    public_url = sb.storage.from_("avatares").get_public_url(path)
+    sb.table("perfiles").update({"banner_url": public_url}).eq("id", usuario["id"]).execute()
+
+    return ok("Banner actualizado", {"banner_url": public_url})
 
 
 @router.get("/perfil/{username}")

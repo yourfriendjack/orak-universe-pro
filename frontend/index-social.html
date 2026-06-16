@@ -215,20 +215,23 @@
 
     <!-- ── PERFIL ── -->
     <div class="view" id="view-profile">
-      <div class="prof-banner">
-        <div class="prof-banner-bg"></div>
+      <div class="prof-banner" id="prof-banner-wrap" style="position:relative;cursor:pointer;" onclick="abrirModalFoto('banner')">
+        <div class="prof-banner-bg" id="prof-banner-bg"></div>
         <div class="prof-banner-stars"></div>
         <div class="prof-banner-overlay"></div>
+        <div style="position:absolute;bottom:10px;right:14px;background:rgba(14,13,11,.6);color:#fff;font-family:'JetBrains Mono',monospace;font-size:.58rem;padding:5px 10px;border-radius:4px;z-index:2;">📷 Cambiar portada</div>
       </div>
+      <input type="file" id="banner-input" accept="image/*" style="display:none" onchange="subirImagen(this,'banner')">
+      <input type="file" id="avatar-input" accept="image/*" style="display:none" onchange="subirImagen(this,'avatar')">
       <div class="prof-infobar">
-        <div class="prof-av-lg" id="prof-av">…</div>
+        <div class="prof-av-lg" id="prof-av" style="cursor:pointer;position:relative;background-size:cover;background-position:center;" onclick="abrirModalFoto('avatar')" title="Ver foto de perfil">…</div>
         <div class="prof-meta">
           <div class="prof-name" id="prof-name">—</div>
           <div class="prof-handle" id="prof-handle">—</div>
           <div class="prof-bio" id="prof-bio">—</div>
         </div>
         <div class="prof-actions">
-          <button class="pbtn pbtn-ink" onclick="toast('✎ Editor de perfil próximamente')">✎ Editar</button>
+          <button class="pbtn pbtn-ink" onclick="abrirEditarPerfil()">✎ Editar perfil</button>
         </div>
       </div>
       <div class="prof-stats">
@@ -285,10 +288,74 @@
   </div>
 </div>
 
+
+<!-- MODAL EDITAR PERFIL -->
+<div class="modal-bg" id="edit-profile-modal">
+  <div class="modal-box" style="width:380px">
+    <div class="modal-title">Editar perfil</div>
+    <div class="modal-sub">Personaliza tu presencia en ORAK</div>
+    <div style="display:flex;flex-direction:column;gap:12px;margin:16px 0;">
+      <div>
+        <div class="field-label" style="font-family:'JetBrains Mono',monospace;font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;color:var(--fog);margin-bottom:5px;">Nombre de escritor</div>
+        <input class="field-input" id="ep-name" style="width:100%;background:var(--mist);border:1px solid var(--fog);border-radius:5px;padding:9px 12px;font-family:'Crimson Pro',serif;font-size:.95rem;color:var(--ink);outline:none;">
+      </div>
+      <div>
+        <div class="field-label" style="font-family:'JetBrains Mono',monospace;font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;color:var(--fog);margin-bottom:5px;">Bio</div>
+        <textarea id="ep-bio" rows="3" maxlength="300" style="width:100%;background:var(--mist);border:1px solid var(--fog);border-radius:5px;padding:9px 12px;font-family:'Crimson Pro',serif;font-size:.92rem;color:var(--ink);outline:none;resize:none;" placeholder="Cuéntale al mundo sobre ti…"></textarea>
+        <div style="text-align:right;font-family:'JetBrains Mono',monospace;font-size:.55rem;color:var(--fog);margin-top:3px;" id="ep-bio-count">0 / 300</div>
+      </div>
+      <div>
+        <div class="field-label" style="font-family:'JetBrains Mono',monospace;font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;color:var(--fog);margin-bottom:5px;">Géneros favoritos</div>
+        <div class="genre-row" id="ep-genres" style="display:flex;flex-wrap:wrap;gap:5px;">
+          <div class="genre-chip" data-g="Fantasía" onclick="toggleEpGenre(this)">Fantasía</div>
+          <div class="genre-chip" data-g="Sci-Fi" onclick="toggleEpGenre(this)">Sci-Fi</div>
+          <div class="genre-chip" data-g="Terror" onclick="toggleEpGenre(this)">Terror</div>
+          <div class="genre-chip" data-g="Histórico" onclick="toggleEpGenre(this)">Histórico</div>
+          <div class="genre-chip" data-g="Distopía" onclick="toggleEpGenre(this)">Distopía</div>
+          <div class="genre-chip" data-g="Mitología" onclick="toggleEpGenre(this)">Mitología</div>
+          <div class="genre-chip" data-g="Romance" onclick="toggleEpGenre(this)">Romance</div>
+          <div class="genre-chip" data-g="Thriller" onclick="toggleEpGenre(this)">Thriller</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeModal('edit-profile-modal')">Cancelar</button>
+      <button class="modal-confirm" onclick="guardarPerfil()">Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- MODAL VER/CAMBIAR AVATAR -->
+<div class="modal-bg" id="avatar-view-modal">
+  <div class="modal-box" style="width:320px;text-align:center;padding:24px;">
+    <div id="avatar-preview-wrap" style="width:220px;height:220px;border-radius:50%;margin:0 auto 18px;background:linear-gradient(135deg,var(--amber),var(--rust));display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-size:3rem;font-weight:900;color:#fff;background-size:cover;background-position:center;border:4px solid var(--page);box-shadow:0 8px 30px rgba(0,0,0,.15);"></div>
+    <div style="font-family:'Cinzel',serif;font-size:1rem;font-weight:600;margin-bottom:4px;">Foto de perfil</div>
+    <div style="font-style:italic;font-size:.82rem;color:var(--fog);margin-bottom:18px;">Esta es tu cara en ORAK Universe</div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeModal('avatar-view-modal')">Cerrar</button>
+      <button class="modal-confirm" onclick="document.getElementById('avatar-input').click()">📷 Cambiar foto</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL VER/CAMBIAR BANNER -->
+<div class="modal-bg" id="banner-view-modal">
+  <div class="modal-box" style="width:480px;padding:20px;">
+    <div id="banner-preview-wrap" style="width:100%;height:200px;border-radius:8px;margin-bottom:16px;background:linear-gradient(160deg,#1a0e0a,#0d1520);background-size:cover;background-position:center;"></div>
+    <div style="font-family:'Cinzel',serif;font-size:1rem;font-weight:600;margin-bottom:4px;text-align:center;">Foto de portada</div>
+    <div style="font-style:italic;font-size:.82rem;color:var(--fog);margin-bottom:18px;text-align:center;">El cosmos visible en tu perfil</div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeModal('banner-view-modal')">Cerrar</button>
+      <button class="modal-confirm" onclick="document.getElementById('banner-input').click()">📷 Cambiar portada</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script type="module">
-import { initAuth, login, logout, registro, getPerfil, getToken, getOruns, getGlimmers, actualizarOruns, actualizarGlimmers, estaLogueado } from './js/services/auth.js';
+import { initAuth, login, logout, registro, getPerfil, getToken, getOruns, getGlimmers, actualizarOruns, actualizarGlimmers, actualizarPerfil, estaLogueado } from './js/services/auth.js';
 import { getFeed, getExplorar, crearPost, borrarPost, seguir, dejarSeguir, darGlimmer, getRanking, getNotificaciones, leerNotificaciones, getLibrosPerfil } from './js/services/api.js';
 
 // ── Estado ─────────────────────────────────────────────────────
@@ -381,9 +448,31 @@ function updateUserUI() {
   const { display_name, username, oruns, glimmers_week, nivel, xp } = p;
   const ini = initials(display_name || username);
   const pct = Math.min(99, Math.round((xp % 500) / 500 * 100));
-  _set('topbar-av',    ini);
-  _set('comp-av',      ini);
-  _set('prof-av',      ini);
+
+  const avUrl = p.avatar_url;
+  [['topbar-av',document.getElementById('topbar-av')],['comp-av',document.getElementById('comp-av')],['prof-av',document.getElementById('prof-av')]].forEach(([id,el]) => {
+    if (!el) return;
+    if (avUrl) {
+      el.style.backgroundImage = `url(${avUrl})`;
+      el.style.backgroundSize = 'cover';
+      el.style.backgroundPosition = 'center';
+      el.textContent = '';
+    } else {
+      el.style.backgroundImage = '';
+      el.textContent = ini;
+    }
+  });
+
+  const bannerEl = document.getElementById('prof-banner-bg');
+  if (bannerEl) {
+    if (p.banner_url) {
+      bannerEl.style.backgroundImage = `url(${p.banner_url})`;
+      bannerEl.style.backgroundSize = 'cover';
+      bannerEl.style.backgroundPosition = 'center';
+    } else {
+      bannerEl.style.backgroundImage = '';
+    }
+  }
   _set('orun-display', (oruns||0).toLocaleString());
   _set('glimmer-display', glimmers_week || 0);
   _set('eco-name',     display_name || username);
@@ -717,6 +806,98 @@ window.sendGlimmer = async () => {
 window.closeModal = (id) => document.getElementById(id).classList.remove('open');
 
 // ── TOAST ────────────────────────────────────────────────────────
+
+// ── EDITAR PERFIL ────────────────────────────────────────────────
+window.abrirEditarPerfil = () => {
+  const p = getPerfil();
+  if (!p) return;
+  document.getElementById('ep-name').value = p.display_name || p.username || '';
+  document.getElementById('ep-bio').value   = p.bio || '';
+  document.getElementById('ep-bio-count').textContent = (p.bio||'').length + ' / 300';
+  const genres = p.generos || [];
+  document.querySelectorAll('#ep-genres .genre-chip').forEach(chip => {
+    chip.classList.toggle('on', genres.includes(chip.dataset.g));
+  });
+  document.getElementById('edit-profile-modal').classList.add('open');
+};
+
+window.toggleEpGenre = (el) => el.classList.toggle('on');
+
+document.getElementById('ep-bio')?.addEventListener('input', (e) => {
+  document.getElementById('ep-bio-count').textContent = e.target.value.length + ' / 300';
+});
+
+window.guardarPerfil = async () => {
+  const display_name = document.getElementById('ep-name').value.trim();
+  const bio = document.getElementById('ep-bio').value.trim();
+  const generos = Array.from(document.querySelectorAll('#ep-genres .genre-chip.on')).map(c => c.dataset.g);
+  if (!display_name) { toast('El nombre no puede estar vacío','err'); return; }
+  try {
+    await actualizarPerfil({ display_name, bio, generos });
+    closeModal('edit-profile-modal');
+    toast('✦ Perfil actualizado');
+    loadProfile();
+  } catch(e) { toast(e.message,'err'); }
+};
+
+
+// ── SUBIR AVATAR / BANNER ────────────────────────────────────────
+window.subirImagen = async (input, tipo) => {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 8*1024*1024) { toast('Imagen muy pesada, máximo 8MB','err'); return; }
+
+  const fd = new FormData();
+  fd.append('file', file);
+
+  toast('Subiendo imagen…');
+  try {
+    const r = await fetch(`/api/auth/me/${tipo}`, {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + getToken() },
+      body: fd
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.detail?.mensaje || d.detail || 'Error al subir');
+
+    if (tipo === 'avatar') {
+      document.getElementById('prof-av').style.backgroundImage = `url(${d.datos.avatar_url})`;
+      document.getElementById('prof-av').textContent = '';
+      document.getElementById('topbar-av').style.backgroundImage = `url(${d.datos.avatar_url})`;
+      document.getElementById('topbar-av').textContent = '';
+      closeModal('avatar-view-modal');
+    } else {
+      document.getElementById('prof-banner-bg').style.backgroundImage = `url(${d.datos.banner_url})`;
+      document.getElementById('prof-banner-bg').style.backgroundSize = 'cover';
+      document.getElementById('prof-banner-bg').style.backgroundPosition = 'center';
+      closeModal('banner-view-modal');
+    }
+    toast('✦ Imagen actualizada');
+  } catch(e) { toast(e.message, 'err'); }
+};
+
+
+// ── MODAL VER FOTO ───────────────────────────────────────────────
+window.abrirModalFoto = (tipo) => {
+  const p = getPerfil();
+  if (!p) return;
+  if (tipo === 'avatar') {
+    const wrap = document.getElementById('avatar-preview-wrap');
+    if (p.avatar_url) {
+      wrap.style.backgroundImage = `url(${p.avatar_url})`;
+      wrap.textContent = '';
+    } else {
+      wrap.style.backgroundImage = '';
+      wrap.textContent = initials(p.display_name || p.username);
+    }
+    document.getElementById('avatar-view-modal').classList.add('open');
+  } else {
+    const wrap = document.getElementById('banner-preview-wrap');
+    wrap.style.backgroundImage = p.banner_url ? `url(${p.banner_url})` : '';
+    document.getElementById('banner-view-modal').classList.add('open');
+  }
+};
+
 let _tt;
 window.toast = (msg, type='') => {
   const el = document.getElementById('toast');
