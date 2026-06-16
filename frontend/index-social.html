@@ -80,6 +80,7 @@
 
   <!-- TOPBAR -->
   <header class="topbar">
+    <button class="hamburger-btn" onclick="toggleSidebar()"><span></span><span></span><span></span></button>
     <div class="logo" onclick="goView('feed')">
       <div class="logo-hex"></div>ORAK
     </div>
@@ -936,3 +937,67 @@ document.getElementById('glimmer-modal').addEventListener('click', e => { if (e.
 </script>
 </body>
 </html>
+<style>
+/* ══════════════════════════════════════════════════════════
+   RESPONSIVE — MÓVIL
+══════════════════════════════════════════════════════════ */
+.hamburger-btn{display:none;width:34px;height:34px;border-radius:8px;background:none;border:none;cursor:pointer;flex-direction:column;justify-content:center;gap:4px;align-items:center;flex-shrink:0;}
+.hamburger-btn span{display:block;width:18px;height:2px;background:var(--ink);border-radius:2px;}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(14,13,11,.5);z-index:150;}
+.sidebar-overlay.open{display:block;}
+
+@media (max-width: 900px) {
+  .hamburger-btn{display:flex;}
+  .topbar-nav{display:none;}
+  .topbar-search{max-width:none;flex:1;}
+  .app-body{grid-template-columns:1fr;}
+  .sidebar{
+    position:fixed;top:0;left:0;height:100vh;width:240px;z-index:200;
+    background:var(--page);transform:translateX(-100%);
+    transition:transform .25s ease;box-shadow:4px 0 24px rgba(0,0,0,.15);
+  }
+  .sidebar.open{transform:translateX(0);}
+  .feed-shell{grid-template-columns:1fr;}
+  .feed-widgets{display:none;}
+  .composer{margin:14px 12px 0;}
+  .feed-posts{padding:12px;}
+  .post-actions{flex-wrap:wrap;}
+  .pact{font-size:.56rem;padding:6px 8px;}
+  .books-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));padding:12px;gap:10px;}
+  .explore-head{padding:16px 12px 0;}
+  .people-wrap{padding:14px 12px;}
+  .prof-infobar{padding:0 14px 16px;flex-wrap:wrap;}
+  .prof-stats{padding:0 14px 14px;gap:14px;flex-wrap:wrap;}
+  .prof-tabs-row{padding:0 14px;}
+  .ptab-pane{padding:14px;}
+  .orun-pill{font-size:.6rem;padding:4px 8px;}
+  .notif-panel{width:calc(100vw - 24px);right:12px;}
+}
+
+@media (max-width: 480px) {
+  .topbar{padding:0 12px;gap:8px;}
+  .logo{font-size:.85rem;}
+  .logo-hex{width:24px;height:24px;}
+  .topbar-search{display:none;}
+  .composer-input{font-size:.95rem;}
+  .post-text{font-size:.92rem;}
+  .books-grid{grid-template-columns:repeat(2,1fr);}
+}
+</style>
+
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+<script>
+window.toggleSidebar = () => {
+  document.querySelector('.sidebar').classList.toggle('open');
+  document.getElementById('sidebar-overlay').classList.toggle('open');
+};
+window.closeSidebar = () => {
+  document.querySelector('.sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('open');
+};
+// Cerrar sidebar al navegar en móvil
+document.querySelectorAll('.snav-item, .write-btn').forEach(el => {
+  el.addEventListener('click', () => { if (window.innerWidth <= 900) closeSidebar(); });
+});
+</script>
