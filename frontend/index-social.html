@@ -11,7 +11,7 @@
 <body>
 
 <!-- ═══════════════════════════ AUTH ═══════════════════════════ -->
-<div class="screen active" id="screen-auth">
+<div class="screen" id="screen-auth">
   <div class="auth-glow"></div>
   <div class="auth-card">
     <div class="auth-logo">
@@ -379,8 +379,11 @@ function initials(name) { return (name||'?').split(' ').map(w=>w[0]).join('').sl
 // ── Arranque ────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', async () => {
   const sesion = await initAuth();
-  if (!sesion) { window.location.href = "/"; return; }
-  if (sesion) launchApp();
+  if (!sesion) {
+    document.getElementById('screen-auth').classList.add('active');
+    return;
+  }
+  launchApp();
 });
 
 // ── AUTH UI ─────────────────────────────────────────────────────
