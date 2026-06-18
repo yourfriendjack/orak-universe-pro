@@ -535,10 +535,10 @@ function postHTML(p, i) {
     </div>` : '';
   return `<div class="post" style="animation-delay:${i*.06}s" id="post-${p.id}">
     <div class="post-head">
-      <div class="pav ${av}">${ini}</div>
+      <div class="pav ${av}" data-username="${p.autor_handle}" style="cursor:pointer">${ini}</div>
       <div class="post-meta">
-        <div class="post-name">${p.autor_nombre || p.autor_handle}</div>
-        <div class="post-handle">@${p.autor_handle} · ${p.autor_oruns||0} Oruns</div>
+        <div class="post-name" data-username="${p.autor_handle}" style="cursor:pointer">${p.autor_nombre || p.autor_handle}</div>
+        <div class="post-handle" data-username="${p.autor_handle}" style="cursor:pointer">@${p.autor_handle} · ${p.autor_oruns||0} Oruns</div>
       </div>
       <div class="post-time">${timeAgo(p.creado_en)}</div>
       <span class="post-badge ${bc}">${bt}</span>
@@ -654,9 +654,9 @@ function renderPeople(list, filter='') {
     const av  = avColor(p.id);
     const ini = initials(p.display_name || p.username);
     return `<div class="person-card" style="animation-delay:${i*.04}s" id="pcard-${p.id}">
-      <div class="person-av ${av}">${ini}</div>
+      <div class="person-av ${av}" data-username="${p.username}" style="cursor:pointer">${ini}</div>
       <div class="person-info">
-        <div class="person-name">${p.display_name || p.username}</div>
+        <div class="person-name" data-username="${p.username}" style="cursor:pointer">${p.display_name || p.username}</div>
         <div class="person-handle">@${p.username}</div>
         <div class="person-stats">
           <span class="pstat-sm">⬡ <strong>${(p.oruns||0).toLocaleString()}</strong> Oruns</span>
@@ -727,9 +727,9 @@ async function loadRanking() {
     document.getElementById('rank-list').innerHTML = data.slice(0,5).map((p,i) => `
       <div class="rank-item">
         <div class="rank-pos ${pos[i]||''}">#${i+1}</div>
-        <div class="rank-av ${avColor(p.id)}">${initials(p.display_name||p.username)}</div>
+        <div class="rank-av ${avColor(p.id)}" data-username="${p.username}" style="cursor:pointer">${initials(p.display_name||p.username)}</div>
         <div class="rank-info">
-          <div class="rank-name">${p.display_name||p.username}</div>
+          <div class="rank-name" data-username="${p.username}" style="cursor:pointer">${p.display_name||p.username}</div>
           <div class="rank-score">⬡ ${(p.oruns||0).toLocaleString()}</div>
         </div>
       </div>`).join('');
@@ -738,9 +738,9 @@ async function loadRanking() {
     const sugs = data.filter(p => p.id !== meId).slice(0,3);
     document.getElementById('sug-list').innerHTML = sugs.map(p => `
       <div class="sug-item">
-        <div class="sug-av ${avColor(p.id)}">${initials(p.display_name||p.username)}</div>
+        <div class="sug-av ${avColor(p.id)}" data-username="${p.username}" style="cursor:pointer">${initials(p.display_name||p.username)}</div>
         <div class="sug-info">
-          <div class="sug-name">${p.display_name||p.username}</div>
+          <div class="sug-name" data-username="${p.username}" style="cursor:pointer">${p.display_name||p.username}</div>
           <div class="sug-meta">⬡ ${(p.oruns||0).toLocaleString()} · ${p.libros_publicados||0} libros</div>
         </div>
         <button class="sug-btn" id="sb-${p.id}" onclick="quickFollow('${p.id}',this)">Seguir</button>
@@ -898,6 +898,15 @@ window.abrirModalFoto = (tipo) => {
     document.getElementById('banner-view-modal').classList.add('open');
   }
 };
+
+
+// ── Navegar a perfil público al hacer click en nombre/avatar ──────
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-username]');
+  if (el && el.dataset.username) {
+    window.location.href = '/perfil?u=' + el.dataset.username;
+  }
+});
 
 let _tt;
 window.toast = (msg, type='') => {

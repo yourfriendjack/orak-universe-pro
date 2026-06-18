@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Perfil — ORAK Universe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/orak-social.css">
+<style>
+body{background:var(--page);}
+.pp-back{position:sticky;top:0;z-index:100;background:rgba(250,247,242,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--fog);display:flex;align-items:center;gap:10px;padding:0 24px;height:52px;}
+.pp-back-link{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--fog);cursor:pointer;transition:color .15s;}
+.pp-back-link:hover{color:var(--amber-dim);}
+.pp-loading{display:flex;align-items:center;justify-content:center;padding:80px;font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--fog);}
+.pp-loading::after{content:'';width:16px;height:16px;border:2px solid var(--fog);border-top-color:var(--amber);border-radius:50%;margin-left:10px;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.pp-notfound{text-align:center;padding:80px 20px;}
+.pp-notfound-title{font-family:'Cinzel',serif;font-size:1.4rem;font-weight:600;color:var(--ink);margin-bottom:8px;}
+.pp-notfound-sub{font-style:italic;color:var(--fog);}
+@media (max-width: 900px) {
+  .prof-infobar{padding:0 14px 16px;flex-wrap:wrap;}
+  .prof-stats{padding:0 14px 14px;gap:14px;flex-wrap:wrap;}
+  .prof-tabs-row{padding:0 14px;}
+  .ptab-pane{padding:14px;}
+}
+</style>
+</head>
+<body>
+
+<div class="pp-back">
+  <div class="pp-back-link" onclick="history.back()">← Volver</div>
+</div>
+
+<div id="pp-loading-wrap">
+  <div class="pp-loading">Cargando perfil</div>
+</div>
+
+<div id="pp-content" style="display:none">
+
+  <div class="prof-banner">
+    <div class="prof-banner-bg" id="pp-banner-bg"></div>
+    <div class="prof-banner-stars"></div>
+    <div class="prof-banner-overlay"></div>
+  </div>
+  <div class="prof-infobar">
+    <div class="prof-av-lg" id="pp-av">…</div>
+    <div class="prof-meta">
+      <div class="prof-name" id="pp-name">—</div>
+      <div class="prof-handle" id="pp-handle">—</div>
+      <div class="prof-bio" id="pp-bio">—</div>
+    </div>
+    <div class="prof-actions" id="pp-actions"></div>
+  </div>
+  <div class="prof-stats">
+    <div class="prof-stat"><div class="prof-stat-num" id="pp-libros">—</div><div class="prof-stat-lbl">Libros</div></div>
+    <div class="prof-stat"><div class="prof-stat-num" id="pp-seg">—</div><div class="prof-stat-lbl">Seguidores</div></div>
+    <div class="prof-stat"><div class="prof-stat-num" id="pp-sig">—</div><div class="prof-stat-lbl">Siguiendo</div></div>
+    <div class="prof-stat"><div class="prof-stat-num gold" id="pp-oruns">—</div><div class="prof-stat-lbl">Oruns</div></div>
+    <div class="prof-stat"><div class="prof-stat-num blue" id="pp-nivel">—</div><div class="prof-stat-lbl">Nivel</div></div>
+  </div>
+  <div class="prof-tabs-row">
+    <div class="ptab active" onclick="ppTab(this,'libros')">Libros</div>
+    <div class="ptab" onclick="ppTab(this,'publicaciones')">Publicaciones</div>
+  </div>
+  <div class="ptab-pane active" id="pp-tab-libros">
+    <div class="books-grid" id="pp-books-grid" style="padding:0"></div>
+  </div>
+  <div class="ptab-pane" id="pp-tab-publicaciones">
+    <div class="feed-posts" id="pp-posts" style="padding:0"></div>
+  </div>
+
+</div>
+
+<div id="pp-notfound" style="display:none">
+  <div class="pp-notfound">
+    <div class="pp-notfound-title">Este escritor no existe</div>
+    <div class="pp-notfound-sub">El universo que buscas no se encuentra aquí</div>
+  </div>
+</div>
+
+<div class="modal-bg" id="glimmer-modal-pp"></div>
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { getToken, getPerfil, actualizarOruns, actualizarGlimmers } from './js/services/auth.js';
+import { getPerfilPublico, getLibrosPerfil, seguir, dejarSeguir, invitarLector } from './js/services/api.js';
+
+const params   = new URLSearchParams(location.search);
+const username = params.get('u');
+const MI_ID    = getPerfil()?.id;
+
+if (!username) {
+  document.getElementById('pp-loading-wrap').style.display = 'none';
+  document.getElementById('pp-notfound').style.display = 'block';
+} else {
+  cargarPerfil();
+}
+
+const AV_COLORS = ['pav1','pav2','pav3','pav4','pav5'];
+function avColor(str) { let h=0; for(const c of (str||'')) h=(h*31+c.charCodeAt(0))&0xffff; return AV_COLORS[h % AV_COLORS.length]; }
+function initials(name) { return (name||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase(); }
+
+async function cargarPerfil() {
+  try {
+    const p = await getPerfilPublico(username);
+
+    document.getElementById('pp-loading-wrap').style.display = 'none';
+    document.getElementById('pp-content').style.display = 'block';
+    document.title = `${p.display_name || p.username} — ORAK Universe`;
+
+    // Si soy yo mismo, redirigir a mi perfil normal
+    if (p.id === MI_ID) {
+      window.location.href = '/index-social.html';
+      return;
+    }
+
+    const ini = initials(p.display_name || p.username);
+    const av  = document.getElementById('pp-av');
+    if (p.avatar_url) {
+      av.style.backgroundImage = `url(${p.avatar_url})`;
+      av.style.backgroundSize = 'cover';
+      av.style.backgroundPosition = 'center';
+      av.textContent = '';
+    } else {
+      av.textContent = ini;
+    }
+
+    if (p.banner_url) {
+      const banner = document.getElementById('pp-banner-bg');
+      banner.style.backgroundImage = `url(${p.banner_url})`;
+      banner.style.backgroundSize = 'cover';
+      banner.style.backgroundPosition = 'center';
+    }
+
+    _set('pp-name', p.display_name || p.username);
+    _set('pp-handle', '@' + p.username);
+    _set('pp-bio', p.bio || 'Este escritor todavía no escribió su bio');
+    _set('pp-libros', p.libros_count || 0);
+    _set('pp-seg', p.seguidores_count || 0);
+    _set('pp-sig', p.siguiendo_count || 0);
+    _set('pp-oruns', (p.oruns || 0).toLocaleString());
+    _set('pp-nivel', p.nivel || 1);
+
+    renderAcciones(p);
+
+    // Cargar libros
+    const libros = await getLibrosPerfil(p.username);
+    renderBooks(libros);
+
+    // Cargar publicaciones
+    const posts = await fetch('/api/social/feed/usuario/' + p.username).then(r=>r.json());
+    renderPosts(posts);
+
+  } catch(e) {
+    document.getElementById('pp-loading-wrap').style.display = 'none';
+    document.getElementById('pp-notfound').style.display = 'block';
+  }
+}
+
+function renderAcciones(p) {
+  if (!MI_ID) {
+    document.getElementById('pp-actions').innerHTML = '';
+    return;
+  }
+  document.getElementById('pp-actions').innerHTML = `
+    <button class="pbtn pbtn-ink" id="pp-follow-btn" onclick="window.toggleFollowPP('${p.id}')">+ Seguir</button>
+    <button class="pbtn pbtn-out" id="pp-reader-btn" onclick="window.toggleReaderPP('${p.id}')">❋ Lector fiel</button>
+  `;
+}
+
+window.toggleFollowPP = async (id) => {
+  const btn = document.getElementById('pp-follow-btn');
+  const on  = btn.textContent.includes('Siguiendo');
+  try {
+    if (on) {
+      await dejarSeguir(id, getToken());
+      btn.textContent = '+ Seguir';
+      toast('Dejaste de seguir');
+    } else {
+      await seguir(id, getToken());
+      btn.textContent = '✓ Siguiendo';
+      actualizarOruns(5);
+      toast('✦ Siguiendo · +5 Oruns');
+    }
+  } catch(e) { toast(e.message, 'err'); }
+};
+
+window.toggleReaderPP = async (id) => {
+  const btn = document.getElementById('pp-reader-btn');
+  if (btn.textContent.includes('✓')) return;
+  try {
+    await invitarLector(id, getToken());
+    btn.textContent = '✓ Invitación enviada';
+    actualizarOruns(10);
+    toast('❋ Invitación enviada · +10 Oruns');
+  } catch(e) { toast(e.message, 'err'); }
+};
+
+function renderBooks(books) {
+  const spines = ['bs1','bs2','bs3','bs4','bs5'];
+  const c = document.getElementById('pp-books-grid');
+  if (!books.length) { c.innerHTML = '<div class="loading">Sin libros publicados todavía</div>'; return; }
+  c.innerHTML = books.map((b,i) => `
+    <div class="bcard" style="animation-delay:${i*.05}s;cursor:pointer" data-libro-id="${b.id}">
+      <div class="bcard-spine ${spines[i%5]}">
+        <div class="bcard-ttl">${b.titulo}</div>
+        <div class="bcard-vis ${b.es_publico?'vis-pub':'vis-pri'}">${b.es_publico?'Público':'Privado'}</div>
+      </div>
+      <div class="bcard-body">
+        <div class="bcard-name">${b.titulo}</div>
+        <div class="bcard-desc">${b.descripcion||'Sin descripción'}</div>
+        <div class="bcard-foot">
+          <div class="btags"><span class="btag">${b.genero||'—'}</span></div>
+          <div class="bcard-gl">✦ ${b.glimmers||0}</div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function renderPosts(posts) {
+  const c = document.getElementById('pp-posts');
+  if (!posts.length) { c.innerHTML = '<div class="loading">Sin publicaciones todavía</div>'; return; }
+  c.innerHTML = posts.map((p,i) => postHTMLpp(p,i)).join('');
+}
+
+function postHTMLpp(p, i) {
+  const av  = avColor(p.autor_id);
+  const ini = initials(p.autor_nombre || p.autor_handle);
+  const badgeMap = { nuevo_libro:'pb-libro Nuevo Libro', capitulo:'pb-update Capítulo', fork:'pb-fork Fork', colaboracion:'pb-collab Colaboración', reflexion:'pb-libro Nota', compartido:'pb-glimmer Compartido' };
+  const [bc, bt] = (badgeMap[p.tipo] || 'pb-libro Publicación').split(' ');
+  const book = p.libro_id ? `
+    <div class="book-preview" data-libro-id="${p.libro_id}">
+      <div class="bp-banner bpb${(p.libro_id%4)+1}">${p.libro_titulo || 'Sin título'}</div>
+      <div class="bp-foot"><div class="bp-stats"><span>${p.libro_genero||''}</span></div><div class="bp-cta">Leer →</div></div>
+    </div>` : '';
+  return `<div class="post" style="animation-delay:${i*.06}s">
+    <div class="post-head">
+      <div class="pav ${av}">${ini}</div>
+      <div class="post-meta">
+        <div class="post-name">${p.autor_nombre || p.autor_handle}</div>
+        <div class="post-handle">@${p.autor_handle}</div>
+      </div>
+      <div class="post-time">${timeAgo(p.creado_en)}</div>
+      <span class="post-badge ${bc}">${bt}</span>
+    </div>
+    <div class="post-body"><div class="post-text">${p.texto}</div>${book}</div>
+  </div>`;
+}
+
+function timeAgo(iso) {
+  if (!iso) return '';
+  const diff = (Date.now() - new Date(iso)) / 1000;
+  if (diff < 60)   return 'ahora';
+  if (diff < 3600) return `hace ${Math.floor(diff/60)}m`;
+  if (diff < 86400)return `hace ${Math.floor(diff/3600)}h`;
+  return `hace ${Math.floor(diff/86400)}d`;
+}
+
+window.ppTab = (el, tab) => {
+  document.querySelectorAll('.ptab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.ptab-pane').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('pp-tab-' + tab).classList.add('active');
+};
+
+document.addEventListener('click', e => {
+  const bc = e.target.closest('.bcard');
+  if (bc && bc.dataset.libroId) { window.location.href = '/libro?id=' + bc.dataset.libroId; return; }
+  const bp = e.target.closest('.book-preview');
+  if (bp && bp.dataset.libroId) { window.location.href = '/libro?id=' + bp.dataset.libroId; return; }
+});
+
+function _set(id, val) { const el = document.getElementById(id); if(el) el.textContent = val ?? ''; }
+
+let _tt;
+window.toast = (msg, type='') => {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.className = 'toast' + (type?' '+type:'') + ' show';
+  clearTimeout(_tt); _tt = setTimeout(() => el.classList.remove('show'), 2800);
+};
+</script>
+</body>
+</html>

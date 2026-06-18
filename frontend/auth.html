@@ -632,7 +632,7 @@ async function doLogin() {
 
 async function doRegister() {
   const name   = document.getElementById('reg-name').value.trim();
-  const handle = document.getElementById('reg-handle').value.trim().replace('@','');
+  const handle = document.getElementById('reg-handle').value.trim().replace('@','').replace(/[^a-zA-Z0-9_.]/g,'');
   const email  = document.getElementById('reg-email').value.trim();
   const pass   = document.getElementById('reg-pass').value;
   if (!name||!handle||!email||!pass) { showError('Completa todos los campos'); return; }

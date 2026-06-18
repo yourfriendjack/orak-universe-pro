@@ -105,3 +105,9 @@ async def web_libro():
     if not content:
         return HTMLResponse("<h1>No encontrado</h1>", status_code=404)
     return HTMLResponse(_inject_config(content))
+@router.get("/perfil", response_class=HTMLResponse)
+async def web_perfil():
+    content = _read(os.path.join(FRONTEND_DIR, "perfil.html"))
+    if not content:
+        return HTMLResponse("<h1>No encontrado</h1>", status_code=404)
+    return HTMLResponse(_inject_config(content))

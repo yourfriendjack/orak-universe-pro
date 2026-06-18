@@ -34,6 +34,13 @@ class RegisterIn(BaseModel):
     display_name: str = Field(..., min_length=1, max_length=60)
     generos: List[str] = []
 
+    @validator('username')
+    def validar_username(cls, v):
+        import re
+        if not re.match(r'^[a-zA-Z0-9_.]+$', v):
+            raise ValueError('El handle solo puede contener letras, números, puntos y guiones bajos')
+        return v.lower()
+
 class LoginIn(BaseModel):
     email: str
     password: str
