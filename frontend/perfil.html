@@ -19,7 +19,7 @@ body{background:var(--page);}
 .pp-notfound-title{font-family:'Cinzel',serif;font-size:1.4rem;font-weight:600;color:var(--ink);margin-bottom:8px;}
 .pp-notfound-sub{font-style:italic;color:var(--fog);}
 @media (max-width: 900px) {
-  .prof-infobar{padding:0 14px 16px;flex-wrap:wrap;}
+  .prof-infobar{padding:0 14px 16px;flex-wrap:wrap;margin-top:-36px;}
   .prof-stats{padding:0 14px 14px;gap:14px;flex-wrap:wrap;}
   .prof-tabs-row{padding:0 14px;}
   .ptab-pane{padding:14px;}
@@ -231,20 +231,20 @@ function postHTMLpp(p, i) {
   const [bc, bt] = (badgeMap[p.tipo] || 'pb-libro Publicación').split(' ');
   const book = p.libro_id ? `
     <div class="book-preview" data-libro-id="${p.libro_id}">
-      <div class="bp-banner bpb${(p.libro_id%4)+1}">${p.libro_titulo || 'Sin título'}</div>
-      <div class="bp-foot"><div class="bp-stats"><span>${p.libro_genero||''}</span></div><div class="bp-cta">Leer →</div></div>
+      <div class="bp-banner bpb${(p.libro_id%4)+1}">${escapeHtml(p.libro_titulo || 'Sin título')}</div>
+      <div class="bp-foot"><div class="bp-stats"><span>${escapeHtml(p.libro_genero||'')}</span></div><div class="bp-cta">Leer →</div></div>
     </div>` : '';
   return `<div class="post" style="animation-delay:${i*.06}s">
     <div class="post-head">
       <div class="pav ${av}">${ini}</div>
       <div class="post-meta">
-        <div class="post-name">${p.autor_nombre || p.autor_handle}</div>
-        <div class="post-handle">@${p.autor_handle}</div>
+        <div class="post-name">${escapeHtml(p.autor_nombre || p.autor_handle)}</div>
+        <div class="post-handle">@${escapeHtml(p.autor_handle)}</div>
       </div>
       <div class="post-time">${timeAgo(p.creado_en)}</div>
       <span class="post-badge ${bc}">${bt}</span>
     </div>
-    <div class="post-body"><div class="post-text">${p.texto}</div>${book}</div>
+    <div class="post-body"><div class="post-text">${escapeHtml(p.texto)}</div>${book}</div>
   </div>`;
 }
 
@@ -271,6 +271,13 @@ document.addEventListener('click', e => {
   if (bp && bp.dataset.libroId) { window.location.href = '/libro?id=' + bp.dataset.libroId; return; }
 });
 
+function escapeHtml(s) {
+  if (s == null) return '';
+  const d = document.createElement('div');
+  d.textContent = String(s);
+  return d.innerHTML;
+}
+
 function _set(id, val) { const el = document.getElementById(id); if(el) el.textContent = val ?? ''; }
 
 let _tt;
@@ -282,3 +289,15 @@ window.toast = (msg, type='') => {
 </script>
 </body>
 </html>
+
+<style>
+.prof-banner-bg { background-size: cover; background-position: center; }
+@media (min-width: 1000px) {
+  .prof-banner { height: 260px; }
+  .prof-infobar { margin-top: -56px; }
+}
+@media (min-width: 1400px) {
+  .prof-banner { height: 320px; }
+  .prof-infobar { margin-top: -70px; }
+}
+</style>

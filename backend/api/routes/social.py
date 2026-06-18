@@ -6,7 +6,7 @@ glimmers, notas, co-escritores, ranking.
 Todos requieren usuario autenticado salvo lectura pública.
 """
 from fastapi import APIRouter, Depends, HTTPException, Query
-from backend.database.supabase_client import get_supabase
+from backend.database.supabase_client import get_supabase, get_supabase_user
 from backend.models.schemas import (
     PostIn, FollowIn, LectorFielIn, LectorFielAccion,
     GlimmerIn, NotaIn, CoescritorIn, OkResponse
@@ -28,7 +28,7 @@ async def get_feed(
     usuario = Depends(get_current_user)
 ):
     """Feed personalizado: posts de quienes sigues + propios."""
-    sb = get_supabase()
+    sb = get_supabase_user(usuario["_token"])
     offset = (pagina - 1) * limite
 
     # IDs de quienes sigo
@@ -85,7 +85,7 @@ async def get_posts_usuario(username: str, limite: int = Query(20, le=50)):
 @router.post("/posts", response_model=OkResponse)
 async def crear_post(datos: PostIn, usuario = Depends(get_current_user)):
     """Crear un post en el feed."""
-    sb = get_supabase()
+    sb = get_supabase_user(usuario["_token"])
     res = sb.table("posts").insert({
         "autor_id":    usuario["id"],
         "tipo":        datos.tipo,
@@ -97,14 +97,13 @@ async def crear_post(datos: PostIn, usuario = Depends(get_current_user)):
     if not res.data:
         error("No se pudo crear el post")
 
-    # Ganar Oruns por publicar
-    _ganar_oruns(sb, usuario["id"], 50, "Publicación en feed", "logro")
+    _ganar_oruns(get_supabase(), usuario["id"], 50, "Publicación en feed", "logro")
     return ok("Post creado", {"post": res.data[0]})
 
 
 @router.delete("/posts/{post_id}", response_model=OkResponse)
 async def borrar_post(post_id: int, usuario = Depends(get_current_user)):
-    sb = get_supabase()
+    sb = get_supabase_user(usuario["_token"])
     sb.table("posts")\
         .delete()\
         .eq("id", post_id)\
@@ -121,13 +120,14 @@ async def borrar_post(post_id: int, usuario = Depends(get_current_user)):
 async def seguir(datos: FollowIn, usuario = Depends(get_current_user)):
     if datos.seguido_id == usuario["id"]:
         error("No puedes seguirte a ti mismo")
-    sb = get_supabase()
+    sb = get_supabase_user(usuario["_token"])
     sb.table("follows").upsert({
         "seguidor_id": usuario["id"],
         "seguido_id":  datos.seguido_id,
     }).execute()
-    _ganar_oruns(sb, usuario["id"], 5, "Nuevo seguidor", "logro")
-    _crear_notif(sb, datos.seguido_id, "follow",
+    sb_admin = get_supabase()
+    _ganar_oruns(sb_admin, usuario["id"], 5, "Nuevo seguidor", "logro")
+    _crear_notif(sb_admin, datos.seguido_id, "follow",
                  "Nuevo seguidor",
                  f"{usuario.get('username','alguien')} ahora te sigue",
                  str(usuario["id"]))
@@ -136,7 +136,7 @@ async def seguir(datos: FollowIn, usuario = Depends(get_current_user)):
 
 @router.delete("/follows/{seguido_id}", response_model=OkResponse)
 async def dejar_de_seguir(seguido_id: str, usuario = Depends(get_current_user)):
-    sb = get_supabase()
+    sb = get_supabase_user(usuario["_token"])
     sb.table("follows")\
         .delete()\
         .eq("seguidor_id", usuario["id"])\
@@ -175,13 +175,13 @@ async def get_siguiendo(perfil_id: str, limite: int = Query(50, le=100)):
 async def invitar_lector_fiel(datos: LectorFielIn, usuario = Depends(get_current_user)):
     if datos.receptor_id == usuario["id"]:
         error("No puedes invitarte a ti mismo")
-    sb = get_supabase()
+    sb = get_supabase_user(usuario["_token"])
     sb.table("lectores_fieles").upsert({
         "solicitante_id": usuario["id"],
         "receptor_id":    datos.receptor_id,
         "estado":         "pendiente",
     }).execute()
-    _crear_notif(sb, datos.receptor_id, "lector_fiel",
+    _crear_notif(get_supabase(), datos.receptor_id, "lector_fiel",
                  "Invitación de lector fiel",
                  f"{usuario.get('username','alguien')} te invitó como lector fiel",
                  str(usuario["id"]))
@@ -190,7 +190,7 @@ async def invitar_lector_fiel(datos: LectorFielIn, usuario = Depends(get_current
 
 @router.patch("/lectores-fieles/responder", response_model=OkResponse)
 async def responder_invitacion(datos: LectorFielAccion, usuario = Depends(get_current_user)):
-    sb = get_supabase()
+    sb = get_supabase_user(usuario["_token"])
     if datos.accion not in ("aceptar", "rechazar"):
         error("Acción inválida")
     estado = "aceptado" if datos.accion == "aceptar" else "rechazado"
@@ -200,8 +200,9 @@ async def responder_invitacion(datos: LectorFielAccion, usuario = Depends(get_cu
         .eq("receptor_id",    usuario["id"])\
         .execute()
     if estado == "aceptado":
-        _ganar_oruns(sb, usuario["id"], 10, "Nuevo lector fiel", "logro")
-        _ganar_oruns(sb, datos.solicitante_id, 10, "Lector fiel aceptado", "logro")
+        sb_admin = get_supabase()
+        _ganar_oruns(sb_admin, usuario["id"], 10, "Nuevo lector fiel", "logro")
+        _ganar_oruns(sb_admin, datos.solicitante_id, 10, "Lector fiel aceptado", "logro")
     return ok(f"Invitación {estado}")
 
 
@@ -211,6 +212,7 @@ async def responder_invitacion(datos: LectorFielAccion, usuario = Depends(get_cu
 
 @router.post("/glimmers", response_model=OkResponse)
 async def dar_glimmer(datos: GlimmerIn, usuario = Depends(get_current_user)):
+    # Glimmers involucra transferencia entre usuarios: usar service_role
     sb = get_supabase()
 
     # Verificar saldo de Oruns
@@ -284,7 +286,7 @@ async def dar_glimmer(datos: GlimmerIn, usuario = Depends(get_current_user)):
 
 @router.post("/notas", response_model=OkResponse)
 async def crear_nota(datos: NotaIn, usuario = Depends(get_current_user)):
-    sb = get_supabase()
+    sb = get_supabase_user(usuario["_token"])
     res = sb.table("notas").insert({
         "autor_id":    usuario["id"],
         "capitulo_id": datos.capitulo_id,
@@ -292,13 +294,12 @@ async def crear_nota(datos: NotaIn, usuario = Depends(get_current_user)):
         "parrafo_idx": datos.parrafo_idx,
         "texto":       datos.texto,
     }).execute()
-    # Actualizar contador en post
     if datos.post_id:
         p = sb.table("posts").select("notas").eq("id", datos.post_id).single().execute()
         if p.data:
             sb.table("posts").update({"notas": (p.data["notas"] or 0) + 1})\
                 .eq("id", datos.post_id).execute()
-    _ganar_oruns(sb, usuario["id"], 5, "Nota dejada", "logro")
+    _ganar_oruns(get_supabase(), usuario["id"], 5, "Nota dejada", "logro")
     return ok("Nota creada", {"nota": res.data[0] if res.data else {}})
 
 
@@ -319,7 +320,7 @@ async def get_notas_capitulo(capitulo_id: int):
 
 @router.post("/coescritores/{libro_id}", response_model=OkResponse)
 async def invitar_coescritor(libro_id: int, datos: CoescritorIn, usuario = Depends(get_current_user)):
-    sb = get_supabase()
+    sb = get_supabase_user(usuario["_token"])
     libro = sb.table("libros").select("autor_id")\
                .eq("id", libro_id).single().execute()
     if not libro.data or libro.data["autor_id"] != usuario["id"]:
@@ -330,7 +331,7 @@ async def invitar_coescritor(libro_id: int, datos: CoescritorIn, usuario = Depen
         "porcentaje": datos.porcentaje,
         "estado":     "pendiente",
     }).execute()
-    _crear_notif(sb, datos.perfil_id, "collab",
+    _crear_notif(get_supabase(), datos.perfil_id, "collab",
                  "Invitación de co-escritor",
                  f"{usuario.get('username','alguien')} te invitó a co-escribir un libro",
                  str(libro_id))
@@ -357,7 +358,7 @@ async def get_notificaciones(
     solo_no_leidas: bool = Query(False),
     usuario = Depends(get_current_user)
 ):
-    sb = get_supabase()
+    sb = get_supabase_user(usuario["_token"])
     q = sb.table("notificaciones")\
           .select("*")\
           .eq("usuario_id", usuario["id"])\
@@ -370,7 +371,7 @@ async def get_notificaciones(
 
 @router.patch("/notificaciones/leer-todas", response_model=OkResponse)
 async def leer_todas_notifs(usuario = Depends(get_current_user)):
-    sb = get_supabase()
+    sb = get_supabase_user(usuario["_token"])
     sb.table("notificaciones")\
       .update({"leida": True})\
       .eq("usuario_id", usuario["id"])\

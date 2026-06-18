@@ -530,20 +530,20 @@ function postHTML(p, i) {
   const [bc, bt] = (badgeMap[p.tipo] || 'pb-libro Publicación').split(' ');
   const book = p.libro_id ? `
     <div class="book-preview" data-libro-id="${p.libro_id||''}">
-      <div class="bp-banner bpb${(p.libro_id%4)+1}">${p.libro_titulo || 'Sin título'}</div>
-      <div class="bp-foot"><div class="bp-stats"><span>${p.libro_genero||''}</span></div><div class="bp-cta">Leer →</div></div>
+      <div class="bp-banner bpb${(p.libro_id%4)+1}">${escapeHtml(p.libro_titulo || 'Sin título')}</div>
+      <div class="bp-foot"><div class="bp-stats"><span>${escapeHtml(p.libro_genero||'')}</span></div><div class="bp-cta">Leer →</div></div>
     </div>` : '';
   return `<div class="post" style="animation-delay:${i*.06}s" id="post-${p.id}">
     <div class="post-head">
-      <div class="pav ${av}" data-username="${p.autor_handle}" style="cursor:pointer">${ini}</div>
+      <div class="pav ${av}" data-username="${escapeHtml(p.autor_handle)}" style="cursor:pointer">${ini}</div>
       <div class="post-meta">
-        <div class="post-name" data-username="${p.autor_handle}" style="cursor:pointer">${p.autor_nombre || p.autor_handle}</div>
-        <div class="post-handle" data-username="${p.autor_handle}" style="cursor:pointer">@${p.autor_handle} · ${p.autor_oruns||0} Oruns</div>
+        <div class="post-name" data-username="${escapeHtml(p.autor_handle)}" style="cursor:pointer">${escapeHtml(p.autor_nombre || p.autor_handle)}</div>
+        <div class="post-handle" data-username="${escapeHtml(p.autor_handle)}" style="cursor:pointer">@${escapeHtml(p.autor_handle)} · ${p.autor_oruns||0} Oruns</div>
       </div>
       <div class="post-time">${timeAgo(p.creado_en)}</div>
       <span class="post-badge ${bc}">${bt}</span>
     </div>
-    <div class="post-body"><div class="post-text">${p.texto}</div>${book}</div>
+    <div class="post-body"><div class="post-text">${escapeHtml(p.texto)}</div>${book}</div>
     <div class="post-actions">
       <button class="pact" id="like-${p.id}" onclick="toggleLike(${p.id})">✦ ${p.glimmers||0}</button>
       <button class="pact" onclick="openGlimmer(${p.id})">⬡ Dar Glimmer</button>
@@ -617,14 +617,14 @@ function renderBooks(containerId, books) {
   c.innerHTML = books.map((b, i) => `
     <div class="bcard" style="animation-delay:${i*.05}s;cursor:pointer" data-libro-id="${b.id}">
       <div class="bcard-spine ${spines[i%5]}">
-        <div class="bcard-ttl">${b.titulo}</div>
+        <div class="bcard-ttl">${escapeHtml(b.titulo)}</div>
         <div class="bcard-vis ${b.es_publico?'vis-pub':'vis-pri'}">${b.es_publico?'Público':'Privado'}</div>
       </div>
       <div class="bcard-body">
-        <div class="bcard-name">${b.titulo}</div>
-        <div class="bcard-desc">${b.descripcion||'Sin descripción'}</div>
+        <div class="bcard-name">${escapeHtml(b.titulo)}</div>
+        <div class="bcard-desc">${escapeHtml(b.descripcion||'Sin descripción')}</div>
         <div class="bcard-foot">
-          <div class="btags"><span class="btag">${b.genero||'—'}</span></div>
+          <div class="btags"><span class="btag">${escapeHtml(b.genero||'—')}</span></div>
           <div class="bcard-gl">✦ ${b.glimmers||0}</div>
         </div>
       </div>
@@ -656,8 +656,8 @@ function renderPeople(list, filter='') {
     return `<div class="person-card" style="animation-delay:${i*.04}s" id="pcard-${p.id}">
       <div class="person-av ${av}" data-username="${p.username}" style="cursor:pointer">${ini}</div>
       <div class="person-info">
-        <div class="person-name" data-username="${p.username}" style="cursor:pointer">${p.display_name || p.username}</div>
-        <div class="person-handle">@${p.username}</div>
+        <div class="person-name" data-username="${escapeHtml(p.username)}" style="cursor:pointer">${escapeHtml(p.display_name || p.username)}</div>
+        <div class="person-handle">@${escapeHtml(p.username)}</div>
         <div class="person-stats">
           <span class="pstat-sm">⬡ <strong>${(p.oruns||0).toLocaleString()}</strong> Oruns</span>
           <span class="pstat-sm">📚 <strong>${p.libros_publicados||0}</strong> libros</span>
@@ -727,9 +727,9 @@ async function loadRanking() {
     document.getElementById('rank-list').innerHTML = data.slice(0,5).map((p,i) => `
       <div class="rank-item">
         <div class="rank-pos ${pos[i]||''}">#${i+1}</div>
-        <div class="rank-av ${avColor(p.id)}" data-username="${p.username}" style="cursor:pointer">${initials(p.display_name||p.username)}</div>
+        <div class="rank-av ${avColor(p.id)}" data-username="${escapeHtml(p.username)}" style="cursor:pointer">${initials(p.display_name||p.username)}</div>
         <div class="rank-info">
-          <div class="rank-name" data-username="${p.username}" style="cursor:pointer">${p.display_name||p.username}</div>
+          <div class="rank-name" data-username="${escapeHtml(p.username)}" style="cursor:pointer">${escapeHtml(p.display_name||p.username)}</div>
           <div class="rank-score">⬡ ${(p.oruns||0).toLocaleString()}</div>
         </div>
       </div>`).join('');
@@ -738,9 +738,9 @@ async function loadRanking() {
     const sugs = data.filter(p => p.id !== meId).slice(0,3);
     document.getElementById('sug-list').innerHTML = sugs.map(p => `
       <div class="sug-item">
-        <div class="sug-av ${avColor(p.id)}" data-username="${p.username}" style="cursor:pointer">${initials(p.display_name||p.username)}</div>
+        <div class="sug-av ${avColor(p.id)}" data-username="${escapeHtml(p.username)}" style="cursor:pointer">${initials(p.display_name||p.username)}</div>
         <div class="sug-info">
-          <div class="sug-name" data-username="${p.username}" style="cursor:pointer">${p.display_name||p.username}</div>
+          <div class="sug-name" data-username="${escapeHtml(p.username)}" style="cursor:pointer">${escapeHtml(p.display_name||p.username)}</div>
           <div class="sug-meta">⬡ ${(p.oruns||0).toLocaleString()} · ${p.libros_publicados||0} libros</div>
         </div>
         <button class="sug-btn" id="sb-${p.id}" onclick="quickFollow('${p.id}',this)">Seguir</button>
@@ -771,7 +771,7 @@ async function loadNotifs() {
       const [cls, ico] = (icoMap[n.tipo]||'ni-g ●').split(' ');
       return `<div class="notif-item ${n.leida?'':'unread'}">
         <div class="notif-ico ${cls}">${ico}</div>
-        <div><div class="notif-text">${n.cuerpo||n.titulo}</div><div class="notif-time">${timeAgo(n.creado_en)}</div></div>
+        <div><div class="notif-text">${escapeHtml(n.cuerpo||n.titulo)}</div><div class="notif-time">${timeAgo(n.creado_en)}</div></div>
       </div>`;
     }).join('') || '<div style="padding:16px;font-style:italic;color:var(--fog);font-size:.85rem;text-align:center">Sin notificaciones</div>';
   } catch { /* silencioso */ }
@@ -916,6 +916,13 @@ window.toast = (msg, type='') => {
 };
 
 // ── HELPERS ──────────────────────────────────────────────────────
+function escapeHtml(s) {
+  if (s == null) return '';
+  const d = document.createElement('div');
+  d.textContent = String(s);
+  return d.innerHTML;
+}
+
 function timeAgo(iso) {
   if (!iso) return '';
   const diff = (Date.now() - new Date(iso)) / 1000;
@@ -1010,3 +1017,13 @@ document.querySelectorAll('.snav-item, .write-btn').forEach(el => {
   el.addEventListener('click', () => { if (window.innerWidth <= 900) closeSidebar(); });
 });
 </script>
+<style>
+@media (min-width: 1000px) {
+  .prof-banner { height: 260px; }
+  .prof-infobar { margin-top: -56px; }
+}
+@media (min-width: 1400px) {
+  .prof-banner { height: 320px; }
+  .prof-infobar { margin-top: -70px; }
+}
+</style>

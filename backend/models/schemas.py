@@ -102,6 +102,7 @@ class LibroUpdate(BaseModel):
     genero:      Optional[str] = None
     es_publico:  Optional[bool] = None
     portada_url: Optional[str] = None
+    worldbuilding: Optional[dict] = None
 
 class HistoriaIn(BaseModel):
     historia: str

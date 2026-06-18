@@ -4,8 +4,9 @@ backend/api/routes/libros_social.py
 CRUD de libros para la red social — usa Supabase directamente.
 Coexiste con libros.py (worldbuilding legacy) sin conflictos.
 """
-from fastapi import APIRouter, Depends, HTTPException, Query
-from backend.database.supabase_client import get_supabase
+from fastapi import APIRouter, Depends, HTTPException, Query, Header
+from typing import Optional
+from backend.database.supabase_client import get_supabase, get_supabase_user
 from backend.models.schemas import LibroIn, LibroUpdate, OkResponse
 from backend.api.deps import get_current_user
 from backend.utils.helpers import ok, error
@@ -34,7 +35,7 @@ async def listar_libros(
 # ── Mis libros ────────────────────────────────────────────────────
 @router.get("/mis-libros")
 async def mis_libros(usuario=Depends(get_current_user)):
-    sb = get_supabase()
+    sb = get_supabase_user(usuario["_token"])
     res = sb.table("libros")\
             .select("id,titulo,datos,genero,portada_url,es_publico,glimmers,lectores,forks_count,creado_en")\
             .eq("autor_id", usuario["id"])\
@@ -46,7 +47,7 @@ async def mis_libros(usuario=Depends(get_current_user)):
 # ── Crear libro ───────────────────────────────────────────────────
 @router.post("", response_model=OkResponse)
 async def crear_libro(datos: LibroIn, usuario=Depends(get_current_user)):
-    sb = get_supabase()
+    sb = get_supabase_user(usuario["_token"])
 
     # Verificar título único para este autor
     existe = sb.table("libros")\
@@ -88,12 +89,10 @@ async def crear_libro(datos: LibroIn, usuario=Depends(get_current_user)):
     if not res.data:
         error("No se pudo crear el libro")
 
-    # Ganar Oruns por publicar
-    _ganar_oruns(sb, usuario["id"], 100, "Nuevo libro publicado", "logro")
-
-    # Crear post en el feed automáticamente
     libro_id = res.data[0]["id"]
-    sb.table("posts").insert({
+    # _ganar_oruns y el post usan service_role porque escriben datos cruzados
+    _ganar_oruns(get_supabase(), usuario["id"], 100, "Nuevo libro publicado", "logro")
+    get_supabase().table("posts").insert({
         "autor_id": usuario["id"],
         "tipo":     "nuevo_libro",
         "texto":    f"Publiqué un nuevo libro: {datos.titulo}",
@@ -105,7 +104,7 @@ async def crear_libro(datos: LibroIn, usuario=Depends(get_current_user)):
 
 # ── Obtener libro por ID ──────────────────────────────────────────
 @router.get("/{libro_id}")
-async def obtener_libro(libro_id: int):
+async def obtener_libro(libro_id: int, authorization: Optional[str] = Header(None)):
     sb = get_supabase()
     res = sb.table("libros")\
             .select("*, autor:perfiles!libros_autor_id_fkey(username,display_name,avatar_url)")\
@@ -114,6 +113,20 @@ async def obtener_libro(libro_id: int):
             .execute()
     if not res.data:
         raise HTTPException(404, "Libro no encontrado")
+
+    # Libro privado: solo el autor puede verlo
+    if not res.data.get("es_publico"):
+        token = (authorization or "").removeprefix("Bearer ").strip()
+        uid = None
+        if token:
+            try:
+                r = get_supabase().auth.get_user(token)
+                uid = str(r.user.id) if r and r.user else None
+            except Exception:
+                pass
+        if uid != res.data.get("autor_id"):
+            raise HTTPException(403, "Este libro es privado")
+
     # Incrementar lectores
     sb.table("libros").update({"lectores": (res.data.get("lectores") or 0) + 1})\
       .eq("id", libro_id).execute()
@@ -134,20 +147,30 @@ async def obtener_libro(libro_id: int):
 # ── Actualizar libro ──────────────────────────────────────────────
 @router.patch("/{libro_id}", response_model=OkResponse)
 async def actualizar_libro(libro_id: int, datos: LibroUpdate, usuario=Depends(get_current_user)):
-    sb = get_supabase()
+    sb = get_supabase_user(usuario["_token"])
     libro = sb.table("libros").select("autor_id,datos").eq("id", libro_id).single().execute()
     if not libro.data or libro.data["autor_id"] != usuario["id"]:
         error("No tienes permiso sobre este libro")
 
-    cambios = {k: v for k, v in datos.dict().items() if v is not None and k not in ("historia","descripcion")}
+    cambios = {k: v for k, v in datos.dict().items() if v is not None and k not in ("historia","descripcion","worldbuilding")}
 
-    # descripcion e historia van dentro del JSONB datos
-    datos_json = libro.data.get("datos") or {}
+    # descripcion, historia y worldbuilding van dentro del JSONB datos.
+    # dict() hace copia para que la comparación posterior detecte cambios reales.
+    datos_orig = libro.data.get("datos") or {}
+    datos_json = dict(datos_orig)
     if datos.descripcion is not None:
         datos_json["descripcion"] = datos.descripcion
     if datos.historia is not None:
         datos_json["historia"] = datos.historia
-    if datos_json != (libro.data.get("datos") or {}):
+
+    wb = datos.worldbuilding
+    if wb is not None:
+        if "personajes" in wb: datos_json["personajes"] = wb["personajes"] or []
+        if "lugares"    in wb: datos_json["lugares"]    = wb["lugares"]    or []
+        if "facciones"  in wb: datos_json["facciones"]  = wb["facciones"]  or []
+        if "eventos"    in wb: datos_json["eventos"]    = wb["eventos"]    or []
+
+    if datos_json != datos_orig:
         cambios["datos"] = datos_json
 
     if not cambios:
@@ -160,7 +183,7 @@ async def actualizar_libro(libro_id: int, datos: LibroUpdate, usuario=Depends(ge
 # ── Eliminar libro ────────────────────────────────────────────────
 @router.delete("/{libro_id}", response_model=OkResponse)
 async def eliminar_libro(libro_id: int, usuario=Depends(get_current_user)):
-    sb = get_supabase()
+    sb = get_supabase_user(usuario["_token"])
     libro = sb.table("libros").select("autor_id").eq("id", libro_id).single().execute()
     if not libro.data or libro.data["autor_id"] != usuario["id"]:
         error("No tienes permiso sobre este libro")
@@ -171,7 +194,7 @@ async def eliminar_libro(libro_id: int, usuario=Depends(get_current_user)):
 # ── Fork de libro ─────────────────────────────────────────────────
 @router.post("/{libro_id}/fork", response_model=OkResponse)
 async def fork_libro(libro_id: int, usuario=Depends(get_current_user)):
-    sb = get_supabase()
+    sb = get_supabase_user(usuario["_token"])
     original = sb.table("libros").select("*").eq("id", libro_id).single().execute()
     if not original.data:
         error("Libro no encontrado")
@@ -193,10 +216,9 @@ async def fork_libro(libro_id: int, usuario=Depends(get_current_user)):
     if not res.data:
         error("No se pudo crear el fork")
 
-    _ganar_oruns(sb, usuario["id"], 50, "Fork realizado", "fork")
-
-    # Notificar al autor original
-    sb.table("notificaciones").insert({
+    # Oruns y notificación usan service_role porque afectan datos de otros usuarios
+    _ganar_oruns(get_supabase(), usuario["id"], 50, "Fork realizado", "fork")
+    get_supabase().table("notificaciones").insert({
         "usuario_id": original.data["autor_id"],
         "tipo":       "fork",
         "titulo":     "Tu libro fue forkeado",

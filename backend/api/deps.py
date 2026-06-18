@@ -40,4 +40,5 @@ async def get_current_user(authorization: Optional[str] = Header(None)) -> dict:
         "username":     perfil.data.get("username") if perfil.data else "",
         "display_name": perfil.data.get("display_name") if perfil.data else "",
         "oruns":        perfil.data.get("oruns", 0) if perfil.data else 0,
+        "_token":       token,
     }

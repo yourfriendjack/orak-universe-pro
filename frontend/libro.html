@@ -542,7 +542,7 @@ function renderHero() {
   const d   = LIBRO.datos || {};
   const idx = LIBRO_ID % 5;
   document.getElementById('hero-bg').style.background   = BG_COLORS[idx];
-  document.getElementById('breadcrumb').innerHTML        = `<strong>${LIBRO.titulo}</strong>`;
+  document.getElementById('breadcrumb').innerHTML        = `<strong>${escapeHtml(LIBRO.titulo)}</strong>`;
   document.getElementById('hero-genre').textContent      = `◆ ${LIBRO.genero || 'Sin género'}`;
   document.getElementById('hero-title').textContent      = LIBRO.titulo;
   document.getElementById('hero-desc').textContent       = d.descripcion || 'Sin sinopsis todavía.';
@@ -552,10 +552,10 @@ function renderHero() {
   const ini = initials(per.display_name || per.username || '?');
   document.getElementById('hero-meta').innerHTML = `
     <div class="author-chip">
-      <div class="author-av">${ini}</div>
+      <div class="author-av">${escapeHtml(ini)}</div>
       <div>
-        <div class="author-name">${per.display_name || per.username || '—'}</div>
-        <div class="author-handle">@${per.username || '—'}</div>
+        <div class="author-name">${escapeHtml(per.display_name || per.username || '—')}</div>
+        <div class="author-handle">@${escapeHtml(per.username || '—')}</div>
       </div>
     </div>
     <span class="meta-sep">·</span>
@@ -606,8 +606,8 @@ async function cargarCapitulos() {
             <div class="ch-num">${toRoman(c.numero)}</div>
             <div class="ch-sep"></div>
             <div class="ch-info">
-              <div class="ch-title">${c.titulo || `Capítulo ${c.numero}`}</div>
-              <div class="ch-preview">${prev}</div>
+              <div class="ch-title">${escapeHtml(c.titulo || `Capítulo ${c.numero}`)}</div>
+              <div class="ch-preview">${escapeHtml(prev)}</div>
             </div>
             <div class="ch-meta">
               <div class="ch-words">${(c.palabras||0).toLocaleString()} palabras</div>
@@ -962,7 +962,7 @@ function renderNotasList(notas) {
     return `<div class="note-item">
       <div class="note-author">
         <div class="note-av">${ini}</div>
-        <div class="note-author-name">${per.display_name || per.username || 'Anónimo'}</div>
+        <div class="note-author-name">${escapeHtml(per.display_name || per.username || 'Anónimo')}</div>
         <div class="note-time">${timeAgoNote(n.creado_en)}</div>
       </div>
       <div class="note-text">${escapeHtml(n.texto)}</div>
