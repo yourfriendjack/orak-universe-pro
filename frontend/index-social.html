@@ -547,7 +547,7 @@ function postHTML(p, i) {
     <div class="post-actions">
       <button class="pact" id="like-${p.id}" onclick="toggleLike(${p.id})">✦ ${p.glimmers||0}</button>
       <button class="pact" onclick="openGlimmer(${p.id})">⬡ Dar Glimmer</button>
-      <button class="pact" onclick="toast('⇄ Fork próximamente')">⇄ ${p.forks||0} Forks</button>
+      <button class="pact" data-libro-fork="${p.libro_id||''}" onclick="if(this.dataset.libroFork) window.location.href='/libro?id='+this.dataset.libroFork; else toast('Este post no tiene libro asociado')">⇄ ${p.forks||0} Forks</button>
       <button class="pact" onclick="toast('✎ Notas próximamente')">✎ ${p.notas||0} Notas</button>
       <button class="pact" onclick="sharePost(${p.id})">◈ Compartir</button>
       ${p.autor_id === getPerfil()?.id ? `<button class="pact" onclick="eliminarPost(${p.id})" style="color:#c06040">✕ Eliminar</button>` : ''}
@@ -701,7 +701,7 @@ async function loadProfile() {
   _set('ps-sig', p.siguiendo_count  || '—');
   _set('ps-libros', p.libros_count  || '—');
   try {
-    const libros = await getLibrosPerfil(p.username);
+    const libros = await getLibrosPerfil(p.username, getToken());
     renderBooks('profile-grid', libros);
   } catch { renderBooks('profile-grid', []); }
 

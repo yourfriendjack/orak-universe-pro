@@ -4,7 +4,7 @@ backend/api/routes/auth.py
 Registro, login, perfil propio, actualizar perfil.
 Usa Supabase Auth como proveedor.
 """
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Header
 from backend.database.supabase_client import get_supabase
 from backend.models.schemas import RegisterIn, LoginIn, PerfilUpdate, OkResponse
 from backend.api.deps import get_current_user
@@ -187,15 +187,28 @@ async def get_perfil_publico(username: str):
 
 
 @router.get("/perfil/{username}/libros")
-async def get_libros_de_perfil(username: str):
+async def get_libros_de_perfil(username: str, authorization: str = Header(None)):
     sb = get_supabase()
     perfil = sb.table("perfiles").select("id").eq("username", username).single().execute()
     if not perfil.data:
         raise HTTPException(404, "Perfil no encontrado")
-    res = sb.table("libros")\
-            .select("id,titulo,datos,genero,portada_url,es_publico,glimmers,lectores,forks_count,creado_en")\
-            .eq("autor_id", perfil.data["id"])\
-            .eq("es_publico", True)\
-            .order("creado_en", desc=True)\
-            .execute()
+
+    # Verificar si quien pregunta es el dueño del perfil
+    es_propietario = False
+    if authorization and authorization.startswith("Bearer "):
+        try:
+            token = authorization.split(" ", 1)[1]
+            res_user = sb.auth.get_user(token)
+            if res_user and res_user.user and str(res_user.user.id) == perfil.data["id"]:
+                es_propietario = True
+        except Exception:
+            pass
+
+    q = sb.table("libros")\
+          .select("id,titulo,datos,genero,portada_url,es_publico,glimmers,lectores,forks_count,creado_en")\
+          .eq("autor_id", perfil.data["id"])
+    if not es_propietario:
+        q = q.eq("es_publico", True)
+
+    res = q.order("creado_en", desc=True).execute()
     return res.data or []

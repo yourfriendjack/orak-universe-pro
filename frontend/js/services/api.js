@@ -44,5 +44,5 @@ export const getRanking     = ()                => apiGet('/api/social/ranking')
 export const getNotificaciones = (token)        => apiGet('/api/social/notificaciones', token);
 export const leerNotificaciones = (token)       => apiPatch('/api/social/notificaciones/leer-todas', {}, token);
 export const getPerfilPublico = (username)      => apiGet(`/api/auth/perfil/${username}`);
-export const getLibrosPerfil  = (username)      => apiGet(`/api/auth/perfil/${username}/libros`);
+export const getLibrosPerfil  = (username, token)  => apiGet(`/api/auth/perfil/${username}/libros`, token);
 export const getCapitulos     = (libroId)       => apiGet(`/api/libros/${libroId}/capitulos`);

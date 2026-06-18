@@ -117,6 +117,17 @@ async def obtener_libro(libro_id: int):
     # Incrementar lectores
     sb.table("libros").update({"lectores": (res.data.get("lectores") or 0) + 1})\
       .eq("id", libro_id).execute()
+
+    # Si es un fork, traer info del libro original
+    if res.data.get("fork_de"):
+        original = sb.table("libros")\
+            .select("id, titulo, autor:perfiles!libros_autor_id_fkey(username,display_name)")\
+            .eq("id", res.data["fork_de"])\
+            .single()\
+            .execute()
+        if original.data:
+            res.data["libro_original"] = original.data
+
     return res.data
 
 
@@ -169,7 +180,7 @@ async def fork_libro(libro_id: int, usuario=Depends(get_current_user)):
     if original.data["autor_id"] == usuario["id"]:
         error("No puedes forkear tu propio libro")
 
-    nuevo_titulo = f"{original.data['titulo']} (Fork)"
+    nuevo_titulo = f"{original.data['titulo']} (Fork de @{usuario.get('username','user')})"
     res = sb.table("libros").insert({
         "titulo":     nuevo_titulo,
         "autor_id":   usuario["id"],

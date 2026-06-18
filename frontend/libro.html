@@ -307,6 +307,9 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;bac
     <div class="hero-title" id="hero-title">…</div>
     <div class="hero-desc"  id="hero-desc">…</div>
     <div class="hero-meta"  id="hero-meta"></div>
+    <div id="fork-badge" style="display:none;margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:.65rem;color:rgba(250,247,242,.5);">
+      ⇄ Forkeado de <a id="fork-badge-link" style="color:var(--amber);text-decoration:none;cursor:pointer;" href="#">—</a>
+    </div>
   </div>
 </div>
 
@@ -538,6 +541,15 @@ function renderHero() {
     </div>
     <span class="meta-sep">·</span>
     <div class="vis-chip ${LIBRO.es_publico ? 'vc-pub':'vc-pri'}">${LIBRO.es_publico ? '◎ Público':'◉ Privado'}</div>`;
+
+  // Mostrar insignia de fork si aplica
+  if (LIBRO.libro_original) {
+    const orig = LIBRO.libro_original;
+    document.getElementById('fork-badge').style.display = 'block';
+    const link = document.getElementById('fork-badge-link');
+    link.textContent = `${orig.titulo} (@${orig.autor?.username || '—'})`;
+    link.href = `/libro?id=${orig.id}`;
+  }
 
   // Mostrar botón editar si es mío
   if (LIBRO.autor_id === ME_ID) {
