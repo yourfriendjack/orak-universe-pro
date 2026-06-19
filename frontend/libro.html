@@ -500,7 +500,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;bac
 // ── Config ──────────────────────────────────────────────────────
 const TOKEN   = JSON.parse(localStorage.getItem('orak_sesion')||'{}')?.access_token;
 const ME_ID   = JSON.parse(localStorage.getItem('orak_sesion')||'{}')?.perfil?.id;
-if (!TOKEN) window.location.href = '/';
+// Sin token solo se pueden ver libros públicos; el backend retorna 403 si es privado
 
 // Leer libro_id de la URL: /libro?id=123
 const params  = new URLSearchParams(location.search);
@@ -526,7 +526,9 @@ const BG_COLORS = [
 // ── Cargar libro ────────────────────────────────────────────────
 async function cargarLibro() {
   try {
-    const r = await fetch(`/v2/libros/${LIBRO_ID}`);
+    const headers = TOKEN ? { 'Authorization': 'Bearer ' + TOKEN } : {};
+    const r = await fetch(`/v2/libros/${LIBRO_ID}`, { headers });
+    if (r.status === 403) { toast('Este libro es privado', 'err'); return; }
     if (!r.ok) throw new Error('Libro no encontrado');
     LIBRO = await r.json();
     renderHero();

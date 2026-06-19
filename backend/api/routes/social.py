@@ -231,9 +231,6 @@ async def dar_glimmer(datos: GlimmerIn, usuario = Depends(get_current_user)):
         post = sb.table("posts").select("autor_id").eq("id", datos.post_id).single().execute()
         if post.data:
             receptor_id = post.data["autor_id"]
-        sb.table("posts").update({"glimmers": sb.rpc("increment_posts_glimmers", {"row_id": datos.post_id, "inc": datos.cantidad})})\
-            .eq("id", datos.post_id).execute()
-        # Forma simple (sin RPC):
         post_act = sb.table("posts").select("glimmers").eq("id", datos.post_id).single().execute()
         if post_act.data:
             sb.table("posts").update({"glimmers": (post_act.data["glimmers"] or 0) + datos.cantidad})\

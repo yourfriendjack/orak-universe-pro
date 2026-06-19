@@ -63,17 +63,13 @@ async def crear_libro(datos: LibroIn, usuario=Depends(get_current_user)):
     datos_json = {
         "descripcion": datos.descripcion,
         "historia":    "",
-        "personajes":  [],
-        "eventos":     [],
-        "lugares":     [],
-        "facciones":   [],
+        "personajes":  wb.get("personajes", []),
+        "lugares":     wb.get("lugares", []),
+        "facciones":   wb.get("facciones", []),
+        "eventos":     wb.get("eventos", []),
         "relaciones":  [],
         "aportes":     [],
         "comentarios": [],
-        "personajes":  wb.get("personajes",[]) if wb else [],
-        "lugares":     wb.get("lugares",[]) if wb else [],
-        "facciones":   wb.get("facciones",[]) if wb else [],
-        "eventos":     wb.get("eventos",[]) if wb else [],
     }
 
     res = sb.table("libros").insert({
