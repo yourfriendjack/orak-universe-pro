@@ -1,6 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════
    ORAK Universe — Temas de interfaz y lectura
-   Se activan añadiendo una clase a <html> o a .reading-body
    ═══════════════════════════════════════════════════════════════ */
 
 /* ── DARK FANTASY ─────────────────────────────────────────────── */
@@ -42,9 +41,6 @@ html.theme-glitch .topbar { border-color: rgba(0,232,144,.12); }
 html.theme-glitch .sidebar { border-color: rgba(0,232,144,.1); }
 html.theme-glitch .auth-card { background: #080f0a; border-color: rgba(0,232,144,.2); }
 html.theme-glitch .auth-glow { background: radial-gradient(ellipse at 50% 0%, rgba(0,200,100,.3) 0%, transparent 65%); }
-html.theme-glitch .logo,
-html.theme-glitch .auth-title { letter-spacing: .18em; }
-html.theme-glitch * { transition: color .1s, background-color .1s; }
 
 /* ── LUNAR ────────────────────────────────────────────────────── */
 html.theme-lunar {
@@ -84,68 +80,113 @@ html.theme-sangre .auth-glow { background: radial-gradient(ellipse at 50% 0%, rg
 
 
 /* ═══════════════════════════════════════════════════════════════
-   TEMAS DE LECTURA — se aplican a .reading-body
+   TEMAS DE LECTURA
+   Se aplican a .reading-overlay para cubrir TODA la pantalla
    ═══════════════════════════════════════════════════════════════ */
 
 /* ── LIBRETA ANTIGUA ──────────────────────────────────────────── */
-.reading-body.rl-libreta {
+.reading-overlay.rl-libreta {
   background-color: #f5ead8;
   background-image:
-    linear-gradient(90deg, transparent 44px, rgba(180,80,80,.35) 44px, rgba(180,80,80,.35) 46px, transparent 46px),
-    repeating-linear-gradient(transparent, transparent 27px, rgba(100,130,180,.22) 28px);
-  color: #2c1a0e;
+    linear-gradient(90deg, transparent 58px, rgba(180,80,80,.3) 58px, rgba(180,80,80,.3) 60px, transparent 60px),
+    repeating-linear-gradient(transparent, transparent 27px, rgba(100,130,180,.2) 28px);
 }
-.reading-body.rl-libreta .reading-book-header,
-.reading-body.rl-libreta .reading-cap-title { color: #5a3010; }
-.reading-body.rl-libreta .reading-ornament  { color: #8b6040; }
-.reading-body.rl-libreta .rnav-btn { background: rgba(100,60,20,.1); border-color: rgba(100,60,20,.3); color: #5a3010; }
+.reading-overlay.rl-libreta .reading-top {
+  background: rgba(245,234,216,.93);
+  border-bottom-color: rgba(139,96,64,.2);
+}
+.reading-overlay.rl-libreta .reading-body { color: #2c1a0e; }
+.reading-overlay.rl-libreta .reading-book-header,
+.reading-overlay.rl-libreta .reading-cap-title { color: #5a3010; }
+.reading-overlay.rl-libreta .reading-ornament  { color: #8b6040; }
+.reading-overlay.rl-libreta .rnav-btn { background: rgba(100,60,20,.08); border-color: rgba(100,60,20,.25); color: #5a3010; }
+.reading-overlay.rl-libreta .reading-back,
+.reading-overlay.rl-libreta .reading-title { color: #5a3010; }
+.reading-overlay.rl-libreta .rc-btn { border-color: rgba(100,60,20,.3); color: #5a3010; }
 
 /* ── PERGAMINO ────────────────────────────────────────────────── */
-.reading-body.rl-pergamino {
+.reading-overlay.rl-pergamino {
   background: radial-gradient(ellipse at center, #d4b896 0%, #c4a07a 60%, #b08860 100%);
-  color: #2a1505;
-  box-shadow: inset 0 0 60px rgba(80,40,0,.3);
 }
-.reading-body.rl-pergamino .reading-book-header,
-.reading-body.rl-pergamino .reading-cap-title { color: #4a2a08; }
-.reading-body.rl-pergamino .reading-ornament  { color: #8b5a20; }
-.reading-body.rl-pergamino .rnav-btn { background: rgba(80,40,0,.12); border-color: rgba(80,40,0,.3); color: #4a2a08; }
-.reading-body.rl-pergamino .reading-progress  { background: rgba(80,40,0,.15); }
-.reading-body.rl-pergamino .reading-progress-fill { background: #8b5a20; }
+.reading-overlay.rl-pergamino .reading-top {
+  background: rgba(200,170,130,.9);
+  border-bottom-color: rgba(80,40,0,.2);
+}
+.reading-overlay.rl-pergamino .reading-body { color: #2a1505; }
+.reading-overlay.rl-pergamino .reading-book-header,
+.reading-overlay.rl-pergamino .reading-cap-title { color: #4a2a08; }
+.reading-overlay.rl-pergamino .reading-ornament  { color: #8b5a20; }
+.reading-overlay.rl-pergamino .rnav-btn { background: rgba(80,40,0,.1); border-color: rgba(80,40,0,.28); color: #4a2a08; }
+.reading-overlay.rl-pergamino .reading-back,
+.reading-overlay.rl-pergamino .reading-title { color: #4a2a08; }
+.reading-overlay.rl-pergamino .rc-btn { border-color: rgba(80,40,0,.28); color: #4a2a08; }
+.reading-overlay.rl-pergamino .reading-progress  { background: rgba(80,40,0,.12); }
+.reading-overlay.rl-pergamino .reading-progress-fill { background: #8b5a20; }
 
 /* ── MÁQUINA DE ESCRIBIR ──────────────────────────────────────── */
-.reading-body.rl-maquina {
+.reading-overlay.rl-maquina {
   background: #fafafa;
-  color: #111111;
-  font-family: 'JetBrains Mono', 'Courier New', Courier, monospace !important;
 }
-.reading-body.rl-maquina * { font-family: 'JetBrains Mono', 'Courier New', Courier, monospace !important; }
-.reading-body.rl-maquina .reading-book-header,
-.reading-body.rl-maquina .reading-cap-title { color: #222; }
-.reading-body.rl-maquina .reading-ornament  { color: #888; }
-.reading-body.rl-maquina .rnav-btn { background: #eee; border-color: #ccc; color: #333; }
-.reading-body.rl-maquina .reading-progress-fill { background: #333; }
+.reading-overlay.rl-maquina .reading-top {
+  background: rgba(250,250,250,.95);
+  border-bottom-color: #ddd;
+}
+.reading-overlay.rl-maquina .reading-body {
+  color: #111;
+  font-family: 'JetBrains Mono','Courier New',Courier,monospace !important;
+}
+.reading-overlay.rl-maquina .reading-body * {
+  font-family: 'JetBrains Mono','Courier New',Courier,monospace !important;
+}
+.reading-overlay.rl-maquina .reading-book-header,
+.reading-overlay.rl-maquina .reading-cap-title { color: #222; }
+.reading-overlay.rl-maquina .reading-ornament  { color: #888; }
+.reading-overlay.rl-maquina .rnav-btn { background: #eee; border-color: #ccc; color: #333; }
+.reading-overlay.rl-maquina .reading-back,
+.reading-overlay.rl-maquina .reading-title,
+.reading-overlay.rl-maquina .rc-btn { color: #333; border-color: #ccc; }
+.reading-overlay.rl-maquina .reading-progress-fill { background: #333; }
 
 /* ── NOCHE ETERNA ─────────────────────────────────────────────── */
-.reading-body.rl-noche {
-  background: #000000;
-  color: #d8d8d8;
+.reading-overlay.rl-noche {
+  background: #000;
 }
-.reading-body.rl-noche .reading-book-header,
-.reading-body.rl-noche .reading-cap-title { color: #ffffff; }
-.reading-body.rl-noche .reading-ornament  { color: #555; }
-.reading-body.rl-noche .rnav-btn { background: #111; border-color: #333; color: #aaa; }
-.reading-body.rl-noche .reading-progress  { background: #111; }
-.reading-body.rl-noche .reading-progress-fill { background: #888; }
+.reading-overlay.rl-noche .reading-top {
+  background: rgba(0,0,0,.92);
+  border-bottom-color: rgba(255,255,255,.07);
+}
+.reading-overlay.rl-noche .reading-body { color: #d8d8d8; }
+.reading-overlay.rl-noche .reading-book-header,
+.reading-overlay.rl-noche .reading-cap-title { color: #fff; }
+.reading-overlay.rl-noche .reading-ornament  { color: #444; }
+.reading-overlay.rl-noche .rnav-btn { background: #111; border-color: #333; color: #aaa; }
+.reading-overlay.rl-noche .reading-back,
+.reading-overlay.rl-noche .reading-title { color: #d0d0d0; }
+.reading-overlay.rl-noche .rc-btn { border-color: rgba(255,255,255,.15); color: #ccc; }
+.reading-overlay.rl-noche .reading-progress  { background: #111; }
+.reading-overlay.rl-noche .reading-progress-fill { background: #666; }
+.reading-overlay.rl-noche .rc-tema-panel { background: #111; border-color: #333; }
+.reading-overlay.rl-noche .rc-tema-opt { color: #ccc; }
+.reading-overlay.rl-noche .rc-tema-opt:hover { background: #222; }
 
 /* ── BOSQUE ENCANTADO ─────────────────────────────────────────── */
-.reading-body.rl-bosque {
+.reading-overlay.rl-bosque {
   background: linear-gradient(180deg, #0a1a0a 0%, #0f2010 100%);
-  color: #b0d8a8;
 }
-.reading-body.rl-bosque .reading-book-header,
-.reading-body.rl-bosque .reading-cap-title { color: #d8f0c8; }
-.reading-body.rl-bosque .reading-ornament  { color: #4a8a5a; }
-.reading-body.rl-bosque .rnav-btn { background: rgba(80,160,80,.1); border-color: rgba(80,160,80,.25); color: #90c890; }
-.reading-body.rl-bosque .reading-progress  { background: rgba(80,160,80,.1); }
-.reading-body.rl-bosque .reading-progress-fill { background: #5a9a6a; }
+.reading-overlay.rl-bosque .reading-top {
+  background: rgba(10,26,10,.92);
+  border-bottom-color: rgba(80,160,80,.12);
+}
+.reading-overlay.rl-bosque .reading-body { color: #b0d8a8; }
+.reading-overlay.rl-bosque .reading-book-header,
+.reading-overlay.rl-bosque .reading-cap-title { color: #d8f0c8; }
+.reading-overlay.rl-bosque .reading-ornament  { color: #4a8a5a; }
+.reading-overlay.rl-bosque .rnav-btn { background: rgba(80,160,80,.08); border-color: rgba(80,160,80,.22); color: #90c890; }
+.reading-overlay.rl-bosque .reading-back,
+.reading-overlay.rl-bosque .reading-title { color: #b0d8a8; }
+.reading-overlay.rl-bosque .rc-btn { border-color: rgba(80,160,80,.25); color: #90c890; }
+.reading-overlay.rl-bosque .reading-progress  { background: rgba(80,160,80,.08); }
+.reading-overlay.rl-bosque .reading-progress-fill { background: #5a9a6a; }
+.reading-overlay.rl-bosque .rc-tema-panel { background: #0f2010; border-color: rgba(80,160,80,.2); }
+.reading-overlay.rl-bosque .rc-tema-opt { color: #b0d8a8; }
+.reading-overlay.rl-bosque .rc-tema-opt:hover { background: rgba(80,160,80,.1); }

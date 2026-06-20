@@ -6,7 +6,6 @@
 <title>Libro — ORAK Universe</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/themes.css">
 <style>
 :root{
   --ink:#0e0d0b;--page:#faf7f2;--parchment:#f5f0e8;
@@ -220,9 +219,9 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;bac
   content:'';position:fixed;inset:0;pointer-events:none;z-index:1;opacity:.5;
   background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
 }
-.reading-overlay .reading-top,.reading-overlay .reading-body{position:relative;z-index:2;}
+.reading-overlay .reading-body{position:relative;z-index:2;}
 .reading-overlay.open{display:block;}
-.reading-top{position:sticky;top:0;background:rgba(250,247,242,.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--fog);display:flex;align-items:center;gap:14px;padding:0 28px;height:52px;z-index:10;}
+.reading-top{position:sticky;top:0;background:rgba(250,247,242,.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--fog);display:flex;align-items:center;gap:14px;padding:0 28px;height:52px;z-index:30;}
 .reading-back{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--fog);cursor:pointer;transition:color .15s;}
 .reading-back:hover{color:var(--amber-dim);}
 .reading-title{font-family:'Cinzel',serif;font-size:.95rem;font-weight:600;flex:1;color:var(--ink);}
@@ -293,6 +292,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;bac
 .reading-overlay.dark .reading-page-num{color:rgba(212,207,197,.3);}
 
 </style>
+<link rel="stylesheet" href="css/themes.css">
 </head>
 <body>
 
@@ -879,9 +879,11 @@ window.abrirCapitulo = async (numero) => {
     overlay.classList.add('open','light');
     // Aplicar tema de lectura del usuario
     const temaLectura = localStorage.getItem('orak_tema_lectura');
-    const rb = document.getElementById('reading-body');
-    rb.classList.remove('rl-libreta','rl-pergamino','rl-maquina','rl-noche','rl-bosque');
-    if (temaLectura) rb.classList.add(temaLectura);
+    overlay.classList.remove('rl-libreta','rl-pergamino','rl-maquina','rl-noche','rl-bosque');
+    if (temaLectura) {
+      overlay.classList.add(temaLectura);
+      overlay.classList.remove('light');
+    }
   } catch(e) { toast(e.message,'err'); }
 };
 
@@ -945,9 +947,14 @@ window.toggleTemaPanel = () => {
 
 window.aplicarTemaLectura = (el) => {
   const tema = el.dataset.tema;
-  const rb   = document.getElementById('reading-body');
-  rb.classList.remove('rl-libreta','rl-pergamino','rl-maquina','rl-noche','rl-bosque');
-  if (tema) rb.classList.add(tema);
+  const ro   = document.getElementById('reading-overlay');
+  ro.classList.remove('rl-libreta','rl-pergamino','rl-maquina','rl-noche','rl-bosque');
+  if (tema) {
+    ro.classList.add(tema);
+    ro.classList.remove('light');
+  } else {
+    ro.classList.add('light');
+  }
   localStorage.setItem('orak_tema_lectura', tema);
   document.getElementById('rc-tema-panel').classList.remove('open');
 };
