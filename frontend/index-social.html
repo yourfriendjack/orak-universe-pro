@@ -988,7 +988,7 @@ async function loadRanking() {
     document.getElementById('rank-list').innerHTML = data.slice(0,5).map((p,i) => `
       <div class="rank-item">
         <div class="rank-pos ${pos[i]||''}">#${i+1}</div>
-        <div class="rank-av ${avColor(p.id)}" data-username="${escapeHtml(p.username)}" style="cursor:pointer">${initials(p.display_name||p.username)}</div>
+        <div class="rank-av ${avColor(p.id)}" data-username="${escapeHtml(p.username)}" style="cursor:pointer">${p.avatar_url?`<img src="${escapeHtml(p.avatar_url)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" loading="lazy">`:initials(p.display_name||p.username)}</div>
         <div class="rank-info">
           <div class="rank-name" data-username="${escapeHtml(p.username)}" style="cursor:pointer">${escapeHtml(p.display_name||p.username)}</div>
           <div class="rank-score">⬡ ${(p.oruns||0).toLocaleString()}</div>
@@ -999,7 +999,7 @@ async function loadRanking() {
     const sugs = data.filter(p => p.id !== meId).slice(0,3);
     document.getElementById('sug-list').innerHTML = sugs.map(p => `
       <div class="sug-item">
-        <div class="sug-av ${avColor(p.id)}" data-username="${escapeHtml(p.username)}" style="cursor:pointer">${initials(p.display_name||p.username)}</div>
+        <div class="sug-av ${avColor(p.id)}" data-username="${escapeHtml(p.username)}" style="cursor:pointer">${p.avatar_url?`<img src="${escapeHtml(p.avatar_url)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" loading="lazy">`:initials(p.display_name||p.username)}</div>
         <div class="sug-info">
           <div class="sug-name" data-username="${escapeHtml(p.username)}" style="cursor:pointer">${escapeHtml(p.display_name||p.username)}</div>
           <div class="sug-meta">⬡ ${(p.oruns||0).toLocaleString()} · ${p.libros_publicados||0} libros</div>
