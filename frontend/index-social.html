@@ -1159,39 +1159,39 @@ document.getElementById('glimmer-modal').addEventListener('click', e => { if (e.
      BURBUJA DE CHAT FLOTANTE
 ══════════════════════════════════════════════════════════ -->
 <div id="chat-float">
+  <!-- Burbuja botón -->
   <div id="chat-float-btn" onclick="toggleChatFloat()" title="Mensajes">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
     <span id="chat-float-badge" style="display:none">0</span>
   </div>
+  <!-- Ventana lista de conversaciones -->
   <div id="chat-win" style="display:none">
-    <!-- Pantalla: lista de conversaciones -->
-    <div id="chat-screen-convs">
-      <div class="chat-win-head" id="chat-win-head-drag">
-        <span class="chat-win-title">Mensajes</span>
-        <div style="display:flex;gap:4px;align-items:center">
-          <button class="chat-head-btn" onclick="toggleBuscadorFloat()" title="Nuevo">＋</button>
-          <button class="chat-head-btn" onclick="cerrarChatFloat()" title="Cerrar">✕</button>
-        </div>
-      </div>
-      <div id="chat-buscar-float" style="display:none;padding:8px 10px;border-bottom:1px solid rgba(205,199,184,.08)">
-        <input id="chat-buscar-input" class="nota-textarea" style="width:100%;padding:5px 8px;font-size:.75rem;border-radius:5px" placeholder="Buscar usuario…" oninput="buscarFloatMsg(this.value)">
-        <div id="chat-buscar-res" style="margin-top:6px"></div>
-      </div>
-      <div id="chat-conv-list" style="overflow-y:auto;flex:1"><div style="font-size:.72rem;color:var(--fog);padding:14px">Cargando…</div></div>
-    </div>
-    <!-- Pantalla: hilo activo -->
-    <div id="chat-screen-thread" style="display:none;flex-direction:column;height:100%">
-      <div class="chat-win-head">
-        <button class="chat-head-btn" onclick="volverChatConvs()" title="Volver">←</button>
-        <span class="chat-win-title" id="chat-thread-title">—</span>
+    <div class="chat-win-head" id="chat-win-head-drag">
+      <span class="chat-win-title">Mensajes</span>
+      <div style="display:flex;gap:4px;align-items:center">
+        <button class="chat-head-btn" onclick="toggleBuscadorFloat()" title="Nuevo">＋</button>
         <button class="chat-head-btn" onclick="cerrarChatFloat()" title="Cerrar">✕</button>
       </div>
-      <div id="chat-msgs" style="flex:1;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:5px"></div>
-      <div style="display:flex;gap:6px;padding:8px 10px;border-top:1px solid rgba(205,199,184,.08);align-items:flex-end">
-        <textarea id="chat-input" class="nota-textarea" rows="2" placeholder="Escribe un mensaje…" style="flex:1;font-size:.8rem" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();enviarChatMsg();}"></textarea>
-        <button class="nota-send" style="padding:8px 12px" onclick="enviarChatMsg()">→</button>
-      </div>
     </div>
+    <div id="chat-buscar-float" style="display:none;padding:8px 10px;border-bottom:1px solid rgba(160,110,60,.2)">
+      <input id="chat-buscar-input" class="nota-textarea" style="width:100%;padding:5px 8px;font-size:.75rem;border-radius:5px" placeholder="Buscar usuario…" oninput="buscarFloatMsg(this.value)">
+      <div id="chat-buscar-res" style="margin-top:6px"></div>
+    </div>
+    <div id="chat-conv-list" style="overflow-y:auto;flex:1"></div>
+  </div>
+</div>
+
+<!-- Burbuja de hilo — se desprende como gota -->
+<div id="chat-thread-win" style="display:none">
+  <div class="chat-win-head">
+    <button class="chat-head-btn" onclick="cerrarChatThread()" title="Volver">←</button>
+    <span class="chat-win-title" id="chat-thread-title">—</span>
+    <button class="chat-head-btn" onclick="cerrarChatThread()" title="Cerrar">✕</button>
+  </div>
+  <div id="chat-msgs" style="flex:1;overflow-y:auto;padding:10px 14px 10px 40px;display:flex;flex-direction:column;gap:6px"></div>
+  <div style="display:flex;gap:6px;padding:8px 10px;border-top:1px solid rgba(160,110,60,.2);align-items:flex-end">
+    <textarea id="chat-input" class="nota-textarea" rows="2" placeholder="Escribe un mensaje…" style="flex:1;font-size:.8rem" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();enviarChatMsg();}"></textarea>
+    <button class="nota-send" style="padding:8px 12px" onclick="enviarChatMsg()">→</button>
   </div>
 </div>
 
@@ -1202,19 +1202,59 @@ document.getElementById('glimmer-modal').addEventListener('click', e => { if (e.
 #chat-float-btn:hover{transform:scale(1.08);box-shadow:0 6px 22px rgba(212,168,67,.55);}
 #chat-float-badge{position:absolute;top:-3px;right:-3px;background:#8b3a1a;color:#f5ecd7;font-size:.55rem;font-weight:700;border-radius:10px;padding:1px 5px;min-width:16px;text-align:center;}
 
-/* Ventana — papel de libreta antigua */
-#chat-win{
-  width:320px;height:460px;
+/* Papel de libreta antigua — compartido por ambas ventanas */
+.chat-notebook{
   background-color:#f5ead8;
   background-image:
     linear-gradient(to right, transparent 36px, rgba(180,100,80,.25) 36px, rgba(180,100,80,.25) 37px, transparent 37px),
     repeating-linear-gradient(transparent, transparent 27px, rgba(100,120,160,.2) 28px, rgba(100,120,160,.2) 28px);
   border:1px solid #c8a97a;
-  border-radius:14px;
   box-shadow:0 8px 32px rgba(0,0,0,.5), inset 0 0 0 1px rgba(255,255,255,.3);
+}
+#chat-win{
+  width:280px;height:420px;
+  border-radius:14px;
   display:flex;flex-direction:column;overflow:hidden;
 }
-#chat-screen-convs{display:flex;flex-direction:column;height:100%;}
+
+/* Burbuja de hilo — segunda ventana */
+#chat-thread-win{
+  position:fixed;
+  bottom:24px;right:356px;
+  width:300px;height:440px;
+  border-radius:14px;
+  display:flex;flex-direction:column;overflow:hidden;
+  z-index:600;
+  transform-origin:right bottom;
+}
+
+/* Animación gota emergiendo */
+@keyframes drop-emerge{
+  0%  {transform:scale(.04);border-radius:50%;opacity:0;}
+  20% {transform:scale(.35);border-radius:48% 52% 44% 56% / 62% 38% 62% 38%;opacity:.9;}
+  42% {transform:scale(1.06);border-radius:38% 62% 56% 44% / 44% 56% 38% 62%;}
+  58% {transform:scale(.97);border-radius:52% 48% 44% 56% / 56% 44% 62% 38%;}
+  74% {transform:scale(1.02);border-radius:20px;}
+  88% {transform:scale(.99);border-radius:15px;}
+  100%{transform:scale(1);border-radius:14px;opacity:1;}
+}
+/* Animación gota regresando */
+@keyframes drop-return{
+  0%  {transform:scale(1);border-radius:14px;opacity:1;}
+  25% {transform:scale(1.03);border-radius:38% 62% 56% 44% / 44% 56% 38% 62%;}
+  55% {transform:scale(.35);border-radius:48% 52% 44% 56% / 62% 38% 62% 38%;opacity:.7;}
+  100%{transform:scale(.02);border-radius:50%;opacity:0;}
+}
+/* Leve squeeze en la ventana lista al desprender el hilo */
+@keyframes squeeze-spawn{
+  0%  {transform:scale(1);}
+  35% {transform:scaleX(.93) scaleY(1.04);}
+  65% {transform:scaleX(1.03) scaleY(.97);}
+  100%{transform:scale(1);}
+}
+#chat-win.spawning{animation:squeeze-spawn .4s cubic-bezier(.34,1.56,.64,1);}
+#chat-thread-win.drop-in{animation:drop-emerge .55s cubic-bezier(.34,1.56,.64,1) forwards;}
+#chat-thread-win.drop-out{animation:drop-return .38s ease-in forwards;}
 .chat-win-head{
   display:flex;align-items:center;gap:8px;padding:10px 12px;
   background:rgba(185,140,80,.2);
@@ -1237,11 +1277,12 @@ document.getElementById('glimmer-modal').addEventListener('click', e => { if (e.
 #chat-buscar-float{background:rgba(245,234,216,.9);border-bottom-color:rgba(160,110,60,.2);}
 #chat-conv-list div[style*="color:var(--fog)"]{color:#a07850 !important;}
 
-/* Mobile: sheet desde abajo */
+/* Mobile: sheets desde abajo */
 @media (max-width: 600px) {
   #chat-float{bottom:16px;right:16px;}
-  #chat-win{position:fixed;bottom:0;left:0;right:0;width:100%;height:80vh;border-radius:18px 18px 0 0;border-bottom:none;}
   #chat-float-btn{width:48px;height:48px;}
+  #chat-win{position:fixed;bottom:0;left:0;right:0;width:100%;height:75vh;border-radius:18px 18px 0 0;border-bottom:none;}
+  #chat-thread-win{position:fixed;bottom:0;left:0;right:0;width:100%;height:85vh;border-radius:18px 18px 0 0;border-bottom:none;transform-origin:center bottom;}
 }
 </style>
 
@@ -1249,74 +1290,99 @@ document.getElementById('glimmer-modal').addEventListener('click', e => { if (e.
 import { apiGet, apiPost } from './js/services/api.js';
 import { getToken, getPerfil } from './js/services/auth.js';
 
-let CHAT_USER_ID   = null;
-let CHAT_DRAGGING  = false;
-let CHAT_DRAG_OX   = 0, CHAT_DRAG_OY = 0;
+let CHAT_USER_ID = null;
 
-// ── Abrir / cerrar ───────────────────────────────────────
+// ── Aplicar estilo libreta a ambas ventanas ──────────────
+['chat-win','chat-thread-win'].forEach(id => {
+  document.getElementById(id)?.classList.add('chat-notebook');
+});
+
+// ── Abrir / cerrar lista ─────────────────────────────────
 window.toggleChatFloat = () => {
   const win = document.getElementById('chat-win');
   const open = win.style.display !== 'none';
   win.style.display = open ? 'none' : 'flex';
   if (!open) loadChatConvs();
 };
-window.cerrarChatFloat = () => { document.getElementById('chat-win').style.display = 'none'; };
+window.cerrarChatFloat = () => {
+  document.getElementById('chat-win').style.display = 'none';
+  cerrarChatThread();
+};
 
 // ── Lista de conversaciones ──────────────────────────────
 async function loadChatConvs() {
   if (!getToken()) return;
   const c = document.getElementById('chat-conv-list');
-  c.innerHTML = '<div style="font-size:.72rem;color:var(--fog);padding:14px">Cargando…</div>';
+  c.innerHTML = '<div style="font-size:.72rem;color:#a07850;padding:14px">Cargando…</div>';
   try {
     const data = await apiGet('/api/social/mensajes', getToken());
     if (!data.length) {
-      c.innerHTML = '<div style="font-size:.75rem;color:var(--fog);padding:14px">Sin conversaciones.<br>Usa ＋ para iniciar una.</div>';
+      c.innerHTML = '<div style="font-size:.75rem;color:#a07850;padding:14px">Sin conversaciones.<br>Usa ＋ para iniciar una.</div>';
       return;
     }
     c.innerHTML = data.map(conv => {
-      const otro = conv.interlocutor || {};
-      const ini  = (otro.display_name || otro.username || '?')[0].toUpperCase();
-      const badge = conv.no_leidos > 0 ? `<span style="background:#c06040;color:#fff;font-size:.55rem;font-weight:700;border-radius:8px;padding:1px 5px">${conv.no_leidos}</span>` : '';
+      const otro  = conv.interlocutor || {};
+      const ini   = (otro.display_name || otro.username || '?')[0].toUpperCase();
+      const badge = conv.no_leidos > 0 ? `<span style="background:#8b3a1a;color:#f5ead8;font-size:.55rem;font-weight:700;border-radius:8px;padding:1px 5px">${conv.no_leidos}</span>` : '';
       return `<div class="chat-conv-item" onclick="abrirChatThread('${otro.id}','${escapeStr(otro.username||'')}','${escapeStr(otro.display_name||otro.username||'')}')">
-        <div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--amber),var(--rust));display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;color:#fff;flex-shrink:0">${escapeStr(ini)}</div>
+        <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#c8a860,#8b5a2b);display:flex;align-items:center;justify-content:center;font-size:.62rem;font-weight:700;color:#f5ead8;flex-shrink:0">${escapeStr(ini)}</div>
         <div style="flex:1;min-width:0">
-          <div style="font-size:.78rem;font-weight:600;color:var(--ink)">${escapeStr(otro.display_name||otro.username||'—')}</div>
-          <div style="font-size:.68rem;color:var(--fog);overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${escapeStr((conv.texto||'').slice(0,35))}</div>
+          <div style="font-size:.78rem;font-weight:600;color:#3d2008">${escapeStr(otro.display_name||otro.username||'—')}</div>
+          <div style="font-size:.66rem;color:#7a5030;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${escapeStr((conv.texto||'').slice(0,32))}</div>
         </div>
         ${badge}
       </div>`;
     }).join('');
-  } catch(e) { c.innerHTML = `<div style="font-size:.72rem;color:#e08080;padding:14px">${e.message}</div>`; }
+  } catch(e) { c.innerHTML = `<div style="font-size:.72rem;color:#c06040;padding:14px">${e.message}</div>`; }
 }
 
-// ── Abrir hilo ───────────────────────────────────────────
+// ── Abrir hilo — efecto gota ─────────────────────────────
 window.abrirChatThread = async (userId, username, nombre) => {
   CHAT_USER_ID = userId;
+  const tw = document.getElementById('chat-thread-win');
+  const cw = document.getElementById('chat-win');
+
+  // Titulo
   document.getElementById('chat-thread-title').textContent = nombre || ('@' + username);
-  document.getElementById('chat-screen-convs').style.display  = 'none';
-  document.getElementById('chat-screen-thread').style.display = 'flex';
+
+  // Squeeze en la ventana origen
+  cw.classList.remove('spawning');
+  void cw.offsetWidth; // reflow
+  cw.classList.add('spawning');
+
+  // Mostrar hilo con animación gota
+  tw.style.display = 'flex';
+  tw.classList.remove('drop-in','drop-out');
+  void tw.offsetWidth;
+  tw.classList.add('drop-in');
+
   await renderChatMsgs(userId);
 };
 
-window.volverChatConvs = () => {
-  CHAT_USER_ID = null;
-  document.getElementById('chat-screen-thread').style.display = 'none';
-  document.getElementById('chat-screen-convs').style.display  = 'flex';
-  loadChatConvs();
+window.cerrarChatThread = () => {
+  const tw = document.getElementById('chat-thread-win');
+  if (tw.style.display === 'none') return;
+  tw.classList.remove('drop-in');
+  tw.classList.add('drop-out');
+  tw.addEventListener('animationend', () => {
+    tw.style.display = 'none';
+    tw.classList.remove('drop-out');
+    CHAT_USER_ID = null;
+  }, { once: true });
 };
 
 async function renderChatMsgs(userId) {
   const meId = getPerfil()?.id;
   const c = document.getElementById('chat-msgs');
-  c.innerHTML = '<div style="font-size:.7rem;color:var(--fog)">Cargando…</div>';
+  c.innerHTML = '<div style="font-size:.7rem;color:#a07850;padding:6px">Cargando…</div>';
   try {
     const msgs = await apiGet(`/api/social/mensajes/${userId}`, getToken());
-    if (!msgs.length) { c.innerHTML = '<div style="font-size:.75rem;color:var(--fog);padding:6px">¡Di hola!</div>'; return; }
+    if (!msgs.length) { c.innerHTML = '<div style="font-size:.75rem;color:#a07850;padding:6px">¡Di hola!</div>'; return; }
     c.innerHTML = msgs.map(m =>
       `<div class="${m.emisor_id === meId ? 'chat-msg-mio' : 'chat-msg-suyo'}">${escapeStr(m.texto)}</div>`
     ).join('');
     c.scrollTop = c.scrollHeight;
-  } catch(e) { c.innerHTML = `<div style="color:#e08080;font-size:.7rem">${e.message}</div>`; }
+  } catch(e) { c.innerHTML = `<div style="color:#c06040;font-size:.7rem">${e.message}</div>`; }
 }
 
 window.enviarChatMsg = async () => {
@@ -1328,10 +1394,10 @@ window.enviarChatMsg = async () => {
     await apiPost('/api/social/mensajes', { receptor_id: CHAT_USER_ID, texto }, getToken());
     input.value = '';
     await renderChatMsgs(CHAT_USER_ID);
-  } catch(e) { /* toast ya lo maneja */ }
+  } catch(e) {}
 };
 
-// ── Buscador de usuario ──────────────────────────────────
+// ── Buscador ─────────────────────────────────────────────
 window.toggleBuscadorFloat = () => {
   const el = document.getElementById('chat-buscar-float');
   const v  = el.style.display !== 'none';
@@ -1348,11 +1414,11 @@ window.buscarFloatMsg = (q) => {
     ((p.username||'').toLowerCase().includes(q.toLowerCase()) ||
      (p.display_name||'').toLowerCase().includes(q.toLowerCase()))
   ).slice(0,5);
-  if (!res.length) { c.innerHTML = '<div style="font-size:.7rem;color:var(--fog)">Sin resultados</div>'; return; }
+  if (!res.length) { c.innerHTML = '<div style="font-size:.7rem;color:#a07850">Sin resultados</div>'; return; }
   c.innerHTML = res.map(p => `
     <div class="chat-conv-item" style="border-radius:6px" onclick="seleccionarChatUser('${p.id}','${escapeStr(p.username||'')}','${escapeStr(p.display_name||p.username||'')}')">
-      <div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--amber),var(--rust));display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:700;color:#fff">${escapeStr((p.display_name||p.username||'?')[0].toUpperCase())}</div>
-      <div><div style="font-size:.78rem;color:var(--ink)">${escapeStr(p.display_name||p.username)}</div><div style="font-size:.65rem;color:var(--fog)">@${escapeStr(p.username)}</div></div>
+      <div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#c8a860,#8b5a2b);display:flex;align-items:center;justify-content:center;font-size:.58rem;font-weight:700;color:#f5ead8">${escapeStr((p.display_name||p.username||'?')[0].toUpperCase())}</div>
+      <div><div style="font-size:.76rem;color:#3d2008">${escapeStr(p.display_name||p.username)}</div><div style="font-size:.63rem;color:#7a5030">@${escapeStr(p.username)}</div></div>
     </div>`).join('');
 };
 
@@ -1365,35 +1431,10 @@ window.seleccionarChatUser = (id, username, nombre) => {
 
 // ── Atajo desde tarjeta de escritor ─────────────────────
 window.iniciarConvDesdeEscritor = (id, username, nombre) => {
-  document.getElementById('chat-win').style.display = 'flex';
-  abrirChatThread(id, username, nombre);
+  const cw = document.getElementById('chat-win');
+  if (cw.style.display === 'none') { cw.style.display = 'flex'; loadChatConvs(); }
+  setTimeout(() => abrirChatThread(id, username, nombre), 80);
 };
-
-// ── Drag (solo desktop) ──────────────────────────────────
-const floatEl = document.getElementById('chat-float');
-const headEl  = document.getElementById('chat-win-head-drag');
-if (headEl) {
-  headEl.style.cursor = 'grab';
-  headEl.addEventListener('mousedown', e => {
-    if (window.innerWidth <= 600) return;
-    CHAT_DRAGGING = true;
-    const rect = floatEl.getBoundingClientRect();
-    CHAT_DRAG_OX = e.clientX - rect.right;
-    CHAT_DRAG_OY = e.clientY - rect.bottom;
-    headEl.style.cursor = 'grabbing';
-  });
-}
-document.addEventListener('mousemove', e => {
-  if (!CHAT_DRAGGING) return;
-  const right  = Math.max(8, window.innerWidth  - e.clientX + CHAT_DRAG_OX);
-  const bottom = Math.max(8, window.innerHeight - e.clientY + CHAT_DRAG_OY);
-  floatEl.style.right  = right  + 'px';
-  floatEl.style.bottom = bottom + 'px';
-});
-document.addEventListener('mouseup', () => {
-  CHAT_DRAGGING = false;
-  if (headEl) headEl.style.cursor = 'grab';
-});
 
 function escapeStr(s) {
   return String(s).replace(/'/g,"&#39;").replace(/</g,'&lt;').replace(/>/g,'&gt;');
