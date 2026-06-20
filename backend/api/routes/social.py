@@ -6,6 +6,7 @@ glimmers, notas, co-escritores, ranking.
 Todos requieren usuario autenticado salvo lectura pública.
 """
 from fastapi import APIRouter, Depends, HTTPException, Query
+from typing import Optional
 from backend.database.supabase_client import get_supabase, get_supabase_user
 from backend.models.schemas import (
     PostIn, FollowIn, LectorFielIn, LectorFielAccion,
@@ -212,34 +213,20 @@ async def responder_invitacion(datos: LectorFielAccion, usuario = Depends(get_cu
 
 @router.post("/glimmers", response_model=OkResponse)
 async def dar_glimmer(datos: GlimmerIn, usuario = Depends(get_current_user)):
-    # Glimmers involucra transferencia entre usuarios: usar service_role
     sb = get_supabase()
 
-    # Verificar saldo de Oruns
-    perfil = sb.table("perfiles").select("oruns, glimmers_week")\
-               .eq("id", usuario["id"]).single().execute()
-    if not perfil.data:
-        error("Perfil no encontrado")
-    if perfil.data["oruns"] < datos.cantidad:
-        error(f"Oruns insuficientes (tienes {perfil.data['oruns']})")
-    if perfil.data["glimmers_week"] <= 0:
-        error("Sin Glimmers esta semana — se recargan el lunes")
-
-    # Obtener receptor
     receptor_id = None
     if datos.post_id:
-        post = sb.table("posts").select("autor_id").eq("id", datos.post_id).single().execute()
+        post = sb.table("posts").select("autor_id, glimmers").eq("id", datos.post_id).single().execute()
         if post.data:
             receptor_id = post.data["autor_id"]
-        post_act = sb.table("posts").select("glimmers").eq("id", datos.post_id).single().execute()
-        if post_act.data:
-            sb.table("posts").update({"glimmers": (post_act.data["glimmers"] or 0) + datos.cantidad})\
+            sb.table("posts").update({"glimmers": (post.data["glimmers"] or 0) + 1})\
                 .eq("id", datos.post_id).execute()
     elif datos.libro_id:
         libro = sb.table("libros").select("autor_id, glimmers").eq("id", datos.libro_id).single().execute()
         if libro.data:
             receptor_id = libro.data["autor_id"]
-            sb.table("libros").update({"glimmers": (libro.data["glimmers"] or 0) + datos.cantidad})\
+            sb.table("libros").update({"glimmers": (libro.data["glimmers"] or 0) + 1})\
                 .eq("id", datos.libro_id).execute()
 
     if not receptor_id:
@@ -247,34 +234,47 @@ async def dar_glimmer(datos: GlimmerIn, usuario = Depends(get_current_user)):
     if receptor_id == usuario["id"]:
         error("No puedes darte Glimmers a ti mismo")
 
-    # Log
-    sb.table("glimmers_log").insert({
-        "donante_id":  usuario["id"],
-        "receptor_id": receptor_id,
-        "post_id":     datos.post_id,
-        "libro_id":    datos.libro_id,
-        "cantidad":    datos.cantidad,
-    }).execute()
-
-    # Transferir Oruns donante → receptor
-    sb.table("perfiles").update({
-        "oruns":         perfil.data["oruns"] - datos.cantidad,
-        "glimmers_week": perfil.data["glimmers_week"] - 1,
-    }).eq("id", usuario["id"]).execute()
-
-    rec_perfil = sb.table("perfiles").select("oruns, glimmers_total")\
-                   .eq("id", receptor_id).single().execute()
+    rec_perfil = sb.table("perfiles").select("glimmers_total").eq("id", receptor_id).single().execute()
     if rec_perfil.data:
         sb.table("perfiles").update({
-            "oruns":          rec_perfil.data["oruns"] + datos.cantidad,
-            "glimmers_total": rec_perfil.data["glimmers_total"] + datos.cantidad,
+            "glimmers_total": (rec_perfil.data["glimmers_total"] or 0) + 1,
         }).eq("id", receptor_id).execute()
 
     _crear_notif(sb, receptor_id, "glimmer",
-                 f"Recibiste {datos.cantidad} Glimmer{'s' if datos.cantidad > 1 else ''}",
-                 f"{usuario.get('username','alguien')} te dio {datos.cantidad} Glimmers",
+                 "Recibiste un Glimmer ⬡",
+                 f"{usuario.get('username','alguien')} te dio un Glimmer",
                  str(datos.post_id or datos.libro_id))
-    return ok(f"{datos.cantidad} Glimmer{'s' if datos.cantidad>1 else ''} enviado{'s' if datos.cantidad>1 else ''}")
+    return ok("Glimmer enviado")
+
+
+@router.delete("/glimmers", response_model=OkResponse)
+async def quitar_glimmer(
+    post_id:  Optional[int] = Query(None),
+    libro_id: Optional[int] = Query(None),
+    usuario = Depends(get_current_user)
+):
+    sb = get_supabase()
+    receptor_id = None
+    if post_id:
+        post = sb.table("posts").select("autor_id, glimmers").eq("id", post_id).single().execute()
+        if post.data:
+            receptor_id = post.data["autor_id"]
+            sb.table("posts").update({"glimmers": max(0, (post.data["glimmers"] or 0) - 1)})\
+                .eq("id", post_id).execute()
+    elif libro_id:
+        libro = sb.table("libros").select("autor_id, glimmers").eq("id", libro_id).single().execute()
+        if libro.data:
+            receptor_id = libro.data["autor_id"]
+            sb.table("libros").update({"glimmers": max(0, (libro.data["glimmers"] or 0) - 1)})\
+                .eq("id", libro_id).execute()
+    if not receptor_id:
+        error("Destino no encontrado")
+    rec = sb.table("perfiles").select("glimmers_total").eq("id", receptor_id).single().execute()
+    if rec.data:
+        sb.table("perfiles").update({
+            "glimmers_total": max(0, (rec.data["glimmers_total"] or 0) - 1)
+        }).eq("id", receptor_id).execute()
+    return ok("Glimmer quitado")
 
 
 # ══════════════════════════════════════════════════════════

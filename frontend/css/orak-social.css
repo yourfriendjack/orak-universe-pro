@@ -195,7 +195,7 @@ a{text-decoration:none;color:inherit;}
 .post-actions{display:flex;border-top:1px solid var(--mist);padding:2px 6px;}
 .pact{display:flex;align-items:center;gap:4px;padding:7px 10px;font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--fog);cursor:pointer;border-radius:var(--radius-sm);transition:all var(--transition);border:none;background:none;}
 .pact:hover{background:var(--mist);color:var(--ink);}
-.pact.liked{color:var(--amber-dim);}
+.pact.liked{color:var(--orun);background:rgba(212,168,67,.15);font-weight:600;}
 
 /* ══════════════════════════════════════════════════════════════
    WIDGETS DEL FEED

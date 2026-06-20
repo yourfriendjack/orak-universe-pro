@@ -39,6 +39,7 @@ export const seguir         = (id, token)       => apiPost('/api/social/follows'
 export const dejarSeguir    = (id, token)       => apiDelete(`/api/social/follows/${id}`, token);
 export const invitarLector  = (id, token)       => apiPost('/api/social/lectores-fieles', { receptor_id: id }, token);
 export const darGlimmer     = (datos, token)    => apiPost('/api/social/glimmers', datos, token);
+export const quitarGlimmer  = (params, token)   => _fetch('DELETE', `/api/social/glimmers?${new URLSearchParams(params)}`, null, token);
 export const crearNota      = (datos, token)    => apiPost('/api/social/notas', datos, token);
 export const getRanking     = ()                => apiGet('/api/social/ranking');
 export const getNotificaciones = (token)        => apiGet('/api/social/notificaciones', token);

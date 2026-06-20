@@ -95,7 +95,7 @@
       <button class="notif-btn" id="notif-btn" onclick="toggleNotif()">
         🔔<div class="notif-dot" id="notif-dot"></div>
       </button>
-      <div class="orun-pill">⬡ <span id="orun-display">—</span> · ✦ <span id="glimmer-display">—</span></div>
+      <div class="orun-pill">⬡ <span id="orun-display">—</span> Oruns</div>
       <div class="user-av" id="topbar-av" onclick="goView('profile')">…</div>
     </div>
   </header>
@@ -159,9 +159,9 @@
                   <div class="eco-pill-lbl">Oruns</div>
                 </div>
                 <div class="eco-pill">
-                  <div class="eco-pill-ico">✦</div>
+                  <div class="eco-pill-ico">⬡</div>
                   <div class="eco-pill-val gv" id="eco-glimmers">—</div>
-                  <div class="eco-pill-lbl">Glimmers</div>
+                  <div class="eco-pill-lbl">Likes recibidos</div>
                 </div>
               </div>
               <div class="eco-xp">
@@ -357,7 +357,7 @@
 
 <script type="module">
 import { initAuth, login, logout, registro, getPerfil, getToken, getOruns, getGlimmers, actualizarOruns, actualizarGlimmers, actualizarPerfil, estaLogueado } from './js/services/auth.js';
-import { getFeed, getExplorar, crearPost, borrarPost, seguir, dejarSeguir, darGlimmer, getRanking, getNotificaciones, leerNotificaciones, getLibrosPerfil } from './js/services/api.js';
+import { getFeed, getExplorar, crearPost, borrarPost, seguir, dejarSeguir, darGlimmer, quitarGlimmer, getRanking, getNotificaciones, leerNotificaciones, getLibrosPerfil } from './js/services/api.js';
 
 // ── Estado ─────────────────────────────────────────────────────
 const S = {
@@ -369,6 +369,7 @@ const S = {
   people: [],
   notifs: [],
   genreFilter: null,
+  likedPosts: new Set(JSON.parse(localStorage.getItem('orak_likes') || '[]')),
 };
 
 // ── Colores de avatares ─────────────────────────────────────────
@@ -478,11 +479,10 @@ function updateUserUI() {
     }
   }
   _set('orun-display', (oruns||0).toLocaleString());
-  _set('glimmer-display', glimmers_week || 0);
   _set('eco-name',     display_name || username);
   _set('eco-lvl',      `Nivel ${nivel || 1}`);
   _set('eco-oruns',    (oruns||0).toLocaleString());
-  _set('eco-glimmers', `${glimmers_week||0}/10`);
+  _set('eco-glimmers', (p.glimmers_total||0).toLocaleString());
   _set('eco-pct',      `${pct}%`);
   document.getElementById('eco-fill').style.width = pct + '%';
   _set('prof-name',    display_name || username);
@@ -548,8 +548,7 @@ function postHTML(p, i) {
     </div>
     <div class="post-body"><div class="post-text">${escapeHtml(p.texto)}</div>${book}</div>
     <div class="post-actions">
-      <button class="pact" id="like-${p.id}" onclick="toggleLike(${p.id})">✦ ${p.glimmers||0}</button>
-      <button class="pact" onclick="openGlimmer(${p.id})">⬡ Dar Glimmer</button>
+      <button class="pact${S.likedPosts.has(p.id) ? ' liked' : ''}" id="glimmer-${p.id}" onclick="darGlimmerPost(${p.id})">⬡ ${p.glimmers||0} Glimmer${(p.glimmers||0)!==1?'s':''}</button>
       <button class="pact" data-libro-fork="${p.libro_id||''}" onclick="if(this.dataset.libroFork) window.location.href='/libro?id='+this.dataset.libroFork; else toast('Este post no tiene libro asociado')">⇄ ${p.forks||0} Forks</button>
       <button class="pact" onclick="toast('✎ Notas próximamente')">✎ ${p.notas||0} Notas</button>
       <button class="pact" onclick="sharePost(${p.id})">◈ Compartir</button>
@@ -558,12 +557,30 @@ function postHTML(p, i) {
   </div>`;
 }
 
-window.toggleLike = (id) => {
-  const btn = document.getElementById('like-' + id);
+window.darGlimmerPost = async (id) => {
+  if (!getToken()) { toast('Inicia sesión para dar Glimmer', 'err'); return; }
+  const btn = document.getElementById('glimmer-' + id);
   if (!btn) return;
-  btn.classList.toggle('liked');
-  const p = S.posts.find(x => x.id === id);
-  if (p) { p.glimmers = (p.glimmers||0) + (btn.classList.contains('liked') ? 1 : -1); btn.textContent = `✦ ${p.glimmers}`; }
+  const yaLikedo = S.likedPosts.has(id);
+  const actual = parseInt(btn.textContent.match(/\d+/)?.[0] || '0');
+  try {
+    if (yaLikedo) {
+      await quitarGlimmer({ post_id: id }, getToken());
+      S.likedPosts.delete(id);
+      localStorage.setItem('orak_likes', JSON.stringify([...S.likedPosts]));
+      btn.classList.remove('liked');
+      const nuevo = Math.max(0, actual - 1);
+      btn.textContent = `⬡ ${nuevo} Glimmer${nuevo !== 1 ? 's' : ''}`;
+    } else {
+      await darGlimmer({ post_id: id, cantidad: 1 }, getToken());
+      S.likedPosts.add(id);
+      localStorage.setItem('orak_likes', JSON.stringify([...S.likedPosts]));
+      btn.classList.add('liked');
+      const nuevo = actual + 1;
+      btn.textContent = `⬡ ${nuevo} Glimmer${nuevo !== 1 ? 's' : ''}`;
+      toast('⬡ Glimmer enviado');
+    }
+  } catch(e) { toast(e.message, 'err'); }
 };
 
 window.submitPost = async () => {
@@ -789,24 +806,6 @@ window.clearNotifs = async () => {
 };
 function closeNotifPanel() { S.notifOpen = false; document.getElementById('notif-panel').classList.remove('open'); }
 
-// ── GLIMMER MODAL ────────────────────────────────────────────────
-window.openGlimmer = (postId) => {
-  if (getGlimmers() <= 0) { toast('Sin Glimmers esta semana · Se recargan el lunes'); return; }
-  S.glimmerPostId = postId; S.glimmerAmt = 1;
-  document.querySelectorAll('.gl-opt').forEach((o,i) => o.classList.toggle('sel', i===0));
-  _set('gl-balance', getGlimmers());
-  document.getElementById('glimmer-modal').classList.add('open');
-};
-window.selGlimmer = (el, val) => { document.querySelectorAll('.gl-opt').forEach(o => o.classList.remove('sel')); el.classList.add('sel'); S.glimmerAmt = val; };
-window.sendGlimmer = async () => {
-  try {
-    await darGlimmer({ post_id: S.glimmerPostId, cantidad: S.glimmerAmt }, getToken());
-    actualizarOruns(-S.glimmerAmt); actualizarGlimmers(-1); updateUserUI();
-    closeModal('glimmer-modal');
-    toast(`✦ ${S.glimmerAmt} Glimmer${S.glimmerAmt>1?'s':''} enviado${S.glimmerAmt>1?'s':''}`);
-    await loadFeed();
-  } catch(e) { toast(e.message,'err'); closeModal('glimmer-modal'); }
-};
 window.closeModal = (id) => document.getElementById(id).classList.remove('open');
 
 // ── TOAST ────────────────────────────────────────────────────────
