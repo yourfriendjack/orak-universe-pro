@@ -12,8 +12,18 @@
 
 const AuroraRenderer = (() => {
 
-  let canvas = null, ctx = null, raf = null, t = 0;
+  // ── Dos canvas ──────────────────────────────────────────────────────────
+  let canvas = null,     ctx     = null;  // z-index:-1  atmósfera + aurora
+  let overCanvas = null, overCtx = null;  // z-index:9998 cursor glow (sobre la UI)
+
+  let raf = null, t = 0;
   let dust = null;
+
+  // ── Cursor ──────────────────────────────────────────────────────────────
+  let mouseX = -999, mouseY = -999;
+  let lastRing = 0;
+  let _onMove  = null;
+  const rings  = [];
 
   // ── Posición del núcleo ─────────────────────────────────────────────────
   const CORE_XF = 0.74;
@@ -307,40 +317,150 @@ const AuroraRenderer = (() => {
   }
 
   // ════════════════════════════════════════════════════════════════════════
+  //  CURSOR OVERLAY — halo de energía + anillos que se expanden
+  //  Renderiza en overCanvas (z:9998) para ser visible sobre posts,
+  //  sidebars y topbar. pointer-events:none → no bloquea ningún clic.
+  // ════════════════════════════════════════════════════════════════════════
+  function drawCursor(W, H) {
+    overCtx.clearRect(0, 0, W, H);
+    if (mouseX < 0) return;
+
+    // Color sincronizado con el ciclo cromático del núcleo
+    const hue = Math.sin(t * 0.00060);
+    const cr  = Math.round(Math.max(0, -hue) * 120);
+    const cg  = Math.round(212 - 48 * Math.abs(hue));
+    const cb  = Math.round(168 + Math.max(0, hue) * 80);
+
+    overCtx.save();
+    overCtx.globalCompositeOperation = 'screen';
+
+    // — Halo exterior suave (siempre presente mientras el cursor esté dentro) —
+    const outerGlow = overCtx.createRadialGradient(mouseX, mouseY, 0, mouseX, mouseY, 80);
+    outerGlow.addColorStop(0.00, `rgba(${cr},${cg},${cb},0.10)`);
+    outerGlow.addColorStop(0.38, `rgba(${cr},${cg},${cb},0.05)`);
+    outerGlow.addColorStop(1.00,  'rgba(0,0,0,0)');
+    overCtx.beginPath();
+    overCtx.arc(mouseX, mouseY, 80, 0, Math.PI * 2);
+    overCtx.fillStyle = outerGlow;
+    overCtx.fill();
+
+    // — Núcleo brillante cercano —
+    const innerGlow = overCtx.createRadialGradient(mouseX, mouseY, 0, mouseX, mouseY, 22);
+    innerGlow.addColorStop(0.00, 'rgba(255,255,255,0.22)');
+    innerGlow.addColorStop(0.25, `rgba(${cr},${cg},${cb},0.16)`);
+    innerGlow.addColorStop(0.65, `rgba(${cr},${cg},${cb},0.07)`);
+    innerGlow.addColorStop(1.00,  'rgba(0,0,0,0)');
+    overCtx.beginPath();
+    overCtx.arc(mouseX, mouseY, 22, 0, Math.PI * 2);
+    overCtx.fillStyle = innerGlow;
+    overCtx.fill();
+
+    // — Punto central (la "estrella" del cursor) —
+    overCtx.beginPath();
+    overCtx.arc(mouseX, mouseY, 2.4, 0, Math.PI * 2);
+    overCtx.fillStyle = `rgba(255,255,255,0.55)`;
+    overCtx.fill();
+
+    // — Anillos de energía que se expanden al moverse —
+    for (let i = rings.length - 1; i >= 0; i--) {
+      const rg = rings[i];
+      const al = rg.life * 0.30;
+
+      overCtx.beginPath();
+      overCtx.arc(rg.x, rg.y, rg.r, 0, Math.PI * 2);
+      overCtx.strokeStyle = `rgba(${cr},${cg},${cb},${al})`;
+      overCtx.lineWidth   = 1.1;
+      overCtx.stroke();
+
+      // Anillo interior tenue
+      if (rg.r > 12) {
+        overCtx.beginPath();
+        overCtx.arc(rg.x, rg.y, rg.r * 0.50, 0, Math.PI * 2);
+        overCtx.strokeStyle = `rgba(${cr},${cg},${cb},${al * 0.38})`;
+        overCtx.lineWidth   = 0.5;
+        overCtx.stroke();
+      }
+
+      rg.r    += 0.55;
+      rg.life -= 0.0095;
+      if (rg.life <= 0) rings.splice(i, 1);
+    }
+
+    overCtx.restore();
+  }
+
+  // ════════════════════════════════════════════════════════════════════════
   //  LOOP
   // ════════════════════════════════════════════════════════════════════════
   function frame() {
     t++;
     const W = canvas.width;
     const H = canvas.height;
+
+    // — Canvas de fondo —
     ctx.clearRect(0, 0, W, H);
     drawStars(W, H);
     drawDust(W, H);
     drawMist(W, H);
     BANDS.forEach(band => drawBand(band, W, H));
     drawCore(W, H);
+
+    // — Overlay cursor —
+    drawCursor(W, H);
+
     raf = requestAnimationFrame(frame);
   }
 
   function resize() {
     if (!canvas) return;
-    canvas.width  = window.innerWidth;
-    canvas.height = window.innerHeight;
-    initDust(canvas.width, canvas.height);
+    const W = window.innerWidth;
+    const H = window.innerHeight;
+    canvas.width      = W;  canvas.height      = H;
+    overCanvas.width  = W;  overCanvas.height  = H;
+    initDust(W, H);
   }
 
   return {
     start() {
       if (canvas) return;
+
+      // Canvas de fondo — atmósfera + aurora
       canvas = document.createElement('canvas');
-      canvas.id = 'orak-aurora-canvas';
+      canvas.id = 'orak-aurora-bg';
       Object.assign(canvas.style, {
         position: 'fixed', inset: '0',
         pointerEvents: 'none', zIndex: '-1',
       });
       document.body.appendChild(canvas);
       ctx = canvas.getContext('2d');
+
+      // Canvas overlay — cursor glow sobre toda la UI
+      overCanvas = document.createElement('canvas');
+      overCanvas.id = 'orak-aurora-over';
+      Object.assign(overCanvas.style, {
+        position: 'fixed', inset: '0',
+        pointerEvents: 'none', zIndex: '9998',
+      });
+      document.body.appendChild(overCanvas);
+      overCtx = overCanvas.getContext('2d');
+
       resize();
+
+      // Cursor: halo inmediato + anillo cada 150 ms
+      _onMove = (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+        const now = performance.now();
+        if (now - lastRing > 150 && rings.length < 12) {
+          lastRing = now;
+          rings.push({ x: mouseX, y: mouseY, r: 2.0, life: 1.0 });
+        }
+      };
+      document.addEventListener('mousemove', _onMove, { passive: true });
+
+      // Ocultar glow cuando el cursor sale de la ventana
+      document.addEventListener('mouseleave', () => { mouseX = -999; mouseY = -999; });
+
       window.addEventListener('resize', resize);
       t = 0;
       frame();
@@ -350,10 +470,13 @@ const AuroraRenderer = (() => {
       if (!canvas) return;
       cancelAnimationFrame(raf);
       window.removeEventListener('resize', resize);
-      canvas.remove();
-      canvas = ctx = raf = null;
+      if (_onMove) { document.removeEventListener('mousemove', _onMove); _onMove = null; }
+      canvas.remove();     canvas     = ctx     = null;
+      overCanvas.remove(); overCanvas = overCtx = null;
       dust = null;
-      t = 0;
+      rings.length = 0;
+      mouseX = mouseY = -999;
+      raf = null; t = 0;
     },
 
     // Futura integración de actividad de comunidad (0 = calma, 1 = tormenta)
