@@ -18,7 +18,11 @@ async function _fetch(method, path, body, token) {
   const data = await res.json().catch(() => ({ ok: false, mensaje: 'Respuesta inválida' }));
 
   if (!res.ok) {
-    throw new Error(data.detail || data.mensaje || `Error ${res.status}`);
+    const detail = data.detail;
+    const msg = Array.isArray(detail)
+      ? detail.map(e => e.msg || JSON.stringify(e)).join(' · ')
+      : (detail || data.mensaje || `Error ${res.status}`);
+    throw new Error(msg);
   }
   return data;
 }
