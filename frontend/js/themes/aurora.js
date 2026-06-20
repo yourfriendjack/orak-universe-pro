@@ -381,30 +381,29 @@ const AuroraRenderer = (() => {
     overCtx.globalCompositeOperation = 'screen';
 
     // — Halo exterior suave —
-    const outerGlow = overCtx.createRadialGradient(mouseX, mouseY, 0, mouseX, mouseY, 72);
-    outerGlow.addColorStop(0.00, `rgba(${cr},${cg},${cb},0.10)`);
-    outerGlow.addColorStop(0.40, `rgba(${cr},${cg},${cb},0.04)`);
+    const outerGlow = overCtx.createRadialGradient(mouseX, mouseY, 0, mouseX, mouseY, 44);
+    outerGlow.addColorStop(0.00, `rgba(${cr},${cg},${cb},0.07)`);
+    outerGlow.addColorStop(0.45, `rgba(${cr},${cg},${cb},0.02)`);
     outerGlow.addColorStop(1.00,  'rgba(0,0,0,0)');
     overCtx.beginPath();
-    overCtx.arc(mouseX, mouseY, 72, 0, Math.PI * 2);
+    overCtx.arc(mouseX, mouseY, 44, 0, Math.PI * 2);
     overCtx.fillStyle = outerGlow;
     overCtx.fill();
 
     // — Núcleo cercano —
-    const innerGlow = overCtx.createRadialGradient(mouseX, mouseY, 0, mouseX, mouseY, 20);
-    innerGlow.addColorStop(0.00, 'rgba(255,255,255,0.20)');
-    innerGlow.addColorStop(0.30, `rgba(${cr},${cg},${cb},0.14)`);
-    innerGlow.addColorStop(0.70, `rgba(${cr},${cg},${cb},0.05)`);
+    const innerGlow = overCtx.createRadialGradient(mouseX, mouseY, 0, mouseX, mouseY, 13);
+    innerGlow.addColorStop(0.00, 'rgba(255,255,255,0.18)');
+    innerGlow.addColorStop(0.35, `rgba(${cr},${cg},${cb},0.10)`);
     innerGlow.addColorStop(1.00,  'rgba(0,0,0,0)');
     overCtx.beginPath();
-    overCtx.arc(mouseX, mouseY, 20, 0, Math.PI * 2);
+    overCtx.arc(mouseX, mouseY, 13, 0, Math.PI * 2);
     overCtx.fillStyle = innerGlow;
     overCtx.fill();
 
     // — Bolita blanca central —
     overCtx.beginPath();
-    overCtx.arc(mouseX, mouseY, 2.6, 0, Math.PI * 2);
-    overCtx.fillStyle = 'rgba(255,255,255,0.62)';
+    overCtx.arc(mouseX, mouseY, 1.8, 0, Math.PI * 2);
+    overCtx.fillStyle = 'rgba(255,255,255,0.50)';
     overCtx.fill();
 
     // — Cristales de escarcha —
@@ -494,12 +493,12 @@ const AuroraRenderer = (() => {
           frosts.push({
             x:        mouseX,
             y:        mouseY,
-            size:     1.0,
-            maxSize:  14 + Math.random() * 10,   // 14-24 px
+            size:     0.5,
+            maxSize:  5 + Math.random() * 4,     // 5-9 px — sutil
             alpha:    0,
-            maxAlpha: 0.55 + Math.random() * 0.20,
+            maxAlpha: 0.22 + Math.random() * 0.12,
             growing:  true,
-            rotation: Math.random() * (Math.PI / 3), // simetría 6-fold: 0-60°
+            rotation: Math.random() * (Math.PI / 3),
           });
         }
       };
