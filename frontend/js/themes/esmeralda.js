@@ -60,6 +60,7 @@ const EsmeraldaRenderer = (() => {
       wander: i * 1.234,
       size:   2.4 + (i % 3) * 1.0,
       deep:   i % 4 === 0,
+      boost:  0,
     }));
   }
 
@@ -482,9 +483,11 @@ const EsmeraldaRenderer = (() => {
       f.wander += 0.008;
       f.vx += Math.cos(f.wander*0.65)*0.015;
       f.vy += Math.sin(f.wander*0.52)*0.012;
-      const spd = Math.sqrt(f.vx*f.vx+f.vy*f.vy);
+      const spd    = Math.sqrt(f.vx*f.vx+f.vy*f.vy);
       if (spd > 0.05) f.angle = Math.atan2(f.vy, f.vx) + Math.PI/2;
-      if (spd > 0.60) { f.vx *= 0.60/spd; f.vy *= 0.60/spd; }
+      const maxSpd = f.boost > 0 ? 5.5 : 0.60;
+      if (spd > maxSpd) { f.vx *= maxSpd/spd; f.vy *= maxSpd/spd; }
+      if (f.boost > 0)  { f.vx *= 0.955; f.vy *= 0.955; f.boost--; }
       f.x += f.vx; f.y += f.vy;
       if (f.x < 0) f.x = W; if (f.x > W) f.x = 0;
       if (f.y < 0) f.y = H*0.82; if (f.y > H*0.94) f.y = H*0.05;
@@ -666,19 +669,30 @@ const EsmeraldaRenderer = (() => {
   //  Interacción de clic
   // ════════════════════════════════════════════════════════════════════════
   function handleClick(cx, cy) {
-    // Siempre crea bloom orgánico
     spawnBloom(cx, cy);
+    if (!fireflies) return;
 
-    // Si hay luciérnagas cerca, huyen asustadas
-    if (fireflies) {
-      fireflies.forEach(f => {
-        const dx=cx-f.x, dy=cy-f.y;
-        if (dx*dx+dy*dy < 1600) { // radio 40px
-          const escA = Math.atan2(f.y-cy, f.x-cx);
-          f.vx = Math.cos(escA)*3.8; f.vy = Math.sin(escA)*3.8;
-        }
-      });
-    }
+    // Ordenar por distancia al clic
+    const sorted = fireflies
+      .map(f => { const dx=cx-f.x, dy=cy-f.y; return { f, dist2:dx*dx+dy*dy }; })
+      .sort((a,b) => a.dist2-b.dist2);
+
+    let attracted = 0;
+    sorted.forEach(({ f, dist2 }) => {
+      if (dist2 < 2500) {
+        // Radio 50px — huye a máxima velocidad
+        const escA = Math.atan2(f.y-cy, f.x-cx);
+        f.vx = Math.cos(escA)*8.5; f.vy = Math.sin(escA)*8.5;
+        f.boost = 55;
+      } else if (attracted < 5 && dist2 < 200000) {
+        // Las 5 más cercanas fuera de la zona de huida → corren a las esporas
+        const toA = Math.atan2(cy-f.y, cx-f.x);
+        const spd = 3.0 + Math.random()*1.5;
+        f.vx = Math.cos(toA)*spd; f.vy = Math.sin(toA)*spd;
+        f.boost = 48;
+        attracted++;
+      }
+    });
   }
 
   // ════════════════════════════════════════════════════════════════════════
