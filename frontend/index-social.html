@@ -86,14 +86,15 @@
     </div>
     <input class="topbar-search" type="text" placeholder="Buscar libros, escritores…">
     <nav class="topbar-nav">
-      <button class="tnav active" id="tnav-feed"    onclick="goView('feed')">◈ Feed</button>
-      <button class="tnav"        id="tnav-explore" onclick="goView('explore')">◎ Explorar</button>
-      <button class="tnav"        id="tnav-people"  onclick="goView('people')">◷ Escritores</button>
-      <button class="tnav"        id="tnav-profile" onclick="goView('profile')">◧ Mi Perfil</button>
+      <button class="tnav active" id="tnav-feed"    onclick="goView('feed')">◉ Feed</button>
+      <button class="tnav"        id="tnav-explore" onclick="goView('explore')">⊛ Explorar</button>
+      <button class="tnav"        id="tnav-people"  onclick="goView('people')">⊙ Escritores</button>
+      <button class="tnav"        id="tnav-profile" onclick="goView('profile')">◑ Mi Perfil</button>
     </nav>
     <div class="topbar-right">
       <button class="notif-btn" id="notif-btn" onclick="toggleNotif()">
-        🔔<div class="notif-dot" id="notif-dot"></div>
+        <span class="notif-sigil"></span>
+        <div class="notif-dot" id="notif-dot"></div>
       </button>
       <div class="orun-pill">⬡ <span id="orun-display">—</span> Oruns</div>
       <div class="user-av" id="topbar-av" onclick="goView('profile')">…</div>
@@ -106,19 +107,19 @@
     <nav class="sidebar">
       <button class="write-btn" onclick="window.location.href='/editor'">✦ Nuevo Libro</button>
       <div class="snav-label">Navegar</div>
-      <div class="snav-item active" id="snav-feed"    onclick="goView('feed')"><span class="snav-icon">◈</span>Feed</div>
-      <div class="snav-item"        id="snav-explore" onclick="goView('explore')"><span class="snav-icon">◎</span>Explorar</div>
-      <div class="snav-item"        id="snav-people"  onclick="goView('people')"><span class="snav-icon">◷</span>Escritores</div>
-      <div class="snav-item"        id="snav-profile" onclick="goView('profile')"><span class="snav-icon">◧</span>Mi Perfil</div>
+      <div class="snav-item active" id="snav-feed"    onclick="goView('feed')"><span class="snav-icon">◉</span>Feed</div>
+      <div class="snav-item"        id="snav-explore" onclick="goView('explore')"><span class="snav-icon">⊛</span>Explorar</div>
+      <div class="snav-item"        id="snav-people"  onclick="goView('people')"><span class="snav-icon">⊙</span>Escritores</div>
+      <div class="snav-item"        id="snav-profile" onclick="goView('profile')"><span class="snav-icon">◑</span>Mi Perfil</div>
       <div class="snav-label">Biblioteca</div>
-      <div class="snav-item" id="snav-misLibros" onclick="goView('misLibros')"><span class="snav-icon">◫</span>Mis Libros</div>
-      <div class="snav-item" id="snav-collab"   onclick="goView('collab')"><span class="snav-icon">◆</span>Colaboraciones</div>
+      <div class="snav-item" id="snav-misLibros" onclick="goView('misLibros')"><span class="snav-icon">≡</span>Mis Libros</div>
+      <div class="snav-item" id="snav-collab"   onclick="goView('collab')"><span class="snav-icon">⊕</span>Colaboraciones</div>
       <div class="snav-label">Comunidad</div>
-      <div class="snav-item" onclick="toggleNotif()"><span class="snav-icon">🔔</span>Notificaciones<span class="snav-badge" id="snav-badge" style="display:none">0</span></div>
-      <div class="snav-item" id="snav-mensajes" onclick="toggleChatFloat()"><span class="snav-icon">✉</span>Mensajes</div>
-      <div class="snav-item" id="snav-tienda"   onclick="goView('tienda')"><span class="snav-icon">❋</span>Tienda Oruns</div>
+      <div class="snav-item" onclick="toggleNotif()"><span class="snav-icon">✵</span>Notificaciones<span class="snav-badge" id="snav-badge" style="display:none">0</span></div>
+      <div class="snav-item" id="snav-mensajes" onclick="toggleChatFloat()"><span class="snav-icon">◎</span>Mensajes</div>
+      <div class="snav-item" id="snav-tienda"   onclick="goView('tienda')"><span class="snav-icon">⬡</span>Tienda Oruns</div>
       <div class="snav-label">Cuenta</div>
-      <div class="snav-item" onclick="doLogout()"><span class="snav-icon">←</span>Cerrar sesión</div>
+      <div class="snav-item" onclick="doLogout()"><span class="snav-icon">⊘</span>Cerrar sesión</div>
     </nav>
 
     <!-- ── FEED ── -->
@@ -581,9 +582,9 @@ function postHTML(p, i) {
     <div class="post-body"><div class="post-text">${escapeHtml(p.texto)}</div>${book}</div>
     <div class="post-actions">
       <button class="pact${S.likedPosts.has(p.id) ? ' liked' : ''}" id="glimmer-${p.id}" onclick="darGlimmerPost(${p.id})">⬡ ${p.glimmers||0} Glimmer${(p.glimmers||0)!==1?'s':''}</button>
-      <button class="pact" data-libro-fork="${p.libro_id||''}" onclick="if(this.dataset.libroFork) window.location.href='/libro?id='+this.dataset.libroFork; else toast('Este post no tiene libro asociado')">⇄ ${p.forks||0} Forks</button>
-      <button class="pact" id="nota-btn-${p.id}" onclick="toggleNotas(${p.id})">✎ ${p.notas||0} Nota${(p.notas||0)!==1?'s':''}</button>
-      <button class="pact" onclick="sharePost(${p.id})">◈ Compartir</button>
+      <button class="pact" data-libro-fork="${p.libro_id||''}" onclick="if(this.dataset.libroFork) window.location.href='/libro?id='+this.dataset.libroFork; else toast('Este post no tiene libro asociado')">⋔ ${p.forks||0} Forks</button>
+      <button class="pact" id="nota-btn-${p.id}" onclick="toggleNotas(${p.id})">✐ ${p.notas||0} Nota${(p.notas||0)!==1?'s':''}</button>
+      <button class="pact" onclick="sharePost(${p.id})">⊜ Compartir</button>
       ${p.autor_id === getPerfil()?.id ? `<button class="pact" onclick="eliminarPost(${p.id})" style="color:#c06040">✕ Eliminar</button>` : ''}
     </div>
     <div class="notas-panel" id="notas-panel-${p.id}" style="display:none">
@@ -653,7 +654,7 @@ window.sharePost = async (id) => {
   if (!p) return;
   try {
     await crearPost({ tipo:'compartido', texto:`Compartiendo: ${p.texto.slice(0,120)}…`, ref_post_id: id }, getToken());
-    toast('◈ Compartido en tu feed');
+    toast('⊜ Compartido en tu feed');
     await loadFeed();
   } catch(e) { toast(e.message,'err'); }
 };
@@ -696,7 +697,7 @@ function renderBooks(containerId, books) {
         <div class="bcard-desc">${escapeHtml(b.descripcion||'Sin descripción')}</div>
         <div class="bcard-foot">
           <div class="btags"><span class="btag">${escapeHtml(b.genero||'—')}</span></div>
-          <div class="bcard-gl">✦ ${b.glimmers||0}</div>
+          <div class="bcard-gl">⬡ ${b.glimmers||0}</div>
         </div>
       </div>
     </div>`).join('');
@@ -745,8 +746,8 @@ function renderPeople(list, filter='') {
       </div>
       <div class="person-btns">
         ${(()=>{const f=S.myFollows.has(p.id);return `<button class="follow-btn${f?' on':''}" id="fw-${p.id}" onclick="toggleFollow('${p.id}',this)">${f?'✓ Siguiendo':'+ Seguir'}</button>`;})()}
-        <button class="reader-btn" id="rd-${p.id}" onclick="toggleReader('${p.id}',this)">❋ Lector fiel</button>
-        <button class="reader-btn" onclick="iniciarConvDesdeEscritor('${p.id}','${escapeHtml(p.username||'')}','${escapeHtml(p.display_name||p.username||'')}')">✉ Mensaje</button>
+        <button class="reader-btn" id="rd-${p.id}" onclick="toggleReader('${p.id}',this)">❧ Lector fiel</button>
+        <button class="reader-btn" onclick="iniciarConvDesdeEscritor('${p.id}','${escapeHtml(p.username||'')}','${escapeHtml(p.display_name||p.username||'')}')">◎ Mensaje</button>
       </div>
     </div>`;
   }).join('') || '<div class="loading">No se encontraron escritores</div>';
@@ -777,7 +778,7 @@ window.toggleReader = async (id, btn) => {
   if (!on) {
     try {
       await fetch('/api/social/lectores-fieles', { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+getToken()}, body: JSON.stringify({receptor_id:id}) });
-      btn.classList.add('on'); btn.textContent = '✓ Lector fiel'; actualizarOruns(10); updateUserUI(); toast('❋ Invitación enviada · +10 Oruns');
+      btn.classList.add('on'); btn.textContent = '✓ Lector fiel'; actualizarOruns(10); updateUserUI(); toast('❧ Invitación enviada · +10 Oruns');
     } catch(e) { toast(e.message,'err'); }
   }
 };
@@ -881,9 +882,9 @@ window.responderCollab = async (libroId, accion, btn) => {
 const RANGOS = [
   { min:0,    max:99,   nombre:'Lector Curioso',       color:'#8899aa', icono:'◎', perks:['Acceso al feed','Explorar universos','Dar Glimmers'] },
   { min:100,  max:499,  nombre:'Escritor Novato',       color:'#7ab87a', icono:'✦', perks:['Publicar libros','Comentar capítulos','Forkear libros'] },
-  { min:500,  max:999,  nombre:'Cronista',              color:'#d4a843', icono:'◈', perks:['Invitar co-escritores','Lectores fieles','Badge dorado'] },
-  { min:1000, max:2499, nombre:'Narrador',              color:'#c47a8a', icono:'◆', perks:['Narrador badge','Prioridad en explorar','Perfil destacado'] },
-  { min:2500, max:4999, nombre:'Arquitecto de Mundos',  color:'#a080d0', icono:'❋', perks:['Badge púrpura','Acceso anticipado a features','Rango visible en posts'] },
+  { min:500,  max:999,  nombre:'Cronista',              color:'#d4a843', icono:'⊛', perks:['Invitar co-escritores','Lectores fieles','Badge dorado'] },
+  { min:1000, max:2499, nombre:'Narrador',              color:'#c47a8a', icono:'◑', perks:['Narrador badge','Prioridad en explorar','Perfil destacado'] },
+  { min:2500, max:4999, nombre:'Arquitecto de Mundos',  color:'#a080d0', icono:'⊕', perks:['Badge púrpura','Acceso anticipado a features','Rango visible en posts'] },
   { min:5000, max:Infinity, nombre:'Maestro del Universo', color:'#e0b860', icono:'⬡', perks:['Badge legendario','Nombre en oro en el ranking','Rango de élite'] },
 ];
 
@@ -987,7 +988,7 @@ async function loadNotifs() {
     const badge = document.getElementById('snav-badge');
     if (unread) { dot.classList.add('show'); badge.textContent = unread; badge.style.display = 'inline'; }
     else        { dot.classList.remove('show'); badge.style.display = 'none'; }
-    const icoMap = { glimmer:'ni-g ✦', fork:'ni-f ⇄', follow:'ni-fw ◷', lector_fiel:'ni-c ❋', collab:'ni-c ◈' };
+    const icoMap = { glimmer:'ni-g ⬡', fork:'ni-f ⋔', follow:'ni-fw ⊙', lector_fiel:'ni-c ❧', collab:'ni-c ⊕' };
     document.getElementById('notif-list').innerHTML = data.slice(0,20).map(n => {
       const [cls, ico] = (icoMap[n.tipo]||'ni-g ●').split(' ');
       return `<div class="notif-item ${n.leida?'':'unread'}">
