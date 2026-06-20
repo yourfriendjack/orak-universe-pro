@@ -949,16 +949,24 @@ const RANGOS = [
 // ── Catálogo de la Tienda ───────────────────────────────────────
 const CATALOGO = [
   // TEMAS UI
-  { id:'ui-dark-fantasy', tipo:'tema_ui',     nombre:'Dark Fantasy',       desc:'Púrpuras abisales y magia oscura',           precio:350, req:200, clase:'theme-dark-fantasy', preview:'linear-gradient(135deg,#0d0a1a 0%,#2a1060 100%)', acento:'#b57bff' },
-  { id:'ui-glitch',       tipo:'tema_ui',     nombre:'Glitch · Cyber',     desc:'Neones digitales sobre oscuridad absoluta',   precio:500, req:200, clase:'theme-glitch',       preview:'linear-gradient(135deg,#05100a 0%,#003320 100%)', acento:'#00e890' },
-  { id:'ui-lunar',        tipo:'tema_ui',     nombre:'Lunar',              desc:'Plateados y azules de medianoche profunda',   precio:400, req:200, clase:'theme-lunar',        preview:'linear-gradient(135deg,#080c14 0%,#102040 100%)', acento:'#7aaccc' },
-  { id:'ui-sangre',       tipo:'tema_ui',     nombre:'Sangre & Tinta',     desc:'Gótico. Rojos carmesí y negro absoluto',      precio:450, req:200, clase:'theme-sangre',       preview:'linear-gradient(135deg,#0a0000 0%,#3a0808 100%)', acento:'#c04040' },
+  { id:'ui-dark-fantasy', tipo:'tema_ui', nombre:'Dark Fantasy',      desc:'Púrpuras abisales y magia oscura',              precio:350, req:200, clase:'theme-dark-fantasy', preview:'linear-gradient(135deg,#0d0a1a 0%,#2a1060 100%)', acento:'#b57bff' },
+  { id:'ui-glitch',       tipo:'tema_ui', nombre:'Glitch · Cyber',    desc:'Neones digitales sobre oscuridad absoluta',      precio:500, req:200, clase:'theme-glitch',       preview:'linear-gradient(135deg,#05100a 0%,#003320 100%)', acento:'#00e890' },
+  { id:'ui-lunar',        tipo:'tema_ui', nombre:'Lunar',             desc:'Plateados y azules de medianoche profunda',      precio:400, req:200, clase:'theme-lunar',        preview:'linear-gradient(135deg,#080c14 0%,#102040 100%)', acento:'#7aaccc' },
+  { id:'ui-sangre',       tipo:'tema_ui', nombre:'Sangre & Tinta',    desc:'Gótico. Rojos carmesí y negro absoluto',         precio:450, req:200, clase:'theme-sangre',       preview:'linear-gradient(135deg,#0a0000 0%,#3a0808 100%)', acento:'#c04040' },
+  { id:'ui-cosmos',       tipo:'tema_ui', nombre:'Cosmos',            desc:'Campo estelar dorado flotando en el abismo',     precio:850, req:500, clase:'theme-cosmos',       preview:'linear-gradient(135deg,#05040b 0%,#2a2050 100%)', acento:'#e8b84a' },
+  { id:'ui-aurora',       tipo:'tema_ui', nombre:'Aurora Boreal',     desc:'Ondas de luz teal sobre el polo del mundo',      precio:700, req:400, clase:'theme-aurora',       preview:'linear-gradient(135deg,#030d12 0%,#0d3040 100%)', acento:'#00d4a8' },
+  { id:'ui-rubi',         tipo:'tema_ui', nombre:'Rubí',              desc:'Carmesí profundo, elegancia oscura y pasión',    precio:500, req:200, clase:'theme-rubi',         preview:'linear-gradient(135deg,#0d0308 0%,#3d1022 100%)', acento:'#e87898' },
+  { id:'ui-esmeralda',    tipo:'tema_ui', nombre:'Esmeralda',         desc:'Verde jade y oscuridad de bosque ancestral',     precio:600, req:300, clase:'theme-esmeralda',    preview:'linear-gradient(135deg,#030e06 0%,#123820 100%)', acento:'#35d878' },
   // TEMAS LECTURA
-  { id:'rl-libreta',   tipo:'tema_lectura', nombre:'Libreta Antigua',    desc:'Rayas de cuaderno en crema envejecida',       precio:150, req:0,   clase:'rl-libreta',   preview:'linear-gradient(135deg,#f5ead8,#ede3c8)', acento:'#8b6040', dark:false },
-  { id:'rl-pergamino', tipo:'tema_lectura', nombre:'Pergamino',          desc:'Papel antiguo con tonos dorados',             precio:200, req:0,   clase:'rl-pergamino', preview:'linear-gradient(135deg,#d4b896,#b08860)', acento:'#7a5020', dark:false },
-  { id:'rl-maquina',   tipo:'tema_lectura', nombre:'Máquina de Escribir',desc:'Blanco prístino con fuente monoespaciada',    precio:150, req:0,   clase:'rl-maquina',   preview:'linear-gradient(135deg,#fafafa,#f0f0f0)', acento:'#333',   dark:false },
-  { id:'rl-noche',     tipo:'tema_lectura', nombre:'Noche Eterna',       desc:'Negro absoluto, letras claras',               precio:100, req:0,   clase:'rl-noche',     preview:'linear-gradient(135deg,#000000,#0a0a0a)', acento:'#cccccc', dark:true  },
-  { id:'rl-bosque',    tipo:'tema_lectura', nombre:'Bosque Encantado',   desc:'Verdes profundos y papel de musgo',           precio:300, req:200, clase:'rl-bosque',    preview:'linear-gradient(135deg,#0a1a0a,#0f2510)', acento:'#5a9a6a', dark:true  },
+  { id:'rl-libreta',   tipo:'tema_lectura', nombre:'Libreta Antigua',     desc:'Rayas de cuaderno en crema envejecida',          precio:150, req:0,   clase:'rl-libreta',   preview:'linear-gradient(135deg,#f5ead8,#ede3c8)', acento:'#8b6040', dark:false },
+  { id:'rl-pergamino', tipo:'tema_lectura', nombre:'Pergamino',           desc:'Papel antiguo con tonos dorados',                precio:200, req:0,   clase:'rl-pergamino', preview:'linear-gradient(135deg,#d4b896,#b08860)', acento:'#7a5020', dark:false },
+  { id:'rl-maquina',   tipo:'tema_lectura', nombre:'Máquina de Escribir', desc:'Blanco prístino con fuente monoespaciada',        precio:150, req:0,   clase:'rl-maquina',   preview:'linear-gradient(135deg,#fafafa,#f0f0f0)', acento:'#333',    dark:false },
+  { id:'rl-noche',     tipo:'tema_lectura', nombre:'Noche Eterna',        desc:'Negro absoluto, letras claras',                  precio:100, req:0,   clase:'rl-noche',     preview:'linear-gradient(135deg,#000000,#0a0a0a)', acento:'#cccccc', dark:true  },
+  { id:'rl-bosque',    tipo:'tema_lectura', nombre:'Bosque Encantado',    desc:'Verdes profundos y papel de musgo',              precio:300, req:200, clase:'rl-bosque',    preview:'linear-gradient(135deg,#0a1a0a,#0f2510)', acento:'#5a9a6a', dark:true  },
+  { id:'rl-estrellas', tipo:'tema_lectura', nombre:'Cielo Estrellado',    desc:'Constelaciones flotando sobre tinta de noche',   precio:500, req:300, clase:'rl-estrellas', preview:'linear-gradient(135deg,#050a18,#0a1428)', acento:'#4070c0', dark:true  },
+  { id:'rl-amanecer',  tipo:'tema_lectura', nombre:'Amanecer',            desc:'Lavanda y melocotón al despertar del sol',       precio:280, req:0,   clase:'rl-amanecer',  preview:'linear-gradient(135deg,#e8d4f0,#f8ecc8)', acento:'#c07040', dark:false },
+  { id:'rl-sepia',     tipo:'tema_lectura', nombre:'Tinta Sepia',         desc:'Diario antiguo a la luz de una vela',            precio:320, req:0,   clase:'rl-sepia',     preview:'linear-gradient(135deg,#1a0f08,#2a1a0c)', acento:'#b09060', dark:true  },
+  { id:'rl-abismo',    tipo:'tema_lectura', nombre:'Abismo Azul',         desc:'Profundidades oceánicas, texto bioluminiscente', precio:420, req:200, clase:'rl-abismo',    preview:'linear-gradient(135deg,#080a20,#060818)', acento:'#40c8d8', dark:true  },
   // TÍTULOS
   { id:'titulo-narrador', tipo:'titulo', nombre:'Narrador de Mundos',   desc:'Se muestra en tu perfil y publicaciones',    precio:300,  req:100,  color:'#d4a843' },
   { id:'titulo-tejedor',  tipo:'titulo', nombre:'Tejedor de Historias', desc:'Para quienes crean con hilos invisibles',    precio:500,  req:500,  color:'#b57bff' },
@@ -1094,7 +1102,7 @@ window.quitarEquipo = async (itemId, tipo) => {
 
 function aplicarTema(itemId, tipo) {
   if (tipo === 'tema_ui') {
-    document.documentElement.classList.remove('theme-dark-fantasy','theme-glitch','theme-lunar','theme-sangre');
+    document.documentElement.classList.remove('theme-dark-fantasy','theme-glitch','theme-lunar','theme-sangre','theme-cosmos','theme-aurora','theme-rubi','theme-esmeralda');
     if (itemId !== 'default') document.documentElement.classList.add(CATALOGO.find(x=>x.id===itemId)?.clase || '');
     localStorage.setItem('orak_tema_ui', itemId === 'default' ? '' : itemId);
   }

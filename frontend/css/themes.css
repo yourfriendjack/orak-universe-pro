@@ -190,3 +190,260 @@ html.theme-sangre .auth-glow { background: radial-gradient(ellipse at 50% 0%, rg
 .reading-overlay.rl-bosque .rc-tema-panel { background: #0f2010; border-color: rgba(80,160,80,.2); }
 .reading-overlay.rl-bosque .rc-tema-opt { color: #b0d8a8; }
 .reading-overlay.rl-bosque .rc-tema-opt:hover { background: rgba(80,160,80,.1); }
+
+
+/* ═══════════════════════════════════════════════════════════════
+   PACK UNIVERSO — 4 temas UI + 4 temas de lectura
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Keyframes compartidos ────────────────────────────────────── */
+@keyframes cosmos-drift   { from{background-position:0 0} to{background-position:-800px -400px} }
+@keyframes cosmos-twinkle { 0%,100%{opacity:.65} 50%{opacity:1} }
+@keyframes aurora-glow {
+  0%  {opacity:.25;transform:translateX(-12%) skewX(-4deg);}
+  35% {opacity:.52;transform:translateX(8%)   skewX(2deg);}
+  70% {opacity:.38;transform:translateX(-3%)  skewX(0deg);}
+  100%{opacity:.25;transform:translateX(-12%) skewX(-4deg);}
+}
+@keyframes estrellas-drift { from{background-position:0 0} to{background-position:-600px -300px} }
+@keyframes abismo-pulse { 0%,100%{filter:brightness(1)} 50%{filter:brightness(1.07)} }
+
+/* ── ✦ COSMOS ────────────────────────────────────────────────── */
+html.theme-cosmos {
+  --page:#05040b; --mist:#0d0b18; --fog:#2a2050;
+  --ink:#f0ecff; --gold:#f8d87a; --amber:#e8b84a; --amber-dim:#a07820;
+  --rust:#6a4010; --deep:#020108; --white:#100e1a; --parchment:#0d0b18;
+}
+html.theme-cosmos body { background:var(--page); }
+html.theme-cosmos body::before {
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+  background:
+    radial-gradient(ellipse 70% 50% at 50% 18%,rgba(80,60,200,.1) 0%,transparent 70%),
+    radial-gradient(ellipse 40% 35% at 82% 70%,rgba(180,100,20,.07) 0%,transparent 70%);
+}
+html.theme-cosmos body::after {
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+  background-image:
+    radial-gradient(1px 1px at 47px 15px,rgba(255,255,255,.9) 0%,transparent 100%),
+    radial-gradient(1.5px 1.5px at 123px 67px,rgba(255,232,160,.75) 0%,transparent 100%),
+    radial-gradient(1px 1px at 234px 34px,rgba(255,255,255,.8) 0%,transparent 100%),
+    radial-gradient(1px 1px at 356px 89px,rgba(255,255,255,.6) 0%,transparent 100%),
+    radial-gradient(1.5px 1.5px at 478px 23px,rgba(255,232,160,.85) 0%,transparent 100%),
+    radial-gradient(1px 1px at 589px 56px,rgba(255,255,255,.7) 0%,transparent 100%),
+    radial-gradient(2px 2px at 678px 89px,rgba(255,255,255,.8) 0%,transparent 100%),
+    radial-gradient(1px 1px at 756px 34px,rgba(255,255,255,.65) 0%,transparent 100%),
+    radial-gradient(1px 1px at 89px 156px,rgba(255,255,255,.75) 0%,transparent 100%),
+    radial-gradient(2px 2px at 178px 134px,rgba(255,232,160,.85) 0%,transparent 100%),
+    radial-gradient(1px 1px at 289px 178px,rgba(255,255,255,.7) 0%,transparent 100%),
+    radial-gradient(1.5px 1.5px at 423px 145px,rgba(255,255,255,.65) 0%,transparent 100%),
+    radial-gradient(1px 1px at 512px 189px,rgba(255,255,255,.9) 0%,transparent 100%),
+    radial-gradient(1px 1px at 634px 134px,rgba(255,232,160,.75) 0%,transparent 100%),
+    radial-gradient(1.5px 1.5px at 723px 167px,rgba(255,255,255,.8) 0%,transparent 100%),
+    radial-gradient(1.5px 1.5px at 34px 267px,rgba(255,255,255,.8) 0%,transparent 100%),
+    radial-gradient(1px 1px at 145px 312px,rgba(255,255,255,.7) 0%,transparent 100%),
+    radial-gradient(2px 2px at 256px 289px,rgba(255,232,160,.75) 0%,transparent 100%),
+    radial-gradient(1px 1px at 378px 334px,rgba(255,255,255,.9) 0%,transparent 100%),
+    radial-gradient(1.5px 1.5px at 456px 267px,rgba(255,255,255,.65) 0%,transparent 100%),
+    radial-gradient(1px 1px at 567px 312px,rgba(255,255,255,.8) 0%,transparent 100%),
+    radial-gradient(1px 1px at 689px 289px,rgba(255,255,255,.7) 0%,transparent 100%),
+    radial-gradient(2px 2px at 756px 356px,rgba(255,232,160,.85) 0%,transparent 100%),
+    radial-gradient(1px 1px at 78px 423px,rgba(255,255,255,.7) 0%,transparent 100%),
+    radial-gradient(1.5px 1.5px at 189px 467px,rgba(255,232,160,.85) 0%,transparent 100%),
+    radial-gradient(1px 1px at 312px 434px,rgba(255,255,255,.75) 0%,transparent 100%),
+    radial-gradient(2px 2px at 434px 489px,rgba(255,255,255,.7) 0%,transparent 100%),
+    radial-gradient(1px 1px at 523px 445px,rgba(255,255,255,.9) 0%,transparent 100%),
+    radial-gradient(1.5px 1.5px at 645px 478px,rgba(255,255,255,.65) 0%,transparent 100%),
+    radial-gradient(1px 1px at 734px 423px,rgba(255,255,255,.8) 0%,transparent 100%),
+    radial-gradient(2px 2px at 56px 589px,rgba(255,232,160,.75) 0%,transparent 100%),
+    radial-gradient(1px 1px at 167px 634px,rgba(255,255,255,.9) 0%,transparent 100%),
+    radial-gradient(1.5px 1.5px at 289px 612px,rgba(255,255,255,.7) 0%,transparent 100%),
+    radial-gradient(1px 1px at 401px 667px,rgba(255,255,255,.8) 0%,transparent 100%),
+    radial-gradient(1px 1px at 512px 623px,rgba(255,232,160,.85) 0%,transparent 100%),
+    radial-gradient(2px 2px at 634px 689px,rgba(255,255,255,.65) 0%,transparent 100%),
+    radial-gradient(1.5px 1.5px at 712px 645px,rgba(255,255,255,.8) 0%,transparent 100%),
+    radial-gradient(1px 1px at 778px 712px,rgba(255,255,255,.75) 0%,transparent 100%);
+  background-size:800px 800px; background-repeat:repeat;
+  animation:cosmos-drift 90s linear infinite, cosmos-twinkle 7s ease-in-out infinite alternate;
+}
+html.theme-cosmos .topbar,
+html.theme-cosmos .sidebar { border-color:rgba(180,150,80,.15); }
+html.theme-cosmos .auth-card { background:#0c0b18; border-color:rgba(232,184,74,.2); }
+html.theme-cosmos .auth-glow { background:radial-gradient(ellipse at 50% 0%,rgba(100,70,180,.45) 0%,transparent 65%); }
+
+/* ── ❋ AURORA BOREAL ─────────────────────────────────────────── */
+html.theme-aurora {
+  --page:#030d12; --mist:#071820; --fog:#0d3040;
+  --ink:#d4f0ea; --gold:#80f0cc; --amber:#00d4a8; --amber-dim:#009878;
+  --rust:#006040; --deep:#020608; --white:#071818; --parchment:#071820;
+}
+html.theme-aurora body { background:var(--page); }
+html.theme-aurora body::before {
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+  background:radial-gradient(ellipse 60% 30% at 50% 8%,rgba(0,180,120,.06) 0%,transparent 80%);
+}
+html.theme-aurora body::after {
+  content:''; position:fixed; top:-40%; left:-25%; width:150%; height:100%;
+  pointer-events:none; z-index:0;
+  background:
+    linear-gradient(158deg,rgba(0,220,160,.09) 0%,rgba(0,180,255,.07) 28%,rgba(100,0,220,.08) 58%,rgba(0,255,180,.05) 100%),
+    linear-gradient(205deg,rgba(60,0,180,.1) 0%,rgba(0,200,140,.07) 42%,rgba(0,100,255,.06) 80%,transparent 100%);
+  filter:blur(60px);
+  animation:aurora-glow 18s ease-in-out infinite;
+}
+html.theme-aurora .topbar,
+html.theme-aurora .sidebar { border-color:rgba(0,200,160,.1); }
+html.theme-aurora .auth-card { background:#07161a; border-color:rgba(0,212,168,.2); }
+html.theme-aurora .auth-glow { background:radial-gradient(ellipse at 50% 0%,rgba(0,160,100,.38) 0%,transparent 65%); }
+
+/* ── ✦ RUBÍ ──────────────────────────────────────────────────── */
+html.theme-rubi {
+  --page:#0d0308; --mist:#1a0610; --fog:#3d1022;
+  --ink:#f4d8e8; --gold:#ffa8c8; --amber:#e87898; --amber-dim:#b04060;
+  --rust:#6a1028; --deep:#060108; --white:#120408; --parchment:#1a0610;
+}
+html.theme-rubi body { background:var(--page); }
+html.theme-rubi body::before {
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+  background:
+    radial-gradient(ellipse 50% 40% at 28% 15%,rgba(200,20,60,.08) 0%,transparent 70%),
+    radial-gradient(ellipse 60% 40% at 72% 80%,rgba(140,0,40,.06) 0%,transparent 70%);
+}
+html.theme-rubi .topbar,
+html.theme-rubi .sidebar { border-color:rgba(220,80,120,.12); }
+html.theme-rubi .auth-card { background:#140408; border-color:rgba(232,120,152,.2); }
+html.theme-rubi .auth-glow { background:radial-gradient(ellipse at 50% 0%,rgba(180,20,60,.42) 0%,transparent 65%); }
+
+/* ── ◈ ESMERALDA ─────────────────────────────────────────────── */
+html.theme-esmeralda {
+  --page:#030e06; --mist:#071a0c; --fog:#123820;
+  --ink:#d0f4e0; --gold:#80f4a8; --amber:#35d878; --amber-dim:#1a9448;
+  --rust:#0a5020; --deep:#010802; --white:#071408; --parchment:#071a0c;
+}
+html.theme-esmeralda body { background:var(--page); }
+html.theme-esmeralda body::before {
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+  background:
+    radial-gradient(ellipse 55% 40% at 20% 20%,rgba(0,180,80,.08) 0%,transparent 70%),
+    radial-gradient(ellipse 40% 60% at 80% 60%,rgba(0,120,60,.06) 0%,transparent 70%);
+}
+html.theme-esmeralda .topbar,
+html.theme-esmeralda .sidebar { border-color:rgba(50,200,100,.1); }
+html.theme-esmeralda .auth-card { background:#081408; border-color:rgba(53,216,120,.2); }
+html.theme-esmeralda .auth-glow { background:radial-gradient(ellipse at 50% 0%,rgba(0,160,60,.38) 0%,transparent 65%); }
+
+
+/* ═══════════════════════════════════════════════════════════════
+   NUEVOS TEMAS DE LECTURA — Pack Universo
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── ✶ CIELO ESTRELLADO ──────────────────────────────────────── */
+.reading-overlay.rl-estrellas { background:#050a18; }
+.reading-overlay.rl-estrellas::after {
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+  background-image:
+    radial-gradient(1px 1px at 56px 22px,rgba(220,240,255,.9) 0%,transparent 100%),
+    radial-gradient(1.5px 1.5px at 134px 78px,rgba(180,210,255,.75) 0%,transparent 100%),
+    radial-gradient(1px 1px at 212px 45px,rgba(220,240,255,.8) 0%,transparent 100%),
+    radial-gradient(1px 1px at 334px 12px,rgba(220,240,255,.6) 0%,transparent 100%),
+    radial-gradient(1.5px 1.5px at 445px 67px,rgba(180,210,255,.85) 0%,transparent 100%),
+    radial-gradient(1px 1px at 523px 34px,rgba(220,240,255,.7) 0%,transparent 100%),
+    radial-gradient(2px 2px at 589px 89px,rgba(255,255,255,.75) 0%,transparent 100%),
+    radial-gradient(1px 1px at 567px 156px,rgba(220,240,255,.65) 0%,transparent 100%),
+    radial-gradient(1px 1px at 78px 167px,rgba(220,240,255,.75) 0%,transparent 100%),
+    radial-gradient(2px 2px at 156px 145px,rgba(180,210,255,.85) 0%,transparent 100%),
+    radial-gradient(1px 1px at 278px 189px,rgba(220,240,255,.7) 0%,transparent 100%),
+    radial-gradient(1.5px 1.5px at 400px 134px,rgba(220,240,255,.65) 0%,transparent 100%),
+    radial-gradient(1px 1px at 489px 178px,rgba(220,240,255,.9) 0%,transparent 100%),
+    radial-gradient(2px 2px at 34px 267px,rgba(255,255,255,.8) 0%,transparent 100%),
+    radial-gradient(1px 1px at 123px 312px,rgba(220,240,255,.7) 0%,transparent 100%),
+    radial-gradient(1.5px 1.5px at 245px 278px,rgba(180,210,255,.75) 0%,transparent 100%),
+    radial-gradient(1px 1px at 367px 334px,rgba(220,240,255,.9) 0%,transparent 100%),
+    radial-gradient(1px 1px at 434px 267px,rgba(220,240,255,.65) 0%,transparent 100%),
+    radial-gradient(2px 2px at 500px 312px,rgba(255,255,255,.7) 0%,transparent 100%),
+    radial-gradient(1px 1px at 567px 289px,rgba(220,240,255,.8) 0%,transparent 100%),
+    radial-gradient(1.5px 1.5px at 89px 423px,rgba(180,210,255,.7) 0%,transparent 100%),
+    radial-gradient(1px 1px at 200px 467px,rgba(220,240,255,.85) 0%,transparent 100%),
+    radial-gradient(2px 2px at 312px 434px,rgba(255,255,255,.75) 0%,transparent 100%),
+    radial-gradient(1px 1px at 423px 489px,rgba(220,240,255,.7) 0%,transparent 100%),
+    radial-gradient(1.5px 1.5px at 500px 445px,rgba(180,210,255,.9) 0%,transparent 100%),
+    radial-gradient(1px 1px at 45px 545px,rgba(220,240,255,.75) 0%,transparent 100%),
+    radial-gradient(2px 2px at 134px 589px,rgba(255,255,255,.65) 0%,transparent 100%),
+    radial-gradient(1px 1px at 278px 567px,rgba(220,240,255,.8) 0%,transparent 100%),
+    radial-gradient(1px 1px at 390px 534px,rgba(180,210,255,.85) 0%,transparent 100%),
+    radial-gradient(1.5px 1.5px at 23px 612px,rgba(220,240,255,.7) 0%,transparent 100%);
+  background-size:600px 600px; background-repeat:repeat;
+  animation:estrellas-drift 120s linear infinite;
+}
+.reading-overlay.rl-estrellas .reading-top {
+  background:rgba(5,10,24,.93); border-bottom-color:rgba(100,150,255,.1); }
+.reading-overlay.rl-estrellas .reading-body { color:#d8eaff; }
+.reading-overlay.rl-estrellas .reading-book-header,
+.reading-overlay.rl-estrellas .reading-cap-title { color:#fff; }
+.reading-overlay.rl-estrellas .reading-ornament { color:#304080; }
+.reading-overlay.rl-estrellas .rnav-btn { background:rgba(100,150,255,.07); border-color:rgba(100,150,255,.2); color:#a0c0f0; }
+.reading-overlay.rl-estrellas .reading-back,
+.reading-overlay.rl-estrellas .reading-title { color:#b0c8f0; }
+.reading-overlay.rl-estrellas .rc-btn { border-color:rgba(100,150,255,.2); color:#b0c8f0; }
+.reading-overlay.rl-estrellas .reading-progress { background:rgba(100,150,255,.07); }
+.reading-overlay.rl-estrellas .reading-progress-fill { background:#4070c0; }
+.reading-overlay.rl-estrellas .rc-tema-panel { background:#0a1228; border-color:rgba(80,120,200,.2); }
+.reading-overlay.rl-estrellas .rc-tema-opt { color:#b0c8f0; }
+.reading-overlay.rl-estrellas .rc-tema-opt:hover { background:rgba(80,120,200,.12); }
+
+/* ── ☀ AMANECER ──────────────────────────────────────────────── */
+.reading-overlay.rl-amanecer {
+  background:linear-gradient(170deg,#e8d4f0 0%,#f0d0b8 38%,#f8ecc8 70%,#fff8e8 100%); }
+.reading-overlay.rl-amanecer .reading-top {
+  background:rgba(240,210,190,.93); border-bottom-color:rgba(160,80,40,.15); }
+.reading-overlay.rl-amanecer .reading-body { color:#2c1a0c; }
+.reading-overlay.rl-amanecer .reading-book-header,
+.reading-overlay.rl-amanecer .reading-cap-title { color:#4a200a; }
+.reading-overlay.rl-amanecer .reading-ornament { color:#c07040; }
+.reading-overlay.rl-amanecer .rnav-btn { background:rgba(160,80,40,.08); border-color:rgba(160,80,40,.22); color:#6a3010; }
+.reading-overlay.rl-amanecer .reading-back,
+.reading-overlay.rl-amanecer .reading-title { color:#6a3010; }
+.reading-overlay.rl-amanecer .rc-btn { border-color:rgba(160,80,40,.25); color:#6a3010; }
+.reading-overlay.rl-amanecer .reading-progress { background:rgba(160,80,40,.1); }
+.reading-overlay.rl-amanecer .reading-progress-fill { background:#c07040; }
+.reading-overlay.rl-amanecer .rc-tema-panel { background:#f8ece0; border-color:rgba(160,80,40,.2); }
+.reading-overlay.rl-amanecer .rc-tema-opt { color:#6a3010; }
+.reading-overlay.rl-amanecer .rc-tema-opt:hover { background:rgba(160,80,40,.08); }
+
+/* ── ✍ TINTA SEPIA ───────────────────────────────────────────── */
+.reading-overlay.rl-sepia { background:#1a0f08; }
+.reading-overlay.rl-sepia .reading-top {
+  background:rgba(26,15,8,.96); border-bottom-color:rgba(180,130,70,.12); }
+.reading-overlay.rl-sepia .reading-body { color:#d4b896; }
+.reading-overlay.rl-sepia .reading-book-header,
+.reading-overlay.rl-sepia .reading-cap-title { color:#e8d4b0; }
+.reading-overlay.rl-sepia .reading-ornament { color:#6a4828; }
+.reading-overlay.rl-sepia .rnav-btn { background:rgba(180,130,70,.08); border-color:rgba(180,130,70,.2); color:#b09060; }
+.reading-overlay.rl-sepia .reading-back,
+.reading-overlay.rl-sepia .reading-title { color:#c4a878; }
+.reading-overlay.rl-sepia .rc-btn { border-color:rgba(180,130,70,.2); color:#b09060; }
+.reading-overlay.rl-sepia .reading-progress { background:rgba(180,130,70,.07); }
+.reading-overlay.rl-sepia .reading-progress-fill { background:#8a6038; }
+.reading-overlay.rl-sepia .rc-tema-panel { background:#140b04; border-color:rgba(180,130,70,.18); }
+.reading-overlay.rl-sepia .rc-tema-opt { color:#c4a878; }
+.reading-overlay.rl-sepia .rc-tema-opt:hover { background:rgba(180,130,70,.1); }
+
+/* ── ◉ ABISMO AZUL ───────────────────────────────────────────── */
+.reading-overlay.rl-abismo {
+  background:linear-gradient(180deg,#080a20 0%,#060818 60%,#040612 100%); }
+.reading-overlay.rl-abismo .reading-top {
+  background:rgba(8,10,32,.95); border-bottom-color:rgba(40,180,200,.1); }
+.reading-overlay.rl-abismo .reading-body {
+  color:#a8e8f0;
+  animation:abismo-pulse 8s ease-in-out infinite; }
+.reading-overlay.rl-abismo .reading-book-header,
+.reading-overlay.rl-abismo .reading-cap-title { color:#d0f8ff; }
+.reading-overlay.rl-abismo .reading-ornament { color:#1a4060; }
+.reading-overlay.rl-abismo .rnav-btn { background:rgba(40,180,200,.06); border-color:rgba(40,180,200,.18); color:#60c8d8; }
+.reading-overlay.rl-abismo .reading-back,
+.reading-overlay.rl-abismo .reading-title { color:#80d8e8; }
+.reading-overlay.rl-abismo .rc-btn { border-color:rgba(40,180,200,.2); color:#60c8d8; }
+.reading-overlay.rl-abismo .reading-progress { background:rgba(40,180,200,.07); }
+.reading-overlay.rl-abismo .reading-progress-fill { background:#2090a8; }
+.reading-overlay.rl-abismo .rc-tema-panel { background:#06091e; border-color:rgba(40,180,200,.18); }
+.reading-overlay.rl-abismo .rc-tema-opt { color:#80d8e8; }
+.reading-overlay.rl-abismo .rc-tema-opt:hover { background:rgba(40,180,200,.1); }

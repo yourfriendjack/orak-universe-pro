@@ -471,6 +471,10 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;bac
           <div class="rc-tema-opt" data-tema="rl-maquina" onclick="aplicarTemaLectura(this)">Máquina de Escribir</div>
           <div class="rc-tema-opt" data-tema="rl-noche" onclick="aplicarTemaLectura(this)">Noche Eterna</div>
           <div class="rc-tema-opt" data-tema="rl-bosque" onclick="aplicarTemaLectura(this)">Bosque Encantado</div>
+          <div class="rc-tema-opt" data-tema="rl-estrellas" onclick="aplicarTemaLectura(this)">✶ Cielo Estrellado</div>
+          <div class="rc-tema-opt" data-tema="rl-amanecer" onclick="aplicarTemaLectura(this)">☀ Amanecer</div>
+          <div class="rc-tema-opt" data-tema="rl-sepia" onclick="aplicarTemaLectura(this)">✍ Tinta Sepia</div>
+          <div class="rc-tema-opt" data-tema="rl-abismo" onclick="aplicarTemaLectura(this)">◉ Abismo Azul</div>
         </div>
       </div>
     </div>
@@ -879,7 +883,7 @@ window.abrirCapitulo = async (numero) => {
     overlay.classList.add('open','light');
     // Aplicar tema de lectura del usuario
     const temaLectura = localStorage.getItem('orak_tema_lectura');
-    overlay.classList.remove('rl-libreta','rl-pergamino','rl-maquina','rl-noche','rl-bosque');
+    overlay.classList.remove('rl-libreta','rl-pergamino','rl-maquina','rl-noche','rl-bosque','rl-estrellas','rl-amanecer','rl-sepia','rl-abismo');
     if (temaLectura) {
       overlay.classList.add(temaLectura);
       overlay.classList.remove('light');
@@ -948,7 +952,7 @@ window.toggleTemaPanel = () => {
 window.aplicarTemaLectura = (el) => {
   const tema = el.dataset.tema;
   const ro   = document.getElementById('reading-overlay');
-  ro.classList.remove('rl-libreta','rl-pergamino','rl-maquina','rl-noche','rl-bosque');
+  ro.classList.remove('rl-libreta','rl-pergamino','rl-maquina','rl-noche','rl-bosque','rl-estrellas','rl-amanecer','rl-sepia','rl-abismo');
   if (tema) {
     ro.classList.add(tema);
     ro.classList.remove('light');

@@ -479,7 +479,9 @@ async def leer_todas_notifs(usuario = Depends(get_current_user)):
 
 PRECIOS = {
     "ui-dark-fantasy": 350, "ui-glitch": 500, "ui-lunar": 400, "ui-sangre": 450,
+    "ui-cosmos": 850, "ui-aurora": 700, "ui-rubi": 500, "ui-esmeralda": 600,
     "rl-libreta": 150, "rl-pergamino": 200, "rl-maquina": 150, "rl-noche": 100, "rl-bosque": 300,
+    "rl-estrellas": 500, "rl-amanecer": 280, "rl-sepia": 320, "rl-abismo": 420,
     "titulo-narrador": 300, "titulo-tejedor": 500, "titulo-guardian": 800, "titulo-oraculo": 1500,
 }
 
