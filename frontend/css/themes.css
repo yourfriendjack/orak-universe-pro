@@ -652,3 +652,60 @@ html.theme-esmeralda .auth-glow { background:radial-gradient(ellipse at 50% 0%,r
 .reading-overlay.rl-abismo .rc-tema-panel { background:#06091e; border-color:rgba(40,180,200,.18); }
 .reading-overlay.rl-abismo .rc-tema-opt { color:#80d8e8; }
 .reading-overlay.rl-abismo .rc-tema-opt:hover { background:rgba(40,180,200,.1); }
+
+
+/* ═══════════════════════════════════════════════════════════════
+   ADAPTACIONES GLOBALES PARA TEMAS OSCUROS
+   El selector html[class*="theme-"] aplica a cualquier tema activo
+   y corrige elementos que tienen colores hardcodeados o que usan
+   --ink como fondo (--ink es el color de texto, claro en temas
+   oscuros, y no debe usarse como background en esos contextos).
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Topbar ─────────────────────────────────────────────────────
+   El fondo hardcodeado rgba(250,247,242,.95) es crema claro.
+   Lo reemplazamos con --white (superficie elevada del tema). */
+html[class*="theme-"] .topbar {
+  background: var(--white);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+/* ── Panel Tu Economía (eco-card) ───────────────────────────────
+   Usa --ink como background; en temas oscuros --ink es el color
+   de texto (claro), produciendo una tarjeta muy brillante. */
+html[class*="theme-"] .eco-card {
+  background: var(--white);
+  border: 1px solid var(--fog);
+}
+
+/* ── Píldora de Oruns en topbar ─────────────────────────────── */
+html[class*="theme-"] .orun-pill {
+  background: var(--fog);
+  color:      var(--gold);
+}
+
+/* ── Botón "Escribir" en sidebar ────────────────────────────── */
+html[class*="theme-"] .write-btn {
+  background: var(--amber);
+  color:      var(--page);
+}
+html[class*="theme-"] .write-btn:hover {
+  background: var(--amber-dim);
+  color:      var(--gold);
+  transform:  translateY(-1px);
+}
+
+/* ── Tab activo en navegación del topbar ────────────────────── */
+html[class*="theme-"] .tnav.active {
+  background: var(--fog);
+  color:      var(--gold);
+}
+
+/* ── Botón de notificaciones ────────────────────────────────── */
+html[class*="theme-"] .notif-btn {
+  background: var(--mist);
+}
+html[class*="theme-"] .notif-btn:hover {
+  background: var(--fog);
+}
