@@ -75,61 +75,87 @@ const RubiRenderer = (() => {
   }
 
   // ── Pétalos de rosa — 40 partículas con rotación y caída suave ──────────
+  // Dibuja la silueta de pétalo: punta en la cima, base redondeada
+  function petalPath(ctx, rx, ry) {
+    ctx.beginPath();
+    ctx.moveTo(0, -ry);
+    ctx.bezierCurveTo( rx * 1.30, -ry * 0.42,  rx * 1.12, ry * 0.60, 0, ry * 0.95);
+    ctx.bezierCurveTo(-rx * 1.12,  ry * 0.60, -rx * 1.30, -ry * 0.42, 0, -ry);
+    ctx.closePath();
+  }
+
   function makePetal(W, H, randomY) {
     const deep = Math.random() < 0.42;
     return {
       x:          Math.random() * W,
-      y:          randomY ? Math.random() * H : -12,
-      rx:         2.4 + Math.random() * 2.2,       // 2.4-4.6px mitad-ancho
-      ry:         5.2 + Math.random() * 4.6,       // 5.2-9.8px mitad-alto
-      angle:      Math.random() * Math.PI * 2,
-      spin:       (Math.random() < 0.5 ? 1 : -1) * (0.003 + Math.random() * 0.005),
-      vx:         (Math.random() - 0.5) * 0.10,
-      vy:         0.22 + Math.random() * 0.36,
-      swayPhase:  Math.random() * Math.PI * 2,
-      alpha:      0.10 + Math.random() * 0.18,
-      cr: deep ? 198 + Math.floor(Math.random() * 22) : 232 + Math.floor(Math.random() * 18),
-      cg: deep ?  38 + Math.floor(Math.random() * 28) :  85 + Math.floor(Math.random() * 42),
-      cb: deep ?  68 + Math.floor(Math.random() * 28) : 115 + Math.floor(Math.random() * 38),
+      y:          randomY ? Math.random() * H : -24,
+      rx:         6 + Math.random() * 5,         // 6-11px mitad-ancho
+      ry:         12 + Math.random() * 9,        // 12-21px mitad-alto
+      baseAngle:  Math.random() * Math.PI * 2,   // orientación inicial
+      rockPhase:  Math.random() * Math.PI * 2,   // fase del balanceo
+      rockSpeed:  0.016 + Math.random() * 0.022, // velocidad de balanceo
+      rockAmp:    0.26 + Math.random() * 0.30,   // amplitud del balanceo (rad)
+      vy:         0.38 + Math.random() * 0.42,   // velocidad de caída
+      alpha:      0.44 + Math.random() * 0.22,   // 0.44-0.66
+      cr: deep ? 190 + Math.floor(Math.random() * 20) : 222 + Math.floor(Math.random() * 22),
+      cg: deep ?  32 + Math.floor(Math.random() * 24) :  70 + Math.floor(Math.random() * 42),
+      cb: deep ?  62 + Math.floor(Math.random() * 24) : 105 + Math.floor(Math.random() * 36),
     };
   }
 
   function initPetals(W, H) {
-    petals = Array.from({ length: 40 }, () => makePetal(W, H, true));
+    petals = Array.from({ length: 38 }, () => makePetal(W, H, true));
   }
 
   function drawPetals(W, H) {
     if (!petals) return;
-    bgCtx.save();
-    bgCtx.globalCompositeOperation = 'screen';
     petals.forEach(p => {
+      // Balanceo pendular: el pétalo oscila y el ángulo provoca deriva horizontal
+      p.rockPhase += p.rockSpeed;
+      const rock  = Math.sin(p.rockPhase) * p.rockAmp;
+      const angle = p.baseAngle + rock;
+      const drift = Math.sin(p.rockPhase) * 0.42;
+
+      p.x += drift;
+      p.y += p.vy;
+
       bgCtx.save();
       bgCtx.translate(p.x, p.y);
-      bgCtx.rotate(p.angle);
+      bgCtx.rotate(angle);
 
-      const grad = bgCtx.createRadialGradient(0, -p.ry * 0.12, 0, 0, 0, p.ry);
-      grad.addColorStop(0.00, `rgba(255, 228, 238, ${p.alpha})`);
-      grad.addColorStop(0.35, `rgba(${p.cr}, ${p.cg}, ${p.cb}, ${p.alpha * 0.82})`);
-      grad.addColorStop(0.70, `rgba(${p.cr}, ${p.cg}, ${p.cb}, ${p.alpha * 0.32})`);
-      grad.addColorStop(1.00,  'rgba(0,0,0,0)');
+      const { rx, ry, cr, cg, cb, alpha } = p;
 
-      bgCtx.beginPath();
-      bgCtx.ellipse(0, 0, p.rx, p.ry, 0, 0, Math.PI * 2);
-      bgCtx.fillStyle = grad;
+      // Relleno base — color sólido semitransparente
+      petalPath(bgCtx, rx, ry);
+      bgCtx.fillStyle = `rgba(${cr}, ${cg}, ${cb}, ${alpha})`;
       bgCtx.fill();
+
+      // Luz interior (refracción) — clipeada a la forma del pétalo
+      petalPath(bgCtx, rx, ry);
+      bgCtx.save();
+      bgCtx.clip();
+      const hl = bgCtx.createRadialGradient(-rx * 0.18, -ry * 0.38, 0, 0, 0, ry * 0.88);
+      hl.addColorStop(0.00, `rgba(255, 235, 245, 0.52)`);
+      hl.addColorStop(0.40, `rgba(255, 210, 228, 0.18)`);
+      hl.addColorStop(1.00, 'rgba(0,0,0,0)');
+      bgCtx.fillStyle = hl;
+      bgCtx.fillRect(-rx * 2, -ry * 1.1, rx * 4, ry * 2.2);
       bgCtx.restore();
 
-      p.x    += p.vx + Math.sin(t * 0.0052 + p.swayPhase) * 0.12;
-      p.y    += p.vy;
-      p.angle += p.spin;
+      // Borde delgado para definir la silueta
+      petalPath(bgCtx, rx, ry);
+      bgCtx.strokeStyle = `rgba(${cr}, ${Math.min(255, cg + 30)}, ${Math.min(255, cb + 30)}, ${alpha * 0.45})`;
+      bgCtx.lineWidth   = 0.6;
+      bgCtx.stroke();
 
-      if (p.y > H + 14) {
+      bgCtx.restore();
+
+      if (p.y > H + 26) {
         const next = makePetal(W, H, false);
         next.x = Math.random() * W;
         Object.assign(p, next);
       }
     });
-    bgCtx.restore();
   }
 
   // ════════════════════════════════════════════════════════════════════════
