@@ -115,7 +115,7 @@
       <div class="snav-item" id="snav-collab"   onclick="goView('collab')"><span class="snav-icon">◆</span>Colaboraciones</div>
       <div class="snav-label">Comunidad</div>
       <div class="snav-item" onclick="toggleNotif()"><span class="snav-icon">🔔</span>Notificaciones<span class="snav-badge" id="snav-badge" style="display:none">0</span></div>
-      <div class="snav-item" id="snav-mensajes" onclick="goView('mensajes')"><span class="snav-icon">✉</span>Mensajes</div>
+      <div class="snav-item" id="snav-mensajes" onclick="toggleChatFloat()"><span class="snav-icon">✉</span>Mensajes</div>
       <div class="snav-item" id="snav-tienda"   onclick="goView('tienda')"><span class="snav-icon">❋</span>Tienda Oruns</div>
       <div class="snav-label">Cuenta</div>
       <div class="snav-item" onclick="doLogout()"><span class="snav-icon">←</span>Cerrar sesión</div>
@@ -265,26 +265,6 @@
         <div class="explore-sub">Libros en los que colaboras como co-escritor</div>
       </div>
       <div id="collab-container"><div class="loading">Cargando…</div></div>
-    </div>
-
-    <!-- ── MENSAJES ── -->
-    <div class="view" id="view-mensajes">
-      <div class="msg-layout">
-        <div class="msg-sidebar">
-          <div class="msg-sidebar-head">
-            Mensajes
-            <button class="nota-send" style="padding:3px 9px;font-size:.58rem;margin-left:auto" onclick="toggleBuscadorMsg()">＋ Nuevo</button>
-          </div>
-          <div id="msg-buscar" style="display:none;padding:8px 10px;border-bottom:1px solid rgba(205,199,184,.08)">
-            <input id="msg-buscar-input" class="nota-textarea" style="width:100%;padding:5px 8px;font-size:.75rem;border-radius:5px" placeholder="Buscar usuario…" oninput="buscarUsuarioMsg(this.value)">
-            <div id="msg-buscar-resultados" style="margin-top:6px"></div>
-          </div>
-          <div id="conv-list"><div class="loading" style="font-size:.75rem;padding:14px">Cargando…</div></div>
-        </div>
-        <div class="msg-thread" id="msg-thread">
-          <div class="msg-thread-empty">Selecciona una conversación</div>
-        </div>
-      </div>
     </div>
 
     <!-- ── TIENDA ORUNS ── -->
@@ -558,7 +538,6 @@ window.goView = (view) => {
   if (view === 'profile')     loadProfile();
   if (view === 'misLibros')   loadMisLibros();
   if (view === 'collab')      loadCollab();
-  if (view === 'mensajes')    loadMensajes();
   if (view === 'tienda')      renderTienda();
 };
 
@@ -735,6 +714,7 @@ async function loadPeople() {
   try {
     const data = await fetch('/api/social/ranking?limite=20').then(r=>r.json());
     S.people = data;
+    window._ORAK_PEOPLE = data;
     const meId = getPerfil()?.id;
     if (meId && getToken()) {
       try {
@@ -894,116 +874,6 @@ window.responderCollab = async (libroId, accion, btn) => {
     await apiPatch(`/api/social/coescritores/${libroId}/responder`, { accion }, getToken());
     toast(accion === 'aceptar' ? '✓ Colaboración aceptada' : 'Invitación rechazada');
     loadCollab();
-  } catch(e) { toast(e.message, 'err'); }
-};
-
-// ── MENSAJES ────────────────────────────────────────────────────
-let CONV_ACTUAL = null;
-
-async function loadMensajes() {
-  if (!getToken()) { goView('feed'); toast('Inicia sesión', 'err'); return; }
-  const c = document.getElementById('conv-list');
-  c.innerHTML = '<div style="font-size:.72rem;color:var(--fog);padding:10px">Cargando…</div>';
-  try {
-    const data = await apiGet('/api/social/mensajes', getToken());
-    if (!data.length) {
-      c.innerHTML = '<div style="font-size:.75rem;color:var(--fog);padding:14px">Sin conversaciones todavía</div>';
-      return;
-    }
-    c.innerHTML = data.map(conv => {
-      const otro = conv.interlocutor || {};
-      const ini  = (otro.display_name || otro.username || '?')[0].toUpperCase();
-      const av   = avColor(otro.id);
-      const badge = conv.no_leidos > 0 ? `<span class="msg-badge">${conv.no_leidos}</span>` : '';
-      return `<div class="conv-item" id="conv-${otro.id}" onclick="abrirConv('${otro.id}','${escapeHtml(otro.username||'')}','${escapeHtml(otro.display_name||otro.username||'')}')">
-        <div class="pav ${av}" style="width:32px;height:32px;font-size:.65rem;flex-shrink:0">${escapeHtml(ini)}</div>
-        <div style="flex:1;min-width:0">
-          <div style="font-size:.8rem;font-weight:600;color:var(--ink)">${escapeHtml(otro.display_name||otro.username)}</div>
-          <div style="font-size:.7rem;color:var(--fog);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(conv.texto?.slice(0,40)||'')}</div>
-        </div>
-        ${badge}
-      </div>`;
-    }).join('');
-  } catch(e) { c.innerHTML = `<div style="font-size:.72rem;color:#e08080;padding:10px">${e.message}</div>`; }
-}
-
-window.iniciarConvDesdeEscritor = (id, username, nombre) => {
-  goView('mensajes');
-  setTimeout(() => abrirConv(id, username, nombre), 100);
-};
-
-window.toggleBuscadorMsg = () => {
-  const el = document.getElementById('msg-buscar');
-  const visible = el.style.display !== 'none';
-  el.style.display = visible ? 'none' : 'block';
-  if (!visible) document.getElementById('msg-buscar-input').focus();
-};
-
-window.buscarUsuarioMsg = (q) => {
-  const c = document.getElementById('msg-buscar-resultados');
-  if (!q.trim()) { c.innerHTML = ''; return; }
-  const filtered = S.people.filter(p =>
-    p.id !== getPerfil()?.id &&
-    ((p.username||'').toLowerCase().includes(q.toLowerCase()) ||
-     (p.display_name||'').toLowerCase().includes(q.toLowerCase()))
-  ).slice(0, 5);
-  if (!filtered.length) { c.innerHTML = '<div style="font-size:.7rem;color:var(--fog)">Sin resultados</div>'; return; }
-  c.innerHTML = filtered.map(p => `
-    <div class="conv-item" style="border-radius:6px" onclick="seleccionarUsuarioMsg('${p.id}','${escapeHtml(p.username||'')}','${escapeHtml(p.display_name||p.username||'')}')">
-      <div class="pav ${avColor(p.id)}" style="width:26px;height:26px;font-size:.6rem;flex-shrink:0">${initials(p.display_name||p.username)}</div>
-      <div>
-        <div style="font-size:.78rem;color:var(--ink)">${escapeHtml(p.display_name||p.username)}</div>
-        <div style="font-size:.65rem;color:var(--fog)">@${escapeHtml(p.username)}</div>
-      </div>
-    </div>`).join('');
-};
-
-window.seleccionarUsuarioMsg = (id, username, nombre) => {
-  document.getElementById('msg-buscar').style.display = 'none';
-  document.getElementById('msg-buscar-input').value = '';
-  document.getElementById('msg-buscar-resultados').innerHTML = '';
-  abrirConv(id, username, nombre);
-};
-
-window.abrirConv = async (userId, username, nombre) => {
-  CONV_ACTUAL = userId;
-  document.querySelectorAll('.conv-item').forEach(el => el.classList.remove('active'));
-  document.getElementById('conv-' + userId)?.classList.add('active');
-  const thread = document.getElementById('msg-thread');
-  thread.innerHTML = `
-    <div class="msg-thread-head">@${escapeHtml(username)} — ${escapeHtml(nombre)}</div>
-    <div class="msg-bubbles" id="msg-bubbles"><div style="font-size:.72rem;color:var(--fog);padding:10px">Cargando…</div></div>
-    <div class="msg-input-row">
-      <textarea class="nota-textarea" id="msg-input" rows="2" placeholder="Escribe un mensaje…"></textarea>
-      <button class="nota-send" onclick="enviarMsg('${userId}')">Enviar</button>
-    </div>`;
-  try {
-    const msgs = await apiGet(`/api/social/mensajes/${userId}`, getToken());
-    renderMsgs(msgs);
-  } catch(e) { document.getElementById('msg-bubbles').innerHTML = `<div style="color:#e08080;font-size:.72rem;padding:10px">${e.message}</div>`; }
-};
-
-function renderMsgs(msgs) {
-  const meId = getPerfil()?.id;
-  const c = document.getElementById('msg-bubbles');
-  if (!c) return;
-  if (!msgs.length) { c.innerHTML = '<div style="font-size:.75rem;color:var(--fog);padding:10px">Sin mensajes. ¡Di hola!</div>'; return; }
-  c.innerHTML = msgs.map(m => {
-    const mio = m.emisor_id === meId;
-    return `<div class="msg-bubble ${mio ? 'msg-mio' : 'msg-suyo'}">${escapeHtml(m.texto)}</div>`;
-  }).join('');
-  c.scrollTop = c.scrollHeight;
-}
-
-window.enviarMsg = async (userId) => {
-  const input = document.getElementById('msg-input');
-  const texto = input?.value.trim();
-  if (!texto) return;
-  try {
-    await apiPost('/api/social/mensajes', { receptor_id: userId, texto }, getToken());
-    input.value = '';
-    const msgs = await apiGet(`/api/social/mensajes/${userId}`, getToken());
-    renderMsgs(msgs);
   } catch(e) { toast(e.message, 'err'); }
 };
 
@@ -1283,6 +1153,230 @@ document.addEventListener('click', e => {
     closeNotifPanel();
 });
 document.getElementById('glimmer-modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal('glimmer-modal'); });
+</script>
+
+<!-- ══════════════════════════════════════════════════════════
+     BURBUJA DE CHAT FLOTANTE
+══════════════════════════════════════════════════════════ -->
+<div id="chat-float">
+  <div id="chat-float-btn" onclick="toggleChatFloat()" title="Mensajes">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <span id="chat-float-badge" style="display:none">0</span>
+  </div>
+  <div id="chat-win" style="display:none">
+    <!-- Pantalla: lista de conversaciones -->
+    <div id="chat-screen-convs">
+      <div class="chat-win-head" id="chat-win-head-drag">
+        <span class="chat-win-title">Mensajes</span>
+        <div style="display:flex;gap:4px;align-items:center">
+          <button class="chat-head-btn" onclick="toggleBuscadorFloat()" title="Nuevo">＋</button>
+          <button class="chat-head-btn" onclick="cerrarChatFloat()" title="Cerrar">✕</button>
+        </div>
+      </div>
+      <div id="chat-buscar-float" style="display:none;padding:8px 10px;border-bottom:1px solid rgba(205,199,184,.08)">
+        <input id="chat-buscar-input" class="nota-textarea" style="width:100%;padding:5px 8px;font-size:.75rem;border-radius:5px" placeholder="Buscar usuario…" oninput="buscarFloatMsg(this.value)">
+        <div id="chat-buscar-res" style="margin-top:6px"></div>
+      </div>
+      <div id="chat-conv-list" style="overflow-y:auto;flex:1"><div style="font-size:.72rem;color:var(--fog);padding:14px">Cargando…</div></div>
+    </div>
+    <!-- Pantalla: hilo activo -->
+    <div id="chat-screen-thread" style="display:none;flex-direction:column;height:100%">
+      <div class="chat-win-head">
+        <button class="chat-head-btn" onclick="volverChatConvs()" title="Volver">←</button>
+        <span class="chat-win-title" id="chat-thread-title">—</span>
+        <button class="chat-head-btn" onclick="cerrarChatFloat()" title="Cerrar">✕</button>
+      </div>
+      <div id="chat-msgs" style="flex:1;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:5px"></div>
+      <div style="display:flex;gap:6px;padding:8px 10px;border-top:1px solid rgba(205,199,184,.08);align-items:flex-end">
+        <textarea id="chat-input" class="nota-textarea" rows="2" placeholder="Escribe un mensaje…" style="flex:1;font-size:.8rem" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();enviarChatMsg();}"></textarea>
+        <button class="nota-send" style="padding:8px 12px" onclick="enviarChatMsg()">→</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+/* ── Chat flotante ─────────────────────────────────────── */
+#chat-float{position:fixed;bottom:24px;right:24px;z-index:600;display:flex;flex-direction:column;align-items:flex-end;gap:10px;}
+#chat-float-btn{width:52px;height:52px;border-radius:50%;background:var(--amber);color:#0e0d0b;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 16px rgba(212,168,67,.4);position:relative;transition:transform .15s,box-shadow .15s;flex-shrink:0;}
+#chat-float-btn:hover{transform:scale(1.08);box-shadow:0 6px 22px rgba(212,168,67,.55);}
+#chat-float-badge{position:absolute;top:-3px;right:-3px;background:#c06040;color:#fff;font-size:.55rem;font-weight:700;border-radius:10px;padding:1px 5px;min-width:16px;text-align:center;}
+#chat-win{width:320px;height:460px;background:var(--paper);border:1px solid rgba(205,199,184,.15);border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,.45);display:flex;flex-direction:column;overflow:hidden;}
+#chat-screen-convs{display:flex;flex-direction:column;height:100%;}
+.chat-win-head{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid rgba(205,199,184,.1);flex-shrink:0;cursor:default;}
+.chat-win-title{font-family:'Cinzel',serif;font-size:.82rem;font-weight:600;color:var(--ink);flex:1;}
+.chat-head-btn{background:none;border:none;cursor:pointer;color:var(--fog);font-size:.9rem;padding:2px 6px;border-radius:4px;transition:background .12s,color .12s;}
+.chat-head-btn:hover{background:rgba(205,199,184,.1);color:var(--ink);}
+.chat-conv-item{display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;border-bottom:1px solid rgba(205,199,184,.05);transition:background .12s;}
+.chat-conv-item:hover,.chat-conv-item.active{background:rgba(212,168,67,.07);}
+.chat-msg-mio{align-self:flex-end;background:rgba(212,168,67,.2);color:var(--ink);padding:7px 11px;border-radius:12px 12px 3px 12px;font-size:.82rem;max-width:80%;line-height:1.45;word-break:break-word;}
+.chat-msg-suyo{align-self:flex-start;background:rgba(205,199,184,.09);color:var(--parchment);padding:7px 11px;border-radius:12px 12px 12px 3px;font-size:.82rem;max-width:80%;line-height:1.45;word-break:break-word;}
+
+/* Mobile: sheet desde abajo */
+@media (max-width: 600px) {
+  #chat-float{bottom:16px;right:16px;}
+  #chat-win{position:fixed;bottom:0;left:0;right:0;width:100%;height:80vh;border-radius:18px 18px 0 0;border-bottom:none;}
+  #chat-float-btn{width:48px;height:48px;}
+}
+</style>
+
+<script type="module">
+import { apiGet, apiPost } from './js/services/api.js';
+import { getToken, getPerfil } from './js/services/auth.js';
+
+let CHAT_USER_ID   = null;
+let CHAT_DRAGGING  = false;
+let CHAT_DRAG_OX   = 0, CHAT_DRAG_OY = 0;
+
+// ── Abrir / cerrar ───────────────────────────────────────
+window.toggleChatFloat = () => {
+  const win = document.getElementById('chat-win');
+  const open = win.style.display !== 'none';
+  win.style.display = open ? 'none' : 'flex';
+  if (!open) loadChatConvs();
+};
+window.cerrarChatFloat = () => { document.getElementById('chat-win').style.display = 'none'; };
+
+// ── Lista de conversaciones ──────────────────────────────
+async function loadChatConvs() {
+  if (!getToken()) return;
+  const c = document.getElementById('chat-conv-list');
+  c.innerHTML = '<div style="font-size:.72rem;color:var(--fog);padding:14px">Cargando…</div>';
+  try {
+    const data = await apiGet('/api/social/mensajes', getToken());
+    if (!data.length) {
+      c.innerHTML = '<div style="font-size:.75rem;color:var(--fog);padding:14px">Sin conversaciones.<br>Usa ＋ para iniciar una.</div>';
+      return;
+    }
+    c.innerHTML = data.map(conv => {
+      const otro = conv.interlocutor || {};
+      const ini  = (otro.display_name || otro.username || '?')[0].toUpperCase();
+      const badge = conv.no_leidos > 0 ? `<span style="background:#c06040;color:#fff;font-size:.55rem;font-weight:700;border-radius:8px;padding:1px 5px">${conv.no_leidos}</span>` : '';
+      return `<div class="chat-conv-item" onclick="abrirChatThread('${otro.id}','${escapeStr(otro.username||'')}','${escapeStr(otro.display_name||otro.username||'')}')">
+        <div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--amber),var(--rust));display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;color:#fff;flex-shrink:0">${escapeStr(ini)}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:.78rem;font-weight:600;color:var(--ink)">${escapeStr(otro.display_name||otro.username||'—')}</div>
+          <div style="font-size:.68rem;color:var(--fog);overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${escapeStr((conv.texto||'').slice(0,35))}</div>
+        </div>
+        ${badge}
+      </div>`;
+    }).join('');
+  } catch(e) { c.innerHTML = `<div style="font-size:.72rem;color:#e08080;padding:14px">${e.message}</div>`; }
+}
+
+// ── Abrir hilo ───────────────────────────────────────────
+window.abrirChatThread = async (userId, username, nombre) => {
+  CHAT_USER_ID = userId;
+  document.getElementById('chat-thread-title').textContent = nombre || ('@' + username);
+  document.getElementById('chat-screen-convs').style.display  = 'none';
+  document.getElementById('chat-screen-thread').style.display = 'flex';
+  await renderChatMsgs(userId);
+};
+
+window.volverChatConvs = () => {
+  CHAT_USER_ID = null;
+  document.getElementById('chat-screen-thread').style.display = 'none';
+  document.getElementById('chat-screen-convs').style.display  = 'flex';
+  loadChatConvs();
+};
+
+async function renderChatMsgs(userId) {
+  const meId = getPerfil()?.id;
+  const c = document.getElementById('chat-msgs');
+  c.innerHTML = '<div style="font-size:.7rem;color:var(--fog)">Cargando…</div>';
+  try {
+    const msgs = await apiGet(`/api/social/mensajes/${userId}`, getToken());
+    if (!msgs.length) { c.innerHTML = '<div style="font-size:.75rem;color:var(--fog);padding:6px">¡Di hola!</div>'; return; }
+    c.innerHTML = msgs.map(m =>
+      `<div class="${m.emisor_id === meId ? 'chat-msg-mio' : 'chat-msg-suyo'}">${escapeStr(m.texto)}</div>`
+    ).join('');
+    c.scrollTop = c.scrollHeight;
+  } catch(e) { c.innerHTML = `<div style="color:#e08080;font-size:.7rem">${e.message}</div>`; }
+}
+
+window.enviarChatMsg = async () => {
+  if (!CHAT_USER_ID || !getToken()) return;
+  const input = document.getElementById('chat-input');
+  const texto = input?.value.trim();
+  if (!texto) return;
+  try {
+    await apiPost('/api/social/mensajes', { receptor_id: CHAT_USER_ID, texto }, getToken());
+    input.value = '';
+    await renderChatMsgs(CHAT_USER_ID);
+  } catch(e) { /* toast ya lo maneja */ }
+};
+
+// ── Buscador de usuario ──────────────────────────────────
+window.toggleBuscadorFloat = () => {
+  const el = document.getElementById('chat-buscar-float');
+  const v  = el.style.display !== 'none';
+  el.style.display = v ? 'none' : 'block';
+  if (!v) document.getElementById('chat-buscar-input').focus();
+};
+
+window.buscarFloatMsg = (q) => {
+  const c = document.getElementById('chat-buscar-res');
+  const people = window._ORAK_PEOPLE || [];
+  if (!q.trim()) { c.innerHTML = ''; return; }
+  const res = people.filter(p =>
+    p.id !== getPerfil()?.id &&
+    ((p.username||'').toLowerCase().includes(q.toLowerCase()) ||
+     (p.display_name||'').toLowerCase().includes(q.toLowerCase()))
+  ).slice(0,5);
+  if (!res.length) { c.innerHTML = '<div style="font-size:.7rem;color:var(--fog)">Sin resultados</div>'; return; }
+  c.innerHTML = res.map(p => `
+    <div class="chat-conv-item" style="border-radius:6px" onclick="seleccionarChatUser('${p.id}','${escapeStr(p.username||'')}','${escapeStr(p.display_name||p.username||'')}')">
+      <div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--amber),var(--rust));display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:700;color:#fff">${escapeStr((p.display_name||p.username||'?')[0].toUpperCase())}</div>
+      <div><div style="font-size:.78rem;color:var(--ink)">${escapeStr(p.display_name||p.username)}</div><div style="font-size:.65rem;color:var(--fog)">@${escapeStr(p.username)}</div></div>
+    </div>`).join('');
+};
+
+window.seleccionarChatUser = (id, username, nombre) => {
+  document.getElementById('chat-buscar-float').style.display = 'none';
+  document.getElementById('chat-buscar-input').value = '';
+  document.getElementById('chat-buscar-res').innerHTML = '';
+  abrirChatThread(id, username, nombre);
+};
+
+// ── Atajo desde tarjeta de escritor ─────────────────────
+window.iniciarConvDesdeEscritor = (id, username, nombre) => {
+  document.getElementById('chat-win').style.display = 'flex';
+  abrirChatThread(id, username, nombre);
+};
+
+// ── Drag (solo desktop) ──────────────────────────────────
+const floatEl = document.getElementById('chat-float');
+const headEl  = document.getElementById('chat-win-head-drag');
+if (headEl) {
+  headEl.style.cursor = 'grab';
+  headEl.addEventListener('mousedown', e => {
+    if (window.innerWidth <= 600) return;
+    CHAT_DRAGGING = true;
+    const rect = floatEl.getBoundingClientRect();
+    CHAT_DRAG_OX = e.clientX - rect.right;
+    CHAT_DRAG_OY = e.clientY - rect.bottom;
+    headEl.style.cursor = 'grabbing';
+  });
+}
+document.addEventListener('mousemove', e => {
+  if (!CHAT_DRAGGING) return;
+  const right  = Math.max(8, window.innerWidth  - e.clientX + CHAT_DRAG_OX);
+  const bottom = Math.max(8, window.innerHeight - e.clientY + CHAT_DRAG_OY);
+  floatEl.style.right  = right  + 'px';
+  floatEl.style.bottom = bottom + 'px';
+});
+document.addEventListener('mouseup', () => {
+  CHAT_DRAGGING = false;
+  if (headEl) headEl.style.cursor = 'grab';
+});
+
+function escapeStr(s) {
+  return String(s).replace(/'/g,"&#39;").replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// Exponer people list para el buscador
+window._ORAK_PEOPLE = [];
+const _origLoadPeople = window.loadPeople;
 </script>
 </body>
 </html>
