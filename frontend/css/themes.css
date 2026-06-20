@@ -197,18 +197,42 @@ html.theme-sangre .auth-glow { background: radial-gradient(ellipse at 50% 0%, rg
    ═══════════════════════════════════════════════════════════════ */
 
 /* ── Keyframes ─────────────────────────────────────────────── */
-@keyframes df-ascend    { from{background-position:0 800px}                             to{background-position:100px 0}                   }
-@keyframes df-glow      { 0%,100%{opacity:.5}                                           50%{opacity:.9}                                   }
-@keyframes glitch-scan  { 0%{transform:translateY(-6px);opacity:0} 4%{opacity:.85} 95%{opacity:.55} 100%{transform:translateY(100vh);opacity:0} }
-@keyframes lunar-drift  { from{background-position:0 0}                                 to{background-position:-600px -250px}             }
-@keyframes lunar-breathe{ 0%,100%{opacity:.5}                                           50%{opacity:.85}                                  }
-@keyframes sangre-fall  { from{background-position:0 -100px}                            to{background-position:60px 700px}                }
-@keyframes sangre-pulse { 0%,40%,60%,100%{opacity:.55}                                  50%{opacity:1}                                    }
-@keyframes aurora-drift { from{background-position:center top,0 0}                      to{background-position:center top,-700px -350px}  }
-@keyframes rubi-petals  { from{background-position:0 -80px}                             to{background-position:50px 700px}                }
-@keyframes rubi-shimmer { 0%,100%{opacity:.4}                                           50%{opacity:.75}                                  }
-@keyframes esm-rise     { from{background-position:0 700px}                             to{background-position:-80px 0}                   }
-@keyframes esm-blink    { 0%,100%{opacity:.5}  30%{opacity:.92}  60%{opacity:.28}  80%{opacity:.8}                                       }
+@keyframes df-ascend      { from{background-position:0 800px} to{background-position:100px 0} }
+@keyframes df-glow        { 0%,100%{opacity:.5} 50%{opacity:.9} }
+@keyframes glitch-scan    { 0%{transform:translateY(-6px);opacity:0} 4%{opacity:.85} 95%{opacity:.55} 100%{transform:translateY(100vh);opacity:0} }
+@keyframes glitch-body-shift {
+  0%,80%,100% { filter:none; }
+  81% { filter:hue-rotate(85deg) saturate(2.8) brightness(1.18); }
+  82% { filter:hue-rotate(-30deg) contrast(1.3) saturate(2); }
+  83% { filter:none; }
+}
+@keyframes glitch-artifact {
+  0%,84%,100% { opacity:0; }
+  85% { opacity:1; background:rgba(0,232,144,.13); clip-path:inset(14% 0 77% 0); transform:translateX(-6px); }
+  86% { opacity:1; background:rgba(255,0,80,.09);  clip-path:inset(62% 0 22% 0); transform:translateX(8px) scaleX(1.01); }
+  87% { opacity:1; background:rgba(0,120,255,.1);  clip-path:inset(38% 0 48% 0); transform:translateX(-3px); }
+  88% { opacity:0; }
+}
+@keyframes lunar-drift    { from{background-position:0 0} to{background-position:-600px -250px} }
+@keyframes lunar-breathe  { 0%,100%{opacity:.55} 50%{opacity:.9} }
+@keyframes lunar-shimmer  { 0%,100%{box-shadow:0 0 28px rgba(190,210,255,.4),0 0 60px rgba(170,195,245,.2),0 0 110px rgba(150,180,240,.1)} 50%{box-shadow:0 0 48px rgba(205,225,255,.65),0 0 95px rgba(185,210,252,.32),0 0 160px rgba(165,195,248,.15)} }
+@keyframes sangre-fall    { from{background-position:0 -100px} to{background-position:60px 700px} }
+@keyframes sangre-pulse   { 0%,40%,60%,100%{opacity:.55} 50%{opacity:1} }
+@keyframes sangre-flicker { 0%,100%{opacity:.8} 18%{opacity:1} 38%{opacity:.55} 62%{opacity:.95} 78%{opacity:.5} }
+@keyframes aurora-drift   { from{background-position:center top,0 0} to{background-position:center top,-700px -350px} }
+@keyframes aurora-ribbon  {
+  0%   { opacity:.52; transform:translateX(-10%) scaleY(.82) rotate(-3deg); }
+  20%  { opacity:.92; transform:translateX(6%)   scaleY(1.22) rotate(1deg);  }
+  40%  { opacity:.72; transform:translateX(-5%)  scaleY(.92) rotate(-1deg); }
+  60%  { opacity:.98; transform:translateX(8%)   scaleY(1.32) rotate(2deg);  }
+  80%  { opacity:.62; transform:translateX(-3%)  scaleY(.88) rotate(-2deg); }
+  100% { opacity:.52; transform:translateX(-10%) scaleY(.82) rotate(-3deg); }
+}
+@keyframes rubi-petals    { from{background-position:0 -80px} to{background-position:50px 700px} }
+@keyframes rubi-shimmer   { 0%,100%{opacity:.5} 50%{opacity:.88} }
+@keyframes esm-rise       { from{background-position:0 700px} to{background-position:-80px 0} }
+@keyframes esm-blink      { 0%{opacity:.3} 25%{opacity:.98} 50%{opacity:.18} 75%{opacity:.88} 100%{opacity:.3} }
+@keyframes esm-blink2     { 0%{opacity:.85} 28%{opacity:.12} 55%{opacity:.95} 82%{opacity:.18} 100%{opacity:.85} }
 
 /* ── ✦ DARK FANTASY — partículas mágicas ascendentes ─────── */
 html.theme-dark-fantasy body::before {
@@ -244,7 +268,10 @@ html.theme-dark-fantasy body::after {
   animation: df-ascend 38s linear infinite;
 }
 
-/* ── ⟋ GLITCH — escáner CRT + trama de scanlines ──────────── */
+/* ── ⟋ GLITCH — escáner CRT + distorsión de pantalla ──────────── */
+html.theme-glitch body {
+  animation: glitch-body-shift 11s linear infinite;
+}
 html.theme-glitch body::before {
   content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
   background: repeating-linear-gradient(
@@ -264,8 +291,23 @@ html.theme-glitch body::after {
   box-shadow: 0 0 8px rgba(0,232,144,.7), 0 0 22px rgba(0,232,144,.4), 0 0 44px rgba(0,232,144,.2);
   animation: glitch-scan 10s linear infinite;
 }
+/* Artefacto de glitch — franjas desplazadas en html para que cubra absolutamente todo */
+html.theme-glitch::after {
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:9999;
+  animation: glitch-artifact 11s linear infinite;
+}
 
-/* ── ◌ LUNAR — polvo de luna que deriva en diagonal ─────────── */
+/* ── ◌ LUNAR — luna llena + polvo plateado ─────────────────── */
+html.theme-lunar body::before {
+  content:'';
+  position:fixed; width:140px; height:140px; top:7%; right:10%;
+  border-radius:50%; pointer-events:none; z-index:0;
+  background: radial-gradient(circle at 38% 35%,
+    #ffffff 0%, #f0f4ff 18%, #d8e4fc 42%,
+    rgba(185,208,252,.55) 68%, rgba(155,185,248,.2) 86%, transparent 100%
+  );
+  animation: lunar-shimmer 8s ease-in-out infinite alternate;
+}
 html.theme-lunar body::after {
   content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
   background-image:
@@ -294,31 +336,31 @@ html.theme-lunar body::after {
   animation: lunar-drift 72s linear infinite, lunar-breathe 9s ease-in-out infinite alternate;
 }
 
-/* ── ♥ SANGRE & TINTA — brasas cayendo + latido ─────────────── */
+/* ── ♥ SANGRE & TINTA — brasas vivas + latido ─────────────── */
 html.theme-sangre body::before { animation: sangre-pulse 2.6s ease-in-out infinite; }
 html.theme-sangre body::after {
   content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
   background-image:
-    radial-gradient(1.5px 1.5px at 55px  60px,  rgba(220,60,30,.75) 0%,transparent 100%),
-    radial-gradient(1px   1px   at 145px 145px, rgba(180,30,15,.6)  0%,transparent 100%),
-    radial-gradient(2px   2px   at 245px 55px,  rgba(200,50,25,.8)  0%,transparent 100%),
-    radial-gradient(1px   1px   at 335px 175px, rgba(240,80,40,.7)  0%,transparent 100%),
-    radial-gradient(1.5px 1.5px at 435px 45px,  rgba(180,30,15,.55) 0%,transparent 100%),
-    radial-gradient(1px   1px   at 515px 135px, rgba(220,60,30,.65) 0%,transparent 100%),
-    radial-gradient(1px   1px   at 75px  265px, rgba(200,50,25,.8)  0%,transparent 100%),
-    radial-gradient(2px   2px   at 205px 335px, rgba(240,80,40,.5)  0%,transparent 100%),
-    radial-gradient(1.5px 1.5px at 355px 285px, rgba(180,30,15,.7)  0%,transparent 100%),
-    radial-gradient(1px   1px   at 475px 365px, rgba(220,60,30,.6)  0%,transparent 100%),
-    radial-gradient(1px   1px   at 115px 445px, rgba(200,50,25,.55) 0%,transparent 100%),
-    radial-gradient(1.5px 1.5px at 275px 495px, rgba(240,80,40,.75) 0%,transparent 100%),
-    radial-gradient(2px   2px   at 405px 435px, rgba(180,30,15,.65) 0%,transparent 100%),
-    radial-gradient(1px   1px   at 535px 495px, rgba(220,60,30,.5)  0%,transparent 100%),
-    radial-gradient(1px   1px   at 30px  545px, rgba(200,50,25,.7)  0%,transparent 100%),
-    radial-gradient(1.5px 1.5px at 180px 575px, rgba(240,80,40,.55) 0%,transparent 100%),
-    radial-gradient(2px   2px   at 480px 565px, rgba(220,60,30,.6)  0%,transparent 100%);
-  background-size: 560px 620px;
-  background-repeat: repeat;
-  animation: sangre-fall 28s linear infinite;
+    /* Brasas: núcleos ovales anaranjados con halo de fuego */
+    radial-gradient(7px 5px  at 55px  60px,  rgba(255,105,20,1)   0%,rgba(220,55,0,.55)  48%,transparent 100%),
+    radial-gradient(5px 8px  at 148px 145px, rgba(255,85,12,.92)  0%,rgba(195,35,0,.45)  52%,transparent 100%),
+    radial-gradient(8px 5px  at 248px 55px,  rgba(255,125,30,1)   0%,rgba(225,65,0,.5)   46%,transparent 100%),
+    radial-gradient(6px 8px  at 338px 175px, rgba(245,95,18,.94)  0%,rgba(205,42,0,.42)  50%,transparent 100%),
+    radial-gradient(5px 5px  at 438px 48px,  rgba(255,75,10,.88)  0%,rgba(182,22,0,.42)  56%,transparent 100%),
+    radial-gradient(7px 5px  at 518px 138px, rgba(255,115,26,1)   0%,rgba(215,52,0,.5)   46%,transparent 100%),
+    radial-gradient(6px 4px  at 78px  268px, rgba(255,95,22,.92)  0%,rgba(198,38,0,.42)  50%,transparent 100%),
+    radial-gradient(8px 6px  at 208px 338px, rgba(245,105,18,.88) 0%,rgba(204,44,0,.42)  48%,transparent 100%),
+    radial-gradient(5px 8px  at 358px 288px, rgba(255,82,12,1)    0%,rgba(188,28,0,.5)   46%,transparent 100%),
+    radial-gradient(7px 5px  at 478px 368px, rgba(255,115,28,.92) 0%,rgba(214,54,0,.42)  50%,transparent 100%),
+    radial-gradient(6px 6px  at 118px 448px, rgba(245,88,16,.88)  0%,rgba(196,32,0,.42)  52%,transparent 100%),
+    radial-gradient(5px 8px  at 278px 498px, rgba(255,102,22,1)   0%,rgba(208,48,0,.5)   46%,transparent 100%),
+    radial-gradient(7px 5px  at 408px 438px, rgba(255,78,12,.92)  0%,rgba(182,22,0,.42)  50%,transparent 100%),
+    radial-gradient(6px 4px  at 538px 498px, rgba(245,92,18,.88)  0%,rgba(198,36,0,.42)  48%,transparent 100%),
+    radial-gradient(5px 6px  at 32px  548px, rgba(255,108,24,1)   0%,rgba(212,50,0,.5)   46%,transparent 100%),
+    radial-gradient(8px 5px  at 183px 578px, rgba(245,82,14,.9)   0%,rgba(188,26,0,.42)  50%,transparent 100%),
+    radial-gradient(6px 7px  at 483px 568px, rgba(255,98,20,.94)  0%,rgba(204,42,0,.5)   46%,transparent 100%);
+  background-size:560px 620px; background-repeat:repeat;
+  animation:sangre-fall 28s linear infinite, sangre-flicker 4s ease-in-out infinite;
 }
 
 /* ── ❋ AURORA BOREAL — añadir estrellas teal bajo las ondas ── */
@@ -350,57 +392,57 @@ html.theme-aurora body::before {
   animation: aurora-drift 95s linear infinite;
 }
 
-/* ── ✦ RUBÍ — pétalos de rosa cayendo ───────────────────────── */
+/* ── ✦ RUBÍ — pétalos de rubí que caen (elipses alargadas) ────── */
 html.theme-rubi body::after {
   content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
   background-image:
-    radial-gradient(1.5px 1.5px at 50px  70px,  rgba(255,140,175,.8)  0%,transparent 100%),
-    radial-gradient(1px   1px   at 150px 30px,  rgba(220,90,130,.65)  0%,transparent 100%),
-    radial-gradient(2px   2px   at 255px 150px, rgba(255,160,200,.85) 0%,transparent 100%),
-    radial-gradient(1px   1px   at 365px 80px,  rgba(200,70,115,.7)   0%,transparent 100%),
-    radial-gradient(1.5px 1.5px at 470px 190px, rgba(240,130,170,.75) 0%,transparent 100%),
-    radial-gradient(1px   1px   at 85px  285px, rgba(215,90,130,.55)  0%,transparent 100%),
-    radial-gradient(1px   1px   at 200px 355px, rgba(255,155,195,.8)  0%,transparent 100%),
-    radial-gradient(2px   2px   at 310px 280px, rgba(200,70,115,.65)  0%,transparent 100%),
-    radial-gradient(1.5px 1.5px at 435px 385px, rgba(240,130,170,.7)  0%,transparent 100%),
-    radial-gradient(1px   1px   at 125px 460px, rgba(255,140,175,.85) 0%,transparent 100%),
-    radial-gradient(1px   1px   at 265px 495px, rgba(215,90,130,.6)   0%,transparent 100%),
-    radial-gradient(2px   2px   at 395px 465px, rgba(255,160,200,.75) 0%,transparent 100%),
-    radial-gradient(1.5px 1.5px at 515px 535px, rgba(200,70,115,.55)  0%,transparent 100%),
-    radial-gradient(1px   1px   at 45px  565px, rgba(240,130,170,.8)  0%,transparent 100%),
-    radial-gradient(1px   1px   at 345px 580px, rgba(255,155,195,.65) 0%,transparent 100%),
-    radial-gradient(2px   2px   at 480px 605px, rgba(215,90,130,.7)   0%,transparent 100%),
-    radial-gradient(1.5px 1.5px at 175px 625px, rgba(255,140,175,.5)  0%,transparent 100%);
-  background-size: 570px 650px;
-  background-repeat: repeat;
-  animation: rubi-petals 44s linear infinite, rubi-shimmer 7s ease-in-out infinite alternate;
+    /* Pétalos: elipses 4×11px simulan forma de pétalo de rosa */
+    radial-gradient(4px 11px at 50px  70px,  rgba(200,15,52,1)    0%,rgba(160,0,28,.52)  52%,transparent 100%),
+    radial-gradient(5px 9px  at 152px 30px,  rgba(180,10,42,.92)  0%,rgba(140,0,22,.42)  58%,transparent 100%),
+    radial-gradient(4px 12px at 258px 155px, rgba(220,22,62,.96)  0%,rgba(175,5,32,.5)   48%,transparent 100%),
+    radial-gradient(5px 9px  at 368px 82px,  rgba(192,12,48,.88)  0%,rgba(150,0,26,.42)  56%,transparent 100%),
+    radial-gradient(4px 11px at 472px 192px, rgba(212,18,58,.92)  0%,rgba(165,2,30,.48)  50%,transparent 100%),
+    radial-gradient(5px 8px  at 88px  288px, rgba(202,15,54,.84)  0%,rgba(158,0,28,.4)   54%,transparent 100%),
+    radial-gradient(4px 12px at 202px 358px, rgba(216,20,60,.96)  0%,rgba(170,4,32,.5)   48%,transparent 100%),
+    radial-gradient(5px 9px  at 312px 282px, rgba(186,10,46,.88)  0%,rgba(146,0,24,.42)  56%,transparent 100%),
+    radial-gradient(4px 11px at 438px 388px, rgba(207,16,55,.92)  0%,rgba(162,1,30,.48)  50%,transparent 100%),
+    radial-gradient(5px 8px  at 128px 462px, rgba(196,13,51,.84)  0%,rgba(153,0,27,.4)   54%,transparent 100%),
+    radial-gradient(4px 12px at 268px 498px, rgba(218,22,62,.96)  0%,rgba(172,5,33,.5)   48%,transparent 100%),
+    radial-gradient(5px 9px  at 398px 468px, rgba(189,11,48,.88)  0%,rgba(148,0,25,.42)  56%,transparent 100%),
+    radial-gradient(4px 11px at 518px 538px, rgba(204,16,54,.92)  0%,rgba(159,0,29,.48)  50%,transparent 100%),
+    radial-gradient(5px 8px  at 48px  568px, rgba(213,19,59,.84)  0%,rgba(167,3,31,.4)   54%,transparent 100%),
+    radial-gradient(4px 12px at 348px 582px, rgba(198,14,53,.96)  0%,rgba(155,0,28,.5)   48%,transparent 100%),
+    radial-gradient(5px 9px  at 482px 608px, rgba(209,17,57,.88)  0%,rgba(163,2,30,.42)  56%,transparent 100%),
+    radial-gradient(4px 11px at 178px 628px, rgba(183,9,45,.84)   0%,rgba(143,0,22,.4)   54%,transparent 100%);
+  background-size:570px 650px; background-repeat:repeat;
+  animation:rubi-petals 44s linear infinite, rubi-shimmer 7s ease-in-out infinite alternate;
 }
 
-/* ── ◈ ESMERALDA — luciérnagas que ascienden ────────────────── */
+/* ── ◈ ESMERALDA — luciérnagas brillantes en el bosque ─────── */
 html.theme-esmeralda body::after {
   content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
   background-image:
-    radial-gradient(2px   2px   at 65px  90px,  rgba(70,255,130,.9)   0%,transparent 100%),
-    radial-gradient(1px   1px   at 180px 50px,  rgba(50,215,95,.7)    0%,transparent 100%),
-    radial-gradient(1.5px 1.5px at 280px 175px, rgba(100,255,158,.8)  0%,transparent 100%),
-    radial-gradient(1px   1px   at 385px 80px,  rgba(55,205,100,.65)  0%,transparent 100%),
-    radial-gradient(2px   2px   at 485px 165px, rgba(80,248,140,.85)  0%,transparent 100%),
-    radial-gradient(1px   1px   at 95px  275px, rgba(50,215,95,.55)   0%,transparent 100%),
-    radial-gradient(1.5px 1.5px at 215px 325px, rgba(95,252,152,.8)   0%,transparent 100%),
-    radial-gradient(1px   1px   at 335px 265px, rgba(60,200,110,.7)   0%,transparent 100%),
-    radial-gradient(2px   2px   at 450px 350px, rgba(75,245,138,.6)   0%,transparent 100%),
-    radial-gradient(1px   1px   at 40px  425px, rgba(50,215,95,.8)    0%,transparent 100%),
-    radial-gradient(1.5px 1.5px at 155px 485px, rgba(100,255,158,.65) 0%,transparent 100%),
-    radial-gradient(1px   1px   at 310px 450px, rgba(55,205,100,.85)  0%,transparent 100%),
-    radial-gradient(2px   2px   at 520px 495px, rgba(80,248,140,.7)   0%,transparent 100%),
-    radial-gradient(1px   1px   at 200px 560px, rgba(50,215,95,.55)   0%,transparent 100%),
-    radial-gradient(1.5px 1.5px at 420px 565px, rgba(95,252,152,.75)  0%,transparent 100%),
-    radial-gradient(1px   1px   at 560px 205px, rgba(60,200,110,.6)   0%,transparent 100%),
-    radial-gradient(2px   2px   at 125px 385px, rgba(80,248,140,.85)  0%,transparent 100%),
-    radial-gradient(1px   1px   at 475px 435px, rgba(50,215,95,.7)    0%,transparent 100%);
-  background-size: 590px 600px;
-  background-repeat: repeat;
-  animation: esm-rise 50s linear infinite, esm-blink 3.5s ease-in-out infinite;
+    /* Luciérnagas: núcleo 5px sólido + halo de glow amplio */
+    radial-gradient(5px 5px at 65px  90px,  rgba(120,255,148,1)   0%,rgba(60,220,100,.42) 55%,transparent 100%),
+    radial-gradient(4px 4px at 182px 52px,  rgba(80,240,118,.92)  0%,rgba(38,198,78,.35)  62%,transparent 100%),
+    radial-gradient(6px 6px at 282px 178px, rgba(140,255,162,1)   0%,rgba(68,228,108,.48) 52%,transparent 100%),
+    radial-gradient(4px 4px at 388px 82px,  rgba(90,235,124,.88)  0%,rgba(44,192,84,.32)  62%,transparent 100%),
+    radial-gradient(5px 5px at 488px 168px, rgba(110,250,144,1)   0%,rgba(54,214,94,.4)   56%,transparent 100%),
+    radial-gradient(4px 4px at 98px  278px, rgba(80,240,118,.85)  0%,rgba(38,198,78,.3)   62%,transparent 100%),
+    radial-gradient(6px 6px at 218px 328px, rgba(140,255,162,1)   0%,rgba(68,228,108,.5)  52%,transparent 100%),
+    radial-gradient(4px 4px at 338px 268px, rgba(95,242,128,.92)  0%,rgba(46,198,88,.35)  60%,transparent 100%),
+    radial-gradient(5px 5px at 452px 352px, rgba(115,252,146,1)   0%,rgba(56,216,96,.42)  56%,transparent 100%),
+    radial-gradient(4px 4px at 42px  428px, rgba(80,240,118,.88)  0%,rgba(38,198,78,.34)  62%,transparent 100%),
+    radial-gradient(6px 6px at 158px 488px, rgba(140,255,162,1)   0%,rgba(68,228,108,.46) 52%,transparent 100%),
+    radial-gradient(4px 4px at 312px 452px, rgba(90,235,124,.92)  0%,rgba(44,192,84,.32)  62%,transparent 100%),
+    radial-gradient(5px 5px at 522px 498px, rgba(110,250,144,.96) 0%,rgba(54,214,94,.4)   56%,transparent 100%),
+    radial-gradient(4px 4px at 202px 562px, rgba(85,242,120,.85)  0%,rgba(40,198,80,.3)   62%,transparent 100%),
+    radial-gradient(6px 6px at 422px 568px, rgba(140,255,162,1)   0%,rgba(68,228,108,.5)  52%,transparent 100%),
+    radial-gradient(4px 4px at 562px 208px, rgba(95,242,128,.88)  0%,rgba(46,198,88,.35)  60%,transparent 100%),
+    radial-gradient(5px 5px at 128px 388px, rgba(112,250,145,1)   0%,rgba(55,215,95,.42)  56%,transparent 100%),
+    radial-gradient(4px 4px at 478px 438px, rgba(80,240,118,.92)  0%,rgba(38,198,78,.35)  62%,transparent 100%);
+  background-size:590px 600px; background-repeat:repeat;
+  animation:esm-rise 50s linear infinite, esm-blink 3.5s ease-in-out infinite, esm-blink2 5.8s ease-in-out infinite reverse;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -493,13 +535,24 @@ html.theme-aurora body::before {
   background:radial-gradient(ellipse 60% 30% at 50% 8%,rgba(0,180,120,.06) 0%,transparent 80%);
 }
 html.theme-aurora body::after {
-  content:''; position:fixed; top:-40%; left:-25%; width:150%; height:100%;
+  content:'';
+  position:fixed; top:-42%; left:-28%; width:156%; height:94%;
   pointer-events:none; z-index:0;
   background:
-    linear-gradient(158deg,rgba(0,220,160,.09) 0%,rgba(0,180,255,.07) 28%,rgba(100,0,220,.08) 58%,rgba(0,255,180,.05) 100%),
-    linear-gradient(205deg,rgba(60,0,180,.1) 0%,rgba(0,200,140,.07) 42%,rgba(0,100,255,.06) 80%,transparent 100%);
-  filter:blur(60px);
-  animation:aurora-glow 18s ease-in-out infinite;
+    /* Banda verde brillante — la más característica de la aurora */
+    radial-gradient(ellipse 115% 22% at 50% 42%, rgba(0,255,130,.48) 0%,rgba(0,205,102,.22) 44%,transparent 70%),
+    /* Banda teal-cyan secundaria */
+    radial-gradient(ellipse 92%  17% at 24% 64%, rgba(0,225,204,.38) 0%,rgba(0,182,162,.16) 54%,transparent 78%),
+    /* Acento violeta/azul */
+    radial-gradient(ellipse 78%  14% at 74% 30%, rgba(132,62,255,.3)  0%,rgba(88,40,215,.13) 54%,transparent 82%),
+    /* Destello cyan vivo */
+    radial-gradient(ellipse 56%  10% at 62% 56%, rgba(0,255,224,.24) 0%,transparent 70%),
+    /* Brillo rosado suave (aurora rara pero hermosa) */
+    radial-gradient(ellipse 40%  8%  at 82% 48%, rgba(200,80,255,.14) 0%,transparent 68%),
+    /* Base azul profunda */
+    radial-gradient(ellipse 125% 40% at 50% 50%, rgba(0,42,145,.07) 0%,transparent 82%);
+  filter:blur(30px);
+  animation:aurora-ribbon 16s ease-in-out infinite;
 }
 html.theme-aurora .topbar,
 html.theme-aurora .sidebar { border-color:rgba(0,200,160,.1); }
