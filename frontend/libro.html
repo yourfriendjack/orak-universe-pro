@@ -266,6 +266,15 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;bac
 .rc-btn:hover{border-color:var(--amber);color:var(--amber-dim);}
 .reading-overlay.dark .rc-btn{border-color:rgba(255,255,255,.1);color:#d4cfc5;}
 .reading-overlay.dark .rc-btn:hover{border-color:var(--amber);color:var(--amber);}
+.rc-tema-wrap{position:relative;}
+.rc-tema-panel{display:none;position:absolute;top:calc(100% + 6px);right:0;background:var(--page);border:1px solid var(--fog);border-radius:8px;overflow:hidden;min-width:170px;box-shadow:0 8px 24px rgba(0,0,0,.15);z-index:20;}
+.rc-tema-panel.open{display:block;}
+.rc-tema-opt{padding:9px 14px;font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--ink);cursor:pointer;transition:background .12s;}
+.rc-tema-opt:hover{background:var(--mist);}
+.rc-tema-opt.active{color:var(--amber);font-weight:600;}
+.reading-overlay.dark .rc-tema-panel{background:#1a1812;border-color:rgba(255,255,255,.1);}
+.reading-overlay.dark .rc-tema-opt{color:#d4cfc5;}
+.reading-overlay.dark .rc-tema-opt:hover{background:rgba(255,255,255,.05);}
 
 .reading-body.size-sm .reading-text{font-size:1rem;}
 .reading-body.size-md .reading-text{font-size:1.15rem;}
@@ -453,6 +462,17 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;bac
       <span class="reading-words" id="reading-words">— palabras</span>
       <button class="rc-btn" onclick="cambiarTamano()" title="Tamaño de texto">Aa</button>
       <button class="rc-btn" id="modo-btn" onclick="toggleModoOscuro()" title="Modo nocturno">☽</button>
+      <div class="rc-tema-wrap">
+        <button class="rc-btn" onclick="toggleTemaPanel()" title="Tema de lectura">⊛</button>
+        <div class="rc-tema-panel" id="rc-tema-panel">
+          <div class="rc-tema-opt" data-tema="" onclick="aplicarTemaLectura(this)">Estándar</div>
+          <div class="rc-tema-opt" data-tema="rl-libreta" onclick="aplicarTemaLectura(this)">Libreta Antigua</div>
+          <div class="rc-tema-opt" data-tema="rl-pergamino" onclick="aplicarTemaLectura(this)">Pergamino</div>
+          <div class="rc-tema-opt" data-tema="rl-maquina" onclick="aplicarTemaLectura(this)">Máquina de Escribir</div>
+          <div class="rc-tema-opt" data-tema="rl-noche" onclick="aplicarTemaLectura(this)">Noche Eterna</div>
+          <div class="rc-tema-opt" data-tema="rl-bosque" onclick="aplicarTemaLectura(this)">Bosque Encantado</div>
+        </div>
+      </div>
     </div>
   </div>
   <div class="reading-progress"><div class="reading-progress-fill" id="reading-progress"></div></div>
@@ -912,6 +932,30 @@ window.toggleModoOscuro = () => {
   document.getElementById('reading-overlay').classList.toggle('dark', _darkMode);
   document.getElementById('modo-btn').textContent = _darkMode ? '☀' : '☽';
 };
+
+window.toggleTemaPanel = () => {
+  const panel = document.getElementById('rc-tema-panel');
+  panel.classList.toggle('open');
+  // Marcar el tema activo
+  const actual = localStorage.getItem('orak_tema_lectura') || '';
+  panel.querySelectorAll('.rc-tema-opt').forEach(o => {
+    o.classList.toggle('active', o.dataset.tema === actual);
+  });
+};
+
+window.aplicarTemaLectura = (el) => {
+  const tema = el.dataset.tema;
+  const rb   = document.getElementById('reading-body');
+  rb.classList.remove('rl-libreta','rl-pergamino','rl-maquina','rl-noche','rl-bosque');
+  if (tema) rb.classList.add(tema);
+  localStorage.setItem('orak_tema_lectura', tema);
+  document.getElementById('rc-tema-panel').classList.remove('open');
+};
+
+document.addEventListener('click', e => {
+  const wrap = document.querySelector('.rc-tema-wrap');
+  if (wrap && !wrap.contains(e.target)) document.getElementById('rc-tema-panel')?.classList.remove('open');
+});
 
 function _actualizarProgreso() {
   const o = document.getElementById('reading-overlay');
