@@ -367,7 +367,7 @@
 
 <script type="module">
 import { initAuth, login, logout, registro, getPerfil, getToken, getOruns, getGlimmers, actualizarOruns, actualizarGlimmers, actualizarPerfil, estaLogueado } from './js/services/auth.js';
-import { getFeed, getExplorar, crearPost, borrarPost, seguir, dejarSeguir, darGlimmer, quitarGlimmer, getRanking, getNotificaciones, leerNotificaciones, getLibrosPerfil, apiGet } from './js/services/api.js';
+import { getFeed, getExplorar, crearPost, borrarPost, seguir, dejarSeguir, darGlimmer, quitarGlimmer, getRanking, getNotificaciones, leerNotificaciones, getLibrosPerfil, apiGet, apiPost } from './js/services/api.js';
 
 // ── Estado ─────────────────────────────────────────────────────
 const S = {
@@ -562,9 +562,16 @@ function postHTML(p, i) {
     <div class="post-actions">
       <button class="pact${S.likedPosts.has(p.id) ? ' liked' : ''}" id="glimmer-${p.id}" onclick="darGlimmerPost(${p.id})">⬡ ${p.glimmers||0} Glimmer${(p.glimmers||0)!==1?'s':''}</button>
       <button class="pact" data-libro-fork="${p.libro_id||''}" onclick="if(this.dataset.libroFork) window.location.href='/libro?id='+this.dataset.libroFork; else toast('Este post no tiene libro asociado')">⇄ ${p.forks||0} Forks</button>
-      <button class="pact" onclick="toast('✎ Notas próximamente')">✎ ${p.notas||0} Notas</button>
+      <button class="pact" id="nota-btn-${p.id}" onclick="toggleNotas(${p.id})">✎ ${p.notas||0} Nota${(p.notas||0)!==1?'s':''}</button>
       <button class="pact" onclick="sharePost(${p.id})">◈ Compartir</button>
       ${p.autor_id === getPerfil()?.id ? `<button class="pact" onclick="eliminarPost(${p.id})" style="color:#c06040">✕ Eliminar</button>` : ''}
+    </div>
+    <div class="notas-panel" id="notas-panel-${p.id}" style="display:none">
+      <div id="notas-list-${p.id}"></div>
+      <div class="nota-form">
+        <textarea class="nota-textarea" id="nota-txt-${p.id}" rows="2" placeholder="Escribe una nota…"></textarea>
+        <button class="nota-send" onclick="enviarNotaPost(${p.id})">Enviar</button>
+      </div>
     </div>
   </div>`;
 }
@@ -751,6 +758,63 @@ window.toggleReader = async (id, btn) => {
       btn.classList.add('on'); btn.textContent = '✓ Lector fiel'; actualizarOruns(10); updateUserUI(); toast('❋ Invitación enviada · +10 Oruns');
     } catch(e) { toast(e.message,'err'); }
   }
+};
+
+// ── NOTAS EN POSTS ──────────────────────────────────────────────
+window.toggleNotas = async (id) => {
+  const panel = document.getElementById('notas-panel-' + id);
+  const btn   = document.getElementById('nota-btn-' + id);
+  if (!panel) return;
+  const isOpen = panel.style.display !== 'none';
+  panel.style.display = isOpen ? 'none' : 'block';
+  btn?.classList.toggle('notas-open', !isOpen);
+  if (!isOpen) await cargarNotasPost(id);
+};
+
+async function cargarNotasPost(id) {
+  const c = document.getElementById('notas-list-' + id);
+  if (!c) return;
+  c.innerHTML = '<div style="font-size:.72rem;color:var(--fog);padding:4px 0">Cargando…</div>';
+  try {
+    const notas = await apiGet('/api/social/notas/post/' + id);
+    if (!notas.length) {
+      c.innerHTML = '<div style="font-size:.75rem;color:var(--fog);padding:4px 0 8px">Sin notas todavía. ¡Sé el primero!</div>';
+      return;
+    }
+    c.innerHTML = notas.map(n => {
+      const per = n.perfiles || {};
+      const ini = (per.display_name || per.username || '?')[0].toUpperCase();
+      return `<div class="nota-item">
+        <div class="nota-av">${escapeHtml(ini)}</div>
+        <div class="nota-body">
+          <div class="nota-handle">@${escapeHtml(per.username || 'anónimo')}</div>
+          <div class="nota-texto">${escapeHtml(n.texto)}</div>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    c.innerHTML = `<div style="font-size:.72rem;color:#e08080;padding:4px 0">${e.message}</div>`;
+  }
+}
+
+window.enviarNotaPost = async (id) => {
+  if (!getToken()) { toast('Inicia sesión para dejar una nota', 'err'); return; }
+  const input = document.getElementById('nota-txt-' + id);
+  const texto = input?.value.trim();
+  if (!texto) { toast('Escribe algo primero', 'err'); return; }
+  try {
+    await apiPost('/api/social/notas', { post_id: id, texto }, getToken());
+    input.value = '';
+    const p = S.posts.find(x => x.id === id);
+    if (p) p.notas = (p.notas || 0) + 1;
+    const btn = document.getElementById('nota-btn-' + id);
+    if (btn) {
+      const n = p?.notas || 1;
+      btn.textContent = `✎ ${n} Nota${n !== 1 ? 's' : ''}`;
+    }
+    await cargarNotasPost(id);
+    toast('✎ Nota enviada');
+  } catch(e) { toast(e.message, 'err'); }
 };
 
 // ── PERFIL ──────────────────────────────────────────────────────
@@ -997,6 +1061,21 @@ document.getElementById('glimmer-modal').addEventListener('click', e => { if (e.
 </body>
 </html>
 <style>
+/* ── Panel de notas en posts ───────────────────────────── */
+.notas-panel{padding:10px 14px 14px;border-top:1px solid rgba(205,199,184,.08);background:rgba(14,13,11,.25);}
+.nota-item{display:flex;gap:8px;padding:7px 0;border-bottom:1px solid rgba(205,199,184,.05);}
+.nota-item:last-child{border-bottom:none;}
+.nota-av{width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--amber),var(--rust));display:flex;align-items:center;justify-content:center;font-size:.55rem;font-weight:700;color:#fff;flex-shrink:0;}
+.nota-body{flex:1;min-width:0;}
+.nota-handle{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--amber);margin-bottom:3px;}
+.nota-texto{font-size:.83rem;color:rgba(205,199,184,.78);line-height:1.55;word-break:break-word;}
+.nota-form{display:flex;gap:6px;margin-top:10px;align-items:flex-end;}
+.nota-textarea{flex:1;background:rgba(205,199,184,.05);border:1px solid rgba(205,199,184,.12);border-radius:6px;padding:7px 10px;color:var(--parchment);font-size:.82rem;font-family:'JetBrains Mono',monospace;resize:none;outline:none;}
+.nota-textarea:focus{border-color:rgba(212,168,67,.4);}
+.nota-send{padding:7px 14px;background:var(--amber);color:#0e0d0b;border:none;border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:.6rem;font-weight:700;cursor:pointer;white-space:nowrap;}
+.nota-send:hover{background:var(--orun);}
+.pact.notas-open{color:var(--amber);background:rgba(212,168,67,.1);}
+
 /* ══════════════════════════════════════════════════════════
    RESPONSIVE — MÓVIL
 ══════════════════════════════════════════════════════════ */

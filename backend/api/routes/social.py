@@ -300,6 +300,17 @@ async def crear_nota(datos: NotaIn, usuario = Depends(get_current_user)):
     return ok("Nota creada", {"nota": res.data[0] if res.data else {}})
 
 
+@router.get("/notas/post/{post_id}")
+async def get_notas_post(post_id: int):
+    sb = get_supabase()
+    res = sb.table("notas")\
+        .select("*, perfiles(username, display_name, avatar_url)")\
+        .eq("post_id", post_id)\
+        .order("creado_en")\
+        .execute()
+    return res.data or []
+
+
 @router.get("/notas/{capitulo_id}")
 async def get_notas_capitulo(capitulo_id: int):
     sb = get_supabase()
