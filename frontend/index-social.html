@@ -15,7 +15,28 @@
   <div class="auth-glow"></div>
   <div class="auth-card">
     <div class="auth-logo">
-      <div class="auth-hex"></div>
+      <svg viewBox="0 0 80 80" width="80" height="80" style="display:block;margin:0 auto 14px;overflow:visible">
+        <g transform="translate(40,40)">
+          <circle r="1" cx="-26" cy="-21" fill="rgba(212,168,67,0.35)"><animate attributeName="opacity" values="0.35;0.75;0.35" dur="3.1s" repeatCount="indefinite"/></circle>
+          <circle r="0.7" cx="23" cy="-29" fill="rgba(212,168,67,0.28)"><animate attributeName="opacity" values="0.28;0.65;0.28" dur="2.2s" repeatCount="indefinite" begin="0.6s"/></circle>
+          <circle r="0.9" cx="29" cy="21" fill="rgba(212,168,67,0.22)"><animate attributeName="opacity" values="0.22;0.55;0.22" dur="3.8s" repeatCount="indefinite" begin="1.2s"/></circle>
+          <circle r="0.6" cx="-22" cy="26" fill="rgba(212,168,67,0.3)"><animate attributeName="opacity" values="0.3;0.6;0.3" dur="2.7s" repeatCount="indefinite" begin="0.9s"/></circle>
+          <circle r="0.8" cx="10" cy="-33" fill="rgba(212,168,67,0.2)"><animate attributeName="opacity" values="0.2;0.5;0.2" dur="4s" repeatCount="indefinite" begin="1.8s"/></circle>
+          <circle r="33" fill="none" stroke="rgba(212,168,67,0.07)" stroke-width="1"/>
+          <circle r="29" fill="none" stroke="rgba(212,168,67,0.11)" stroke-width="0.6"/>
+          <ellipse rx="27" ry="10.5" fill="none" stroke="rgba(212,168,67,0.92)" stroke-width="1.6" style="filter:drop-shadow(0 0 3px rgba(212,168,67,0.85))">
+            <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="4s" repeatCount="indefinite"/>
+          </ellipse>
+          <ellipse rx="27" ry="10.5" fill="none" stroke="rgba(212,168,67,0.58)" stroke-width="1.2" style="filter:drop-shadow(0 0 2px rgba(212,168,67,0.6))">
+            <animateTransform attributeName="transform" type="rotate" from="65" to="-295" dur="6.5s" repeatCount="indefinite"/>
+          </ellipse>
+          <circle r="9.5" fill="#a06808" style="filter:drop-shadow(0 0 10px rgba(212,168,67,0.85))">
+            <animate attributeName="r" values="8.5;10.5;8.5" dur="3s" repeatCount="indefinite"/>
+          </circle>
+          <circle r="5.5" fill="#c8860a"/>
+          <circle r="2.5" fill="#fff9e0"/>
+        </g>
+      </svg>
       <div class="auth-title">ORAK UNIVERSE</div>
       <div class="auth-sub">La red social de los escritores</div>
     </div>
@@ -82,7 +103,21 @@
   <header class="topbar">
     <button class="hamburger-btn" onclick="toggleSidebar()"><span></span><span></span><span></span></button>
     <div class="logo" onclick="goView('feed')">
-      <div class="logo-bh"></div>ORAK
+      <svg viewBox="0 0 32 32" width="30" height="30" style="flex-shrink:0;overflow:visible">
+        <g transform="translate(16,16)">
+          <circle r="14.5" fill="none" stroke="rgba(212,168,67,0.14)" stroke-width="0.8"/>
+          <ellipse rx="13" ry="5" fill="none" stroke="rgba(212,168,67,0.92)" stroke-width="1.5" style="filter:drop-shadow(0 0 2px rgba(212,168,67,0.8))">
+            <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="3s" repeatCount="indefinite"/>
+          </ellipse>
+          <ellipse rx="13" ry="5" fill="none" stroke="rgba(212,168,67,0.58)" stroke-width="1.1" style="filter:drop-shadow(0 0 2px rgba(212,168,67,0.5))">
+            <animateTransform attributeName="transform" type="rotate" from="65" to="-295" dur="5s" repeatCount="indefinite"/>
+          </ellipse>
+          <circle r="3.8" fill="#c8860a" style="filter:drop-shadow(0 0 4px rgba(212,168,67,0.9))">
+            <animate attributeName="r" values="3.3;4.2;3.3" dur="2.5s" repeatCount="indefinite"/>
+          </circle>
+          <circle r="1.4" fill="#fff9e0"/>
+        </g>
+      </svg>ORAK
     </div>
     <input class="topbar-search" type="text" placeholder="Buscar libros, escritores…">
     <nav class="topbar-nav">
@@ -1540,7 +1575,7 @@ const _origLoadPeople = window.loadPeople;
 @media (max-width: 480px) {
   .topbar{padding:0 12px;gap:8px;}
   .logo{font-size:.85rem;}
-  .logo-hex{width:24px;height:24px;}
+  .logo svg{width:24px;height:24px;}
   .topbar-search{display:none;}
   .composer-input{font-size:.95rem;}
   .post-text{font-size:.92rem;}
