@@ -20,12 +20,15 @@ const RubiRenderer = (() => {
 
   // ── Cursor ──────────────────────────────────────────────────────────────
   let mouseX = -999, mouseY = -999;
-  let lastSparkle = 0, _onMove = null;
+  let lastSparkle = 0, _onMove = null, _onClick = null;
   const sparkles = [];
 
   // ── Destellos de faceta espontáneos ─────────────────────────────────────
   const flashes = [];
   let nextFlashIn = 200;
+
+  // ── Bursts de pétalo destruido ───────────────────────────────────────────
+  const bursts = [];
 
   // ── Corazón Rubí ────────────────────────────────────────────────────────
   const HEART_XF = 0.72;
@@ -595,6 +598,81 @@ const RubiRenderer = (() => {
   }
 
   // ════════════════════════════════════════════════════════════════════════
+  //  Burst — destrucción de pétalo al hacer clic
+  // ════════════════════════════════════════════════════════════════════════
+  function spawnBurst(x, y) {
+    const shards = Array.from({ length: 11 }, () => {
+      const a   = Math.random() * Math.PI * 2;
+      const spd = 2.2 + Math.random() * 3.8;
+      return { x, y, vx: Math.cos(a) * spd, vy: Math.sin(a) * spd };
+    });
+    bursts.push({ x, y, life: 1.0, shards });
+  }
+
+  function drawBursts() {
+    if (!bursts.length) return;
+    bgCtx.save();
+    bgCtx.globalCompositeOperation = 'screen';
+    for (let i = bursts.length - 1; i >= 0; i--) {
+      const b = bursts[i];
+      const prog = 1 - b.life;   // 0→1 mientras el burst avanza
+
+      // Flash central
+      const fR = 6 + prog * 40;
+      const fA = b.life * 0.90;
+      const flash = bgCtx.createRadialGradient(b.x, b.y, 0, b.x, b.y, fR);
+      flash.addColorStop(0.00, `rgba(255, 230, 240, ${fA})`);
+      flash.addColorStop(0.28, `rgba(228,  48,  88, ${fA * 0.80})`);
+      flash.addColorStop(0.65, `rgba(165,  12,  42, ${fA * 0.38})`);
+      flash.addColorStop(1.00, 'rgba(0,0,0,0)');
+      bgCtx.beginPath();
+      bgCtx.arc(b.x, b.y, fR, 0, Math.PI * 2);
+      bgCtx.fillStyle = flash;
+      bgCtx.fill();
+
+      // Anillo expansivo
+      if (b.life > 0.35) {
+        const ringR = prog * 62;
+        const ringA = (b.life - 0.35) / 0.65 * 0.55;
+        bgCtx.beginPath();
+        bgCtx.arc(b.x, b.y, ringR, 0, Math.PI * 2);
+        bgCtx.strokeStyle = `rgba(215, 52, 90, ${ringA})`;
+        bgCtx.lineWidth   = 1.4;
+        bgCtx.stroke();
+      }
+
+      // Fragmentos de cristal volando
+      b.shards.forEach(s => {
+        s.x  += s.vx; s.y += s.vy;
+        s.vx *= 0.91; s.vy *= 0.91;
+        bgCtx.beginPath();
+        bgCtx.arc(s.x, s.y, 1.6, 0, Math.PI * 2);
+        bgCtx.fillStyle = `rgba(222, 55, 92, ${b.life * 0.85})`;
+        bgCtx.fill();
+      });
+
+      b.life -= 0.030;
+      if (b.life <= 0) bursts.splice(i, 1);
+    }
+    bgCtx.restore();
+  }
+
+  function checkPetalHit(cx, cy) {
+    if (!petals) return;
+    for (let i = 0; i < petals.length; i++) {
+      const p  = petals[i];
+      const dx = cx - p.x, dy = cy - p.y;
+      if (dx * dx + dy * dy < (p.ry * 1.4) ** 2) {
+        spawnBurst(p.x, p.y);
+        const next = makePetal(bgCanvas.width, bgCanvas.height, false);
+        next.x = Math.random() * bgCanvas.width;
+        Object.assign(p, next);
+        return;   // un clic destruye un solo pétalo
+      }
+    }
+  }
+
+  // ════════════════════════════════════════════════════════════════════════
   //  LOOP
   // ════════════════════════════════════════════════════════════════════════
   function frame() {
@@ -607,6 +685,7 @@ const RubiRenderer = (() => {
     drawStars(W, H);
     drawDust(W, H);
     drawPetals(W, H);
+    drawBursts();
     VEINS.forEach(v => drawVein(v, W, H));
     drawHeart(W, H);
     updateFlashes(W, H);
@@ -667,7 +746,9 @@ const RubiRenderer = (() => {
           });
         }
       };
-      document.addEventListener('mousemove', _onMove, { passive: true });
+      _onClick = (e) => checkPetalHit(e.clientX, e.clientY);
+      document.addEventListener('mousemove',  _onMove,  { passive: true });
+      document.addEventListener('click',      _onClick);
       document.addEventListener('mouseleave', () => { mouseX = -999; mouseY = -999; });
       window.addEventListener('resize', resize);
       t = 0;
@@ -678,11 +759,12 @@ const RubiRenderer = (() => {
       if (!bgCanvas) return;
       cancelAnimationFrame(raf);
       window.removeEventListener('resize', resize);
-      if (_onMove) { document.removeEventListener('mousemove', _onMove); _onMove = null; }
+      if (_onMove)  { document.removeEventListener('mousemove', _onMove);  _onMove  = null; }
+      if (_onClick) { document.removeEventListener('click',     _onClick); _onClick = null; }
       bgCanvas.remove();   bgCanvas   = bgCtx   = null;
       overCanvas.remove(); overCanvas = overCtx = null;
       dust = null; petals = null;
-      sparkles.length = flashes.length = 0;
+      sparkles.length = flashes.length = bursts.length = 0;
       mouseX = mouseY = -999;
       raf = null; t = 0;
     },
