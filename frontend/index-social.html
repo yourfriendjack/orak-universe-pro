@@ -111,7 +111,7 @@
       <div class="snav-item"        id="snav-people"  onclick="goView('people')"><span class="snav-icon">◷</span>Escritores</div>
       <div class="snav-item"        id="snav-profile" onclick="goView('profile')"><span class="snav-icon">◧</span>Mi Perfil</div>
       <div class="snav-label">Biblioteca</div>
-      <div class="snav-item" onclick="toast('📚 Mis libros próximamente')"><span class="snav-icon">◫</span>Mis Libros</div>
+      <div class="snav-item" id="snav-misLibros" onclick="goView('misLibros')"><span class="snav-icon">◫</span>Mis Libros</div>
       <div class="snav-item" onclick="toast('◈ Colaboraciones próximamente')"><span class="snav-icon">◆</span>Colaboraciones</div>
       <div class="snav-label">Comunidad</div>
       <div class="snav-item" onclick="toggleNotif()"><span class="snav-icon">🔔</span>Notificaciones<span class="snav-badge" id="snav-badge" style="display:none">0</span></div>
@@ -258,6 +258,16 @@
       </div>
     </div>
 
+    <!-- ── MIS LIBROS ── -->
+    <div class="view" id="view-misLibros">
+      <div class="explore-head">
+        <div class="explore-title">Mis Libros</div>
+        <div class="explore-sub">Todos tus mundos en un solo lugar</div>
+        <button class="pbtn pbtn-ink" style="margin-top:10px" onclick="window.location.href='/libro?nuevo=1'">＋ Nuevo libro</button>
+      </div>
+      <div class="books-grid" id="mis-libros-grid"><div class="loading">Cargando…</div></div>
+    </div>
+
   </div><!-- app-body -->
 </div><!-- screen-app -->
 
@@ -357,7 +367,7 @@
 
 <script type="module">
 import { initAuth, login, logout, registro, getPerfil, getToken, getOruns, getGlimmers, actualizarOruns, actualizarGlimmers, actualizarPerfil, estaLogueado } from './js/services/auth.js';
-import { getFeed, getExplorar, crearPost, borrarPost, seguir, dejarSeguir, darGlimmer, quitarGlimmer, getRanking, getNotificaciones, leerNotificaciones, getLibrosPerfil } from './js/services/api.js';
+import { getFeed, getExplorar, crearPost, borrarPost, seguir, dejarSeguir, darGlimmer, quitarGlimmer, getRanking, getNotificaciones, leerNotificaciones, getLibrosPerfil, apiGet } from './js/services/api.js';
 
 // ── Estado ─────────────────────────────────────────────────────
 const S = {
@@ -504,9 +514,10 @@ window.goView = (view) => {
   document.getElementById('tnav-' + view)?.classList.add('active');
   document.getElementById('snav-' + view)?.classList.add('active');
   closeNotifPanel();
-  if (view === 'explore' && !document.getElementById('books-grid').children.length) loadExplore();
-  if (view === 'people'  && !S.people.length) loadPeople();
-  if (view === 'profile') loadProfile();
+  if (view === 'explore'    && !document.getElementById('books-grid').children.length) loadExplore();
+  if (view === 'people'     && !S.people.length) loadPeople();
+  if (view === 'profile')     loadProfile();
+  if (view === 'misLibros')   loadMisLibros();
 };
 
 // ── FEED ────────────────────────────────────────────────────────
@@ -620,6 +631,17 @@ window.sharePost = async (id) => {
 };
 
 // ── EXPLORAR ────────────────────────────────────────────────────
+async function loadMisLibros() {
+  if (!getToken()) { goView('feed'); toast('Inicia sesión para ver tus libros', 'err'); return; }
+  const c = document.getElementById('mis-libros-grid');
+  c.innerHTML = '<div class="loading">Cargando tus libros…</div>';
+  try {
+    const data = await apiGet('/v2/libros/mis-libros', getToken());
+    if (!data.length) { c.innerHTML = '<div class="loading">Aún no tienes libros. ¡Crea el primero!</div>'; return; }
+    renderBooks('mis-libros-grid', data);
+  } catch(e) { c.innerHTML = `<div class="loading" style="color:#e08080">${e.message}</div>`; }
+}
+
 async function loadExplore(genero) {
   const c = document.getElementById('books-grid');
   c.innerHTML = '<div class="loading">Cargando libros</div>';

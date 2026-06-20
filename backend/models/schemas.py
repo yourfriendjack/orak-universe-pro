@@ -178,13 +178,7 @@ class LectorFielAccion(BaseModel):
 class GlimmerIn(BaseModel):
     post_id:    Optional[int] = None
     libro_id:   Optional[int] = None
-    cantidad:   int = Field(..., ge=1, le=5)
-
-    @validator('cantidad')
-    def validar_cantidad(cls, v):
-        if v not in (1, 2, 3, 5):
-            raise ValueError('Cantidad debe ser 1, 2, 3 o 5')
-        return v
+    cantidad:   int = Field(1, ge=1, le=5)
 
 
 # ══════════════════════════════════════════════════════════

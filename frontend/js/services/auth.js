@@ -71,7 +71,7 @@ export const getToken    = ()  => _sesion?.access_token || null;
 export const getPerfil   = ()  => _sesion?.perfil || null;
 export const estaLogueado = () => !!_sesion?.access_token;
 export const getOruns    = ()  => _sesion?.perfil?.oruns || 0;
-export const getGlimmers = ()  => _sesion?.perfil?.glimmers_week || 0;
+export const getGlimmers = ()  => _sesion?.perfil?.glimmers_total || 0;
 
 // ── Actualizar balance local (sin re-fetch) ──────────────────────
 export function actualizarOruns(delta) {
@@ -83,7 +83,7 @@ export function actualizarOruns(delta) {
 }
 export function actualizarGlimmers(delta) {
   if (_sesion?.perfil) {
-    _sesion.perfil.glimmers_week = Math.max(0, (_sesion.perfil.glimmers_week || 0) + delta);
+    _sesion.perfil.glimmers_total = Math.max(0, (_sesion.perfil.glimmers_total || 0) + delta);
     _guardarSesion();
     _actualizarUI();
   }
@@ -92,20 +92,20 @@ export function actualizarGlimmers(delta) {
 // ── UI ───────────────────────────────────────────────────────────
 function _actualizarUI() {
   if (!_sesion?.perfil) return;
-  const { oruns, glimmers_week, display_name, username } = _sesion.perfil;
+  const { oruns, glimmers_total, display_name, username } = _sesion.perfil;
   _set('orunsVal',    oruns);
-  _set('glimmersVal', glimmers_week);
+  _set('glimmersVal', glimmers_total);
   _set('pmOruns',     oruns);
   _set('rpOruns',     oruns);
-  _set('rpGlimmers',  glimmers_week);
-  _set('orun-display',   oruns?.toLocaleString());
-  _set('glimmer-display', glimmers_week);
-  _set('ec-oruns',    oruns?.toLocaleString());
-  _set('ec-glimmers', `${glimmers_week}/10`);
+  _set('rpGlimmers',  glimmers_total);
+  _set('orun-display',    oruns?.toLocaleString());
+  _set('glimmer-display', glimmers_total);
+  _set('eco-oruns',   oruns?.toLocaleString());
+  _set('eco-glimmers',(glimmers_total||0).toLocaleString());
   _set('topbar-av',   (display_name || username || 'U').slice(0,2).toUpperCase());
   _set('prof-name',   display_name || username);
   _set('prof-handle', `@${username}`);
-  _set('ec-name',     display_name || username);
+  _set('eco-name',    display_name || username);
 }
 
 function _set(id, val) {
