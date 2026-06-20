@@ -33,6 +33,7 @@ const EsmeraldaRenderer = (() => {
 
   // ── Bloom de clic ───────────────────────────────────────────────────────
   const blooms = [];
+  let treeLeaves = [];
 
   // ── Campo estelar — 120 estrellas deterministas ─────────────────────────
   const STARS = Array.from({ length: 120 }, (_, i) => ({
@@ -44,6 +45,16 @@ const EsmeraldaRenderer = (() => {
     jade:  i % 7 === 0,
     gold:  i % 13 === 0,
     violet: i % 17 === 0,
+  }));
+
+  // 9 "nubes" de niebla: posición base, tamaño y velocidad de deriva independientes
+  const MIST_PUFFS = Array.from({ length: 9 }, (_, i) => ({
+    xBase: (i * 0.138 + 0.05) % 1.0,
+    y:     0.78 + (i % 4) * 0.056,
+    r:     0.20  + (i % 5) * 0.055,
+    alpha: 0.028 + (i % 4) * 0.008,
+    speed: (i % 2 === 0 ? 1 : -1) * (0.000055 + i * 0.000012),
+    phase: i * 0.92,
   }));
 
   // ════════════════════════════════════════════════════════════════════════
@@ -254,6 +265,26 @@ const EsmeraldaRenderer = (() => {
   }
 
   // ════════════════════════════════════════════════════════════════════════
+  //  BG — Niebla volumétrica: capas que derivan a distintas velocidades
+  // ════════════════════════════════════════════════════════════════════════
+  function drawGroundMist(W, H) {
+    bgCtx.save();
+    MIST_PUFFS.forEach(p => {
+      const dx = Math.sin(t * p.speed + p.phase) * W * 0.10;
+      const cx = W * p.xBase + dx;
+      const cy = H * p.y;
+      const r  = W * p.r;
+      const g  = bgCtx.createRadialGradient(cx, cy, 0, cx, cy, r);
+      g.addColorStop(0,    `rgba(42,138,68,${p.alpha})`);
+      g.addColorStop(0.55, `rgba(24, 88,46,${p.alpha * 0.42})`);
+      g.addColorStop(1,     'rgba(0,0,0,0)');
+      bgCtx.beginPath(); bgCtx.arc(cx, cy, r, 0, Math.PI*2);
+      bgCtx.fillStyle = g; bgCtx.fill();
+    });
+    bgCtx.restore();
+  }
+
+  // ════════════════════════════════════════════════════════════════════════
   //  BG — Estrellas (jade + dorado + violeta + blanco frío)
   // ════════════════════════════════════════════════════════════════════════
   function drawStars(W, H) {
@@ -418,6 +449,63 @@ const EsmeraldaRenderer = (() => {
       bgCtx.fillStyle = `rgba(200,255,220,${0.88*pulse})`; bgCtx.fill();
     });
 
+    bgCtx.restore();
+  }
+
+  // ════════════════════════════════════════════════════════════════════════
+  //  BG — Hojas que caen del Árbol Ancestral
+  //  Bezier idéntico a drawLeafCluster; balanceo sinusoidal como pétalos Rubí
+  // ════════════════════════════════════════════════════════════════════════
+  function spawnTreeLeaf() {
+    const tips = branches.filter(b => b.depth === 1);
+    if (!tips.length) return null;
+    const tip = tips[Math.floor(Math.random() * tips.length)];
+    return {
+      x:         tip.x1 + (Math.random()-0.5) * 18,
+      y:         tip.y1 + (Math.random()-0.5) * 12,
+      vx:        (Math.random()-0.5) * 0.18,
+      vy:        0.32 + Math.random() * 0.52,
+      rockPhase: Math.random() * Math.PI * 2,
+      rockSpeed: 0.018 + Math.random() * 0.014,
+      rockAmp:   0.30  + Math.random() * 0.35,
+      size:      4.8   + Math.random() * 3.8,
+      alpha:     0.26  + Math.random() * 0.18,
+    };
+  }
+
+  function drawTreeLeaves(W, H) {
+    while (treeLeaves.length < 22 && branches.length) {
+      const l = spawnTreeLeaf();
+      if (l) treeLeaves.push(l); else break;
+    }
+    bgCtx.save();
+    bgCtx.globalCompositeOperation = 'screen';
+    for (let i = treeLeaves.length-1; i >= 0; i--) {
+      const l = treeLeaves[i];
+      l.rockPhase += l.rockSpeed;
+      const rock = Math.sin(l.rockPhase) * l.rockAmp;
+      l.x += l.vx + Math.sin(l.rockPhase) * 0.28;
+      l.y += l.vy;
+      if (l.y > H+20 || l.x < -20 || l.x > W+20) {
+        const nl = spawnTreeLeaf();
+        if (nl) treeLeaves[i] = nl; else treeLeaves.splice(i, 1);
+        continue;
+      }
+      bgCtx.save();
+      bgCtx.translate(l.x, l.y);
+      bgCtx.rotate(rock);
+      const s = l.size;
+      bgCtx.beginPath();
+      bgCtx.moveTo(0, -s);
+      bgCtx.bezierCurveTo( s*0.88,-s*0.30, s*0.88, s*0.52, 0, s*0.92);
+      bgCtx.bezierCurveTo(-s*0.88, s*0.52,-s*0.88,-s*0.30, 0,   -s);
+      bgCtx.closePath();
+      bgCtx.fillStyle = `rgba(52,195,95,${l.alpha})`;
+      bgCtx.fill();
+      bgCtx.beginPath(); bgCtx.moveTo(0,-s*0.78); bgCtx.lineTo(0,s*0.78);
+      bgCtx.strokeStyle = `rgba(130,255,165,${l.alpha*0.32})`; bgCtx.lineWidth=0.4; bgCtx.stroke();
+      bgCtx.restore();
+    }
     bgCtx.restore();
   }
 
@@ -709,6 +797,8 @@ const EsmeraldaRenderer = (() => {
     drawStars(W,H);
     drawTree(W,H);
     drawSoulOrb();
+    drawGroundMist(W,H);
+    drawTreeLeaves(W,H);
     drawFireflies(W,H);
     drawSpores(W,H);
     drawSeeds(W,H);
@@ -726,6 +816,7 @@ const EsmeraldaRenderer = (() => {
     overCanvas.width=W; overCanvas.height=H;
     initFireflies(W,H); initSpores(W,H); initSeeds(W,H);
     buildTree(W,H);
+    treeLeaves = [];
   }
 
   // ════════════════════════════════════════════════════════════════════════
@@ -787,6 +878,7 @@ const EsmeraldaRenderer = (() => {
       bgCanvas.remove();   bgCanvas   = bgCtx   = null;
       overCanvas.remove(); overCanvas = overCtx = null;
       fireflies = spores = seeds = null;
+      treeLeaves.length = 0;
       branches=[]; roots=[];
       cursorLeaves.length = trailDots.length = blooms.length = 0;
       mouseX = mouseY = -999; raf = null; t = 0;
