@@ -193,6 +193,217 @@ html.theme-sangre .auth-glow { background: radial-gradient(ellipse at 50% 0%, rg
 
 
 /* ═══════════════════════════════════════════════════════════════
+   ANIMACIONES VIVIENTES — Un efecto único por cada tema UI
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Keyframes ─────────────────────────────────────────────── */
+@keyframes df-ascend    { from{background-position:0 800px}                             to{background-position:100px 0}                   }
+@keyframes df-glow      { 0%,100%{opacity:.5}                                           50%{opacity:.9}                                   }
+@keyframes glitch-scan  { 0%{transform:translateY(-6px);opacity:0} 4%{opacity:.85} 95%{opacity:.55} 100%{transform:translateY(100vh);opacity:0} }
+@keyframes lunar-drift  { from{background-position:0 0}                                 to{background-position:-600px -250px}             }
+@keyframes lunar-breathe{ 0%,100%{opacity:.5}                                           50%{opacity:.85}                                  }
+@keyframes sangre-fall  { from{background-position:0 -100px}                            to{background-position:60px 700px}                }
+@keyframes sangre-pulse { 0%,40%,60%,100%{opacity:.55}                                  50%{opacity:1}                                    }
+@keyframes aurora-drift { from{background-position:center top,0 0}                      to{background-position:center top,-700px -350px}  }
+@keyframes rubi-petals  { from{background-position:0 -80px}                             to{background-position:50px 700px}                }
+@keyframes rubi-shimmer { 0%,100%{opacity:.4}                                           50%{opacity:.75}                                  }
+@keyframes esm-rise     { from{background-position:0 700px}                             to{background-position:-80px 0}                   }
+@keyframes esm-blink    { 0%,100%{opacity:.5}  30%{opacity:.92}  60%{opacity:.28}  80%{opacity:.8}                                       }
+
+/* ── ✦ DARK FANTASY — partículas mágicas ascendentes ─────── */
+html.theme-dark-fantasy body::before {
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+  background:
+    radial-gradient(ellipse 65% 50% at 50% 100%, rgba(100,40,160,.14) 0%, transparent 70%),
+    radial-gradient(ellipse 80% 30% at 50% 0%,   rgba(80,20,140,.09)  0%, transparent 60%);
+  animation: df-glow 6s ease-in-out infinite alternate;
+}
+html.theme-dark-fantasy body::after {
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+  background-image:
+    radial-gradient(1.5px 1.5px at 70px  80px,  rgba(180,120,255,.85) 0%,transparent 100%),
+    radial-gradient(1px   1px   at 160px 200px, rgba(200,150,255,.65) 0%,transparent 100%),
+    radial-gradient(2px   2px   at 255px 50px,  rgba(220,180,255,.9)  0%,transparent 100%),
+    radial-gradient(1px   1px   at 340px 160px, rgba(160,90,255,.7)   0%,transparent 100%),
+    radial-gradient(1.5px 1.5px at 430px 280px, rgba(190,130,255,.75) 0%,transparent 100%),
+    radial-gradient(1px   1px   at 520px 80px,  rgba(210,160,255,.6)  0%,transparent 100%),
+    radial-gradient(2px   2px   at 100px 350px, rgba(230,200,255,.8)  0%,transparent 100%),
+    radial-gradient(1px   1px   at 200px 450px, rgba(170,100,255,.55) 0%,transparent 100%),
+    radial-gradient(1.5px 1.5px at 310px 370px, rgba(195,140,255,.8)  0%,transparent 100%),
+    radial-gradient(1px   1px   at 450px 480px, rgba(215,170,255,.65) 0%,transparent 100%),
+    radial-gradient(1px   1px   at 560px 350px, rgba(175,110,255,.7)  0%,transparent 100%),
+    radial-gradient(2px   2px   at 40px  530px, rgba(220,180,255,.75) 0%,transparent 100%),
+    radial-gradient(1.5px 1.5px at 280px 590px, rgba(180,120,255,.5)  0%,transparent 100%),
+    radial-gradient(1px   1px   at 490px 560px, rgba(200,150,255,.8)  0%,transparent 100%),
+    radial-gradient(1px   1px   at 370px 680px, rgba(160,90,255,.6)   0%,transparent 100%),
+    radial-gradient(1.5px 1.5px at 130px 680px, rgba(235,210,255,.7)  0%,transparent 100%),
+    radial-gradient(2px   2px   at 580px 700px, rgba(190,130,255,.85) 0%,transparent 100%),
+    radial-gradient(1px   1px   at 470px 720px, rgba(210,160,255,.55) 0%,transparent 100%);
+  background-size: 620px 800px;
+  background-repeat: repeat;
+  animation: df-ascend 38s linear infinite;
+}
+
+/* ── ⟋ GLITCH — escáner CRT + trama de scanlines ──────────── */
+html.theme-glitch body::before {
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0px, transparent 3px,
+    rgba(0,232,144,.013) 3px, rgba(0,232,144,.013) 4px
+  );
+}
+html.theme-glitch body::after {
+  content:''; position:fixed; left:0; right:0; top:0; height:3px;
+  pointer-events:none; z-index:1;
+  background: linear-gradient(90deg,
+    transparent 0%, rgba(0,200,120,.4) 10%,
+    rgba(0,255,160,.95) 50%,
+    rgba(0,200,120,.4) 90%, transparent 100%
+  );
+  box-shadow: 0 0 8px rgba(0,232,144,.7), 0 0 22px rgba(0,232,144,.4), 0 0 44px rgba(0,232,144,.2);
+  animation: glitch-scan 10s linear infinite;
+}
+
+/* ── ◌ LUNAR — polvo de luna que deriva en diagonal ─────────── */
+html.theme-lunar body::after {
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+  background-image:
+    radial-gradient(1px   1px   at 40px  25px,  rgba(200,215,255,.85) 0%,transparent 100%),
+    radial-gradient(1.5px 1.5px at 120px 90px,  rgba(180,200,245,.7)  0%,transparent 100%),
+    radial-gradient(1px   1px   at 215px 50px,  rgba(215,225,255,.8)  0%,transparent 100%),
+    radial-gradient(2px   2px   at 305px 130px, rgba(190,210,250,.9)  0%,transparent 100%),
+    radial-gradient(1px   1px   at 410px 40px,  rgba(205,220,255,.65) 0%,transparent 100%),
+    radial-gradient(1.5px 1.5px at 505px 100px, rgba(180,200,245,.75) 0%,transparent 100%),
+    radial-gradient(1px   1px   at 65px  200px, rgba(215,225,255,.6)  0%,transparent 100%),
+    radial-gradient(1px   1px   at 175px 270px, rgba(195,210,250,.8)  0%,transparent 100%),
+    radial-gradient(2px   2px   at 275px 220px, rgba(205,220,255,.7)  0%,transparent 100%),
+    radial-gradient(1.5px 1.5px at 385px 290px, rgba(185,202,248,.85) 0%,transparent 100%),
+    radial-gradient(1px   1px   at 470px 245px, rgba(215,228,255,.55) 0%,transparent 100%),
+    radial-gradient(1px   1px   at 30px  365px, rgba(195,212,252,.7)  0%,transparent 100%),
+    radial-gradient(1.5px 1.5px at 150px 415px, rgba(205,220,255,.8)  0%,transparent 100%),
+    radial-gradient(2px   2px   at 255px 375px, rgba(185,202,248,.65) 0%,transparent 100%),
+    radial-gradient(1px   1px   at 365px 455px, rgba(215,228,255,.75) 0%,transparent 100%),
+    radial-gradient(1px   1px   at 490px 405px, rgba(195,212,252,.6)  0%,transparent 100%),
+    radial-gradient(1.5px 1.5px at 90px  495px, rgba(205,220,255,.85) 0%,transparent 100%),
+    radial-gradient(1px   1px   at 335px 535px, rgba(185,202,248,.7)  0%,transparent 100%),
+    radial-gradient(2px   2px   at 435px 515px, rgba(215,228,255,.55) 0%,transparent 100%),
+    radial-gradient(1px   1px   at 555px 475px, rgba(195,212,252,.8)  0%,transparent 100%);
+  background-size: 600px 550px;
+  background-repeat: repeat;
+  animation: lunar-drift 72s linear infinite, lunar-breathe 9s ease-in-out infinite alternate;
+}
+
+/* ── ♥ SANGRE & TINTA — brasas cayendo + latido ─────────────── */
+html.theme-sangre body::before { animation: sangre-pulse 2.6s ease-in-out infinite; }
+html.theme-sangre body::after {
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+  background-image:
+    radial-gradient(1.5px 1.5px at 55px  60px,  rgba(220,60,30,.75) 0%,transparent 100%),
+    radial-gradient(1px   1px   at 145px 145px, rgba(180,30,15,.6)  0%,transparent 100%),
+    radial-gradient(2px   2px   at 245px 55px,  rgba(200,50,25,.8)  0%,transparent 100%),
+    radial-gradient(1px   1px   at 335px 175px, rgba(240,80,40,.7)  0%,transparent 100%),
+    radial-gradient(1.5px 1.5px at 435px 45px,  rgba(180,30,15,.55) 0%,transparent 100%),
+    radial-gradient(1px   1px   at 515px 135px, rgba(220,60,30,.65) 0%,transparent 100%),
+    radial-gradient(1px   1px   at 75px  265px, rgba(200,50,25,.8)  0%,transparent 100%),
+    radial-gradient(2px   2px   at 205px 335px, rgba(240,80,40,.5)  0%,transparent 100%),
+    radial-gradient(1.5px 1.5px at 355px 285px, rgba(180,30,15,.7)  0%,transparent 100%),
+    radial-gradient(1px   1px   at 475px 365px, rgba(220,60,30,.6)  0%,transparent 100%),
+    radial-gradient(1px   1px   at 115px 445px, rgba(200,50,25,.55) 0%,transparent 100%),
+    radial-gradient(1.5px 1.5px at 275px 495px, rgba(240,80,40,.75) 0%,transparent 100%),
+    radial-gradient(2px   2px   at 405px 435px, rgba(180,30,15,.65) 0%,transparent 100%),
+    radial-gradient(1px   1px   at 535px 495px, rgba(220,60,30,.5)  0%,transparent 100%),
+    radial-gradient(1px   1px   at 30px  545px, rgba(200,50,25,.7)  0%,transparent 100%),
+    radial-gradient(1.5px 1.5px at 180px 575px, rgba(240,80,40,.55) 0%,transparent 100%),
+    radial-gradient(2px   2px   at 480px 565px, rgba(220,60,30,.6)  0%,transparent 100%);
+  background-size: 560px 620px;
+  background-repeat: repeat;
+  animation: sangre-fall 28s linear infinite;
+}
+
+/* ── ❋ AURORA BOREAL — añadir estrellas teal bajo las ondas ── */
+html.theme-aurora body::before {
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+  background-image:
+    radial-gradient(ellipse 60% 30% at 50% 8%, rgba(0,180,120,.06) 0%, transparent 80%),
+    radial-gradient(1px   1px   at 50px  30px,  rgba(220,255,245,.7)  0%,transparent 100%),
+    radial-gradient(1.5px 1.5px at 140px 90px,  rgba(180,240,220,.6)  0%,transparent 100%),
+    radial-gradient(1px   1px   at 235px 45px,  rgba(200,250,235,.75) 0%,transparent 100%),
+    radial-gradient(1px   1px   at 335px 120px, rgba(160,230,210,.55) 0%,transparent 100%),
+    radial-gradient(2px   2px   at 425px 35px,  rgba(220,255,245,.8)  0%,transparent 100%),
+    radial-gradient(1px   1px   at 535px 100px, rgba(190,245,228,.65) 0%,transparent 100%),
+    radial-gradient(1.5px 1.5px at 80px  205px, rgba(210,252,238,.7)  0%,transparent 100%),
+    radial-gradient(1px   1px   at 195px 275px, rgba(170,235,215,.6)  0%,transparent 100%),
+    radial-gradient(1px   1px   at 295px 225px, rgba(220,255,245,.75) 0%,transparent 100%),
+    radial-gradient(2px   2px   at 395px 295px, rgba(195,248,230,.65) 0%,transparent 100%),
+    radial-gradient(1px   1px   at 490px 245px, rgba(175,238,220,.5)  0%,transparent 100%),
+    radial-gradient(1.5px 1.5px at 35px  365px, rgba(210,252,238,.8)  0%,transparent 100%),
+    radial-gradient(1px   1px   at 155px 435px, rgba(220,255,245,.55) 0%,transparent 100%),
+    radial-gradient(1px   1px   at 265px 385px, rgba(180,242,224,.7)  0%,transparent 100%),
+    radial-gradient(2px   2px   at 375px 455px, rgba(205,250,235,.6)  0%,transparent 100%),
+    radial-gradient(1px   1px   at 480px 415px, rgba(185,244,226,.75) 0%,transparent 100%),
+    radial-gradient(1.5px 1.5px at 110px 515px, rgba(215,253,240,.5)  0%,transparent 100%),
+    radial-gradient(1px   1px   at 330px 545px, rgba(175,238,220,.65) 0%,transparent 100%),
+    radial-gradient(1px   1px   at 510px 525px, rgba(200,249,234,.8)  0%,transparent 100%);
+  background-size: 100% 100%, 700px 560px;
+  background-repeat: no-repeat, repeat;
+  animation: aurora-drift 95s linear infinite;
+}
+
+/* ── ✦ RUBÍ — pétalos de rosa cayendo ───────────────────────── */
+html.theme-rubi body::after {
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+  background-image:
+    radial-gradient(1.5px 1.5px at 50px  70px,  rgba(255,140,175,.8)  0%,transparent 100%),
+    radial-gradient(1px   1px   at 150px 30px,  rgba(220,90,130,.65)  0%,transparent 100%),
+    radial-gradient(2px   2px   at 255px 150px, rgba(255,160,200,.85) 0%,transparent 100%),
+    radial-gradient(1px   1px   at 365px 80px,  rgba(200,70,115,.7)   0%,transparent 100%),
+    radial-gradient(1.5px 1.5px at 470px 190px, rgba(240,130,170,.75) 0%,transparent 100%),
+    radial-gradient(1px   1px   at 85px  285px, rgba(215,90,130,.55)  0%,transparent 100%),
+    radial-gradient(1px   1px   at 200px 355px, rgba(255,155,195,.8)  0%,transparent 100%),
+    radial-gradient(2px   2px   at 310px 280px, rgba(200,70,115,.65)  0%,transparent 100%),
+    radial-gradient(1.5px 1.5px at 435px 385px, rgba(240,130,170,.7)  0%,transparent 100%),
+    radial-gradient(1px   1px   at 125px 460px, rgba(255,140,175,.85) 0%,transparent 100%),
+    radial-gradient(1px   1px   at 265px 495px, rgba(215,90,130,.6)   0%,transparent 100%),
+    radial-gradient(2px   2px   at 395px 465px, rgba(255,160,200,.75) 0%,transparent 100%),
+    radial-gradient(1.5px 1.5px at 515px 535px, rgba(200,70,115,.55)  0%,transparent 100%),
+    radial-gradient(1px   1px   at 45px  565px, rgba(240,130,170,.8)  0%,transparent 100%),
+    radial-gradient(1px   1px   at 345px 580px, rgba(255,155,195,.65) 0%,transparent 100%),
+    radial-gradient(2px   2px   at 480px 605px, rgba(215,90,130,.7)   0%,transparent 100%),
+    radial-gradient(1.5px 1.5px at 175px 625px, rgba(255,140,175,.5)  0%,transparent 100%);
+  background-size: 570px 650px;
+  background-repeat: repeat;
+  animation: rubi-petals 44s linear infinite, rubi-shimmer 7s ease-in-out infinite alternate;
+}
+
+/* ── ◈ ESMERALDA — luciérnagas que ascienden ────────────────── */
+html.theme-esmeralda body::after {
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+  background-image:
+    radial-gradient(2px   2px   at 65px  90px,  rgba(70,255,130,.9)   0%,transparent 100%),
+    radial-gradient(1px   1px   at 180px 50px,  rgba(50,215,95,.7)    0%,transparent 100%),
+    radial-gradient(1.5px 1.5px at 280px 175px, rgba(100,255,158,.8)  0%,transparent 100%),
+    radial-gradient(1px   1px   at 385px 80px,  rgba(55,205,100,.65)  0%,transparent 100%),
+    radial-gradient(2px   2px   at 485px 165px, rgba(80,248,140,.85)  0%,transparent 100%),
+    radial-gradient(1px   1px   at 95px  275px, rgba(50,215,95,.55)   0%,transparent 100%),
+    radial-gradient(1.5px 1.5px at 215px 325px, rgba(95,252,152,.8)   0%,transparent 100%),
+    radial-gradient(1px   1px   at 335px 265px, rgba(60,200,110,.7)   0%,transparent 100%),
+    radial-gradient(2px   2px   at 450px 350px, rgba(75,245,138,.6)   0%,transparent 100%),
+    radial-gradient(1px   1px   at 40px  425px, rgba(50,215,95,.8)    0%,transparent 100%),
+    radial-gradient(1.5px 1.5px at 155px 485px, rgba(100,255,158,.65) 0%,transparent 100%),
+    radial-gradient(1px   1px   at 310px 450px, rgba(55,205,100,.85)  0%,transparent 100%),
+    radial-gradient(2px   2px   at 520px 495px, rgba(80,248,140,.7)   0%,transparent 100%),
+    radial-gradient(1px   1px   at 200px 560px, rgba(50,215,95,.55)   0%,transparent 100%),
+    radial-gradient(1.5px 1.5px at 420px 565px, rgba(95,252,152,.75)  0%,transparent 100%),
+    radial-gradient(1px   1px   at 560px 205px, rgba(60,200,110,.6)   0%,transparent 100%),
+    radial-gradient(2px   2px   at 125px 385px, rgba(80,248,140,.85)  0%,transparent 100%),
+    radial-gradient(1px   1px   at 475px 435px, rgba(50,215,95,.7)    0%,transparent 100%);
+  background-size: 590px 600px;
+  background-repeat: repeat;
+  animation: esm-rise 50s linear infinite, esm-blink 3.5s ease-in-out infinite;
+}
+
+/* ═══════════════════════════════════════════════════════════════
    PACK UNIVERSO — 4 temas UI + 4 temas de lectura
    ═══════════════════════════════════════════════════════════════ */
 
