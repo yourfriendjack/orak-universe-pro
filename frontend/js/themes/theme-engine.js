@@ -22,13 +22,18 @@
 //    3. Agregarlo en el objeto RENDERERS con su clase CSS
 // ════════════════════════════════════════════════════════════════
 
-import { AuroraRenderer } from './aurora.js';
+import { AuroraRenderer }  from './aurora.js';
+import { CosmosRenderer }  from './cosmos.js';
+import { LunarRenderer }   from './lunar.js';
+import { SangreRenderer }  from './sangre.js';
 
 const RENDERERS = {
-  'theme-aurora': AuroraRenderer,
+  'theme-aurora':  AuroraRenderer,
+  'theme-cosmos':  CosmosRenderer,
+  'theme-lunar':   LunarRenderer,
+  'theme-sangre':  SangreRenderer,
   // 'theme-rubi':      RubiRenderer,
   // 'theme-esmeralda': EsmeraldaRenderer,
-  // 'theme-sangre':    SangreRenderer,
 };
 
 let activeRenderer = null;

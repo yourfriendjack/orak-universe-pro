@@ -62,21 +62,21 @@ html.theme-lunar .auth-glow { background: radial-gradient(ellipse at 50% 0%, rgb
 
 /* ── SANGRE & TINTA ───────────────────────────────────────────── */
 html.theme-sangre {
-  --page:      #0a0000;
-  --mist:      #140404;
-  --fog:       #3a1010;
-  --ink:       #f0d4d4;
-  --gold:      #ff9090;
-  --amber:     #c04040;
-  --amber-dim: #8a2020;
-  --rust:      #6a1010;
-  --deep:      #050000;
-  --white:     #100000;
-  --parchment: #140404;
+  --page:      #f2e8d8;   /* pergamino envejecido */
+  --mist:      #e8dcc8;   /* papel antiguo */
+  --fog:       #884050;   /* borgoña (visible sobre claro) */
+  --ink:       #1a0810;   /* tinta oscura — texto principal */
+  --gold:      #f8e8e0;   /* marfil — texto sobre superficies oscuras */
+  --amber:     #781428;   /* borgoña activo — botones */
+  --amber-dim: #5a0e20;   /* borgoña apagado */
+  --rust:      #4a1a10;   /* óxido oscuro */
+  --deep:      #0e0408;   /* negro absoluto */
+  --white:     #faf4e8;   /* superficie elevada — topbar, eco-card */
+  --parchment: #e8dcc8;
 }
 html.theme-sangre body { background: var(--page); }
-html.theme-sangre .auth-card { background: #100202; border-color: rgba(192,64,64,.2); }
-html.theme-sangre .auth-glow { background: radial-gradient(ellipse at 50% 0%, rgba(160,20,20,.35) 0%, transparent 65%); }
+html.theme-sangre .auth-card { background: rgba(248,240,222,.92); border-color: rgba(80,18,28,.18); }
+html.theme-sangre .auth-glow { background: radial-gradient(ellipse at 50% 0%, rgba(120,20,38,.12) 0%, transparent 65%); }
 
 
 /* ═══════════════════════════════════════════════════════════════
@@ -213,12 +213,8 @@ html.theme-sangre .auth-glow { background: radial-gradient(ellipse at 50% 0%, rg
   87% { opacity:1; background:rgba(0,120,255,.1);  clip-path:inset(38% 0 48% 0); transform:translateX(-3px); }
   88% { opacity:0; }
 }
-@keyframes lunar-drift    { from{background-position:0 0} to{background-position:-600px -250px} }
-@keyframes lunar-breathe  { 0%,100%{opacity:.55} 50%{opacity:.9} }
-@keyframes lunar-shimmer  { 0%,100%{box-shadow:0 0 28px rgba(190,210,255,.4),0 0 60px rgba(170,195,245,.2),0 0 110px rgba(150,180,240,.1)} 50%{box-shadow:0 0 48px rgba(205,225,255,.65),0 0 95px rgba(185,210,252,.32),0 0 160px rgba(165,195,248,.15)} }
-@keyframes sangre-fall    { from{background-position:0 -100px} to{background-position:60px 700px} }
-@keyframes sangre-pulse   { 0%,40%,60%,100%{opacity:.55} 50%{opacity:1} }
-@keyframes sangre-flicker { 0%,100%{opacity:.8} 18%{opacity:1} 38%{opacity:.55} 62%{opacity:.95} 78%{opacity:.5} }
+/* lunar-drift / lunar-breathe / lunar-shimmer eliminados — Canvas los reemplaza */
+/* sangre-fall / sangre-pulse / sangre-flicker eliminados — Canvas los reemplaza */
 @keyframes rubi-petals    { from{background-position:0 -80px} to{background-position:50px 700px} }
 @keyframes rubi-shimmer   { 0%,100%{opacity:.5} 50%{opacity:.88} }
 @keyframes esm-rise       { from{background-position:0 700px} to{background-position:-80px 0} }
@@ -288,71 +284,11 @@ html.theme-glitch::after {
   animation: glitch-artifact 11s linear infinite;
 }
 
-/* ── ◌ LUNAR — luna llena + polvo plateado ─────────────────── */
-html.theme-lunar body::before {
-  content:'';
-  position:fixed; width:140px; height:140px; top:7%; right:10%;
-  border-radius:50%; pointer-events:none; z-index:0;
-  background: radial-gradient(circle at 38% 35%,
-    #ffffff 0%, #f0f4ff 18%, #d8e4fc 42%,
-    rgba(185,208,252,.55) 68%, rgba(155,185,248,.2) 86%, transparent 100%
-  );
-  animation: lunar-shimmer 8s ease-in-out infinite alternate;
-}
-html.theme-lunar body::after {
-  content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
-  background-image:
-    radial-gradient(1px   1px   at 40px  25px,  rgba(200,215,255,.85) 0%,transparent 100%),
-    radial-gradient(1.5px 1.5px at 120px 90px,  rgba(180,200,245,.7)  0%,transparent 100%),
-    radial-gradient(1px   1px   at 215px 50px,  rgba(215,225,255,.8)  0%,transparent 100%),
-    radial-gradient(2px   2px   at 305px 130px, rgba(190,210,250,.9)  0%,transparent 100%),
-    radial-gradient(1px   1px   at 410px 40px,  rgba(205,220,255,.65) 0%,transparent 100%),
-    radial-gradient(1.5px 1.5px at 505px 100px, rgba(180,200,245,.75) 0%,transparent 100%),
-    radial-gradient(1px   1px   at 65px  200px, rgba(215,225,255,.6)  0%,transparent 100%),
-    radial-gradient(1px   1px   at 175px 270px, rgba(195,210,250,.8)  0%,transparent 100%),
-    radial-gradient(2px   2px   at 275px 220px, rgba(205,220,255,.7)  0%,transparent 100%),
-    radial-gradient(1.5px 1.5px at 385px 290px, rgba(185,202,248,.85) 0%,transparent 100%),
-    radial-gradient(1px   1px   at 470px 245px, rgba(215,228,255,.55) 0%,transparent 100%),
-    radial-gradient(1px   1px   at 30px  365px, rgba(195,212,252,.7)  0%,transparent 100%),
-    radial-gradient(1.5px 1.5px at 150px 415px, rgba(205,220,255,.8)  0%,transparent 100%),
-    radial-gradient(2px   2px   at 255px 375px, rgba(185,202,248,.65) 0%,transparent 100%),
-    radial-gradient(1px   1px   at 365px 455px, rgba(215,228,255,.75) 0%,transparent 100%),
-    radial-gradient(1px   1px   at 490px 405px, rgba(195,212,252,.6)  0%,transparent 100%),
-    radial-gradient(1.5px 1.5px at 90px  495px, rgba(205,220,255,.85) 0%,transparent 100%),
-    radial-gradient(1px   1px   at 335px 535px, rgba(185,202,248,.7)  0%,transparent 100%),
-    radial-gradient(2px   2px   at 435px 515px, rgba(215,228,255,.55) 0%,transparent 100%),
-    radial-gradient(1px   1px   at 555px 475px, rgba(195,212,252,.8)  0%,transparent 100%);
-  background-size: 600px 550px;
-  background-repeat: repeat;
-  animation: lunar-drift 72s linear infinite, lunar-breathe 9s ease-in-out infinite alternate;
-}
+/* ── ◌ LUNAR — luna, estrellas y polvo renderizados por Canvas ──
+   (lunar.js + theme-engine.js reemplazan todos los pseudo-elementos)  */
 
-/* ── ♥ SANGRE & TINTA — brasas vivas + latido ─────────────── */
-html.theme-sangre body::before { animation: sangre-pulse 2.6s ease-in-out infinite; }
-html.theme-sangre body::after {
-  content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
-  background-image:
-    /* Brasas: núcleos ovales anaranjados con halo de fuego */
-    radial-gradient(7px 5px  at 55px  60px,  rgba(255,105,20,1)   0%,rgba(220,55,0,.55)  48%,transparent 100%),
-    radial-gradient(5px 8px  at 148px 145px, rgba(255,85,12,.92)  0%,rgba(195,35,0,.45)  52%,transparent 100%),
-    radial-gradient(8px 5px  at 248px 55px,  rgba(255,125,30,1)   0%,rgba(225,65,0,.5)   46%,transparent 100%),
-    radial-gradient(6px 8px  at 338px 175px, rgba(245,95,18,.94)  0%,rgba(205,42,0,.42)  50%,transparent 100%),
-    radial-gradient(5px 5px  at 438px 48px,  rgba(255,75,10,.88)  0%,rgba(182,22,0,.42)  56%,transparent 100%),
-    radial-gradient(7px 5px  at 518px 138px, rgba(255,115,26,1)   0%,rgba(215,52,0,.5)   46%,transparent 100%),
-    radial-gradient(6px 4px  at 78px  268px, rgba(255,95,22,.92)  0%,rgba(198,38,0,.42)  50%,transparent 100%),
-    radial-gradient(8px 6px  at 208px 338px, rgba(245,105,18,.88) 0%,rgba(204,44,0,.42)  48%,transparent 100%),
-    radial-gradient(5px 8px  at 358px 288px, rgba(255,82,12,1)    0%,rgba(188,28,0,.5)   46%,transparent 100%),
-    radial-gradient(7px 5px  at 478px 368px, rgba(255,115,28,.92) 0%,rgba(214,54,0,.42)  50%,transparent 100%),
-    radial-gradient(6px 6px  at 118px 448px, rgba(245,88,16,.88)  0%,rgba(196,32,0,.42)  52%,transparent 100%),
-    radial-gradient(5px 8px  at 278px 498px, rgba(255,102,22,1)   0%,rgba(208,48,0,.5)   46%,transparent 100%),
-    radial-gradient(7px 5px  at 408px 438px, rgba(255,78,12,.92)  0%,rgba(182,22,0,.42)  50%,transparent 100%),
-    radial-gradient(6px 4px  at 538px 498px, rgba(245,92,18,.88)  0%,rgba(198,36,0,.42)  48%,transparent 100%),
-    radial-gradient(5px 6px  at 32px  548px, rgba(255,108,24,1)   0%,rgba(212,50,0,.5)   46%,transparent 100%),
-    radial-gradient(8px 5px  at 183px 578px, rgba(245,82,14,.9)   0%,rgba(188,26,0,.42)  50%,transparent 100%),
-    radial-gradient(6px 7px  at 483px 568px, rgba(255,98,20,.94)  0%,rgba(204,42,0,.5)   46%,transparent 100%);
-  background-size:560px 620px; background-repeat:repeat;
-  animation:sangre-fall 28s linear infinite, sangre-flicker 4s ease-in-out infinite;
-}
+/* ── ♥ SANGRE & TINTA — tinta viva renderizada por Canvas ───
+   (sangre.js + theme-engine.js reemplazan todos los pseudo-elementos) */
 
 /* ── ❋ AURORA BOREAL — glow ambiente CSS (cortinas via Canvas) ── */
 /* El campo de estrellas y las cortinas de aurora las renderiza
@@ -708,4 +644,364 @@ html[class*="theme-"] .notif-btn {
 }
 html[class*="theme-"] .notif-btn:hover {
   background: var(--fog);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   SOUL GLASS — TEMA LUNAR
+   Observatorio lunar: paneles translúcidos con backdrop-filter,
+   iluminación de luz de luna, microinteracciones cinematográficas.
+   Estas reglas tienen misma especificidad que el bloque de arriba
+   pero están después → sobreescriben correctamente sin !important
+   (excepto donde el valor base lleva !important implícito por
+   inline-style; en esos casos se usa overide con clase más alta).
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Texto de publicaciones (hardcoded #333 en base CSS) ─────── */
+html.theme-lunar .post-text         { color: var(--ink); }
+html.theme-lunar .post-text strong  { color: #e8f0ff; }
+html.theme-lunar .post-text em      { color: var(--gold); }
+html.theme-lunar .post-name         { color: var(--ink); }
+html.theme-lunar .post-handle,
+html.theme-lunar .post-time         { color: var(--fog); }
+
+/* ── Tarjetas post — Soul Glass ─────────────────────────────── */
+html.theme-lunar .post {
+  position: relative;
+  background: rgba(6, 10, 24, 0.70);
+  border-color: rgba(158, 195, 238, 0.09);
+  backdrop-filter: blur(18px) saturate(1.3);
+  -webkit-backdrop-filter: blur(18px) saturate(1.3);
+  box-shadow:
+    0 2px 16px rgba(0, 4, 28, 0.45),
+    inset 0 1px 0 rgba(168, 200, 242, 0.07);
+  transition:
+    transform .38s cubic-bezier(.22,.82,.30,1),
+    box-shadow .38s cubic-bezier(.22,.82,.30,1),
+    border-color .38s ease,
+    background .38s ease;
+}
+
+/* Línea de luz de luna en el borde superior de cada tarjeta */
+html.theme-lunar .post::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 10%; right: 10%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(200,222,255,0.14) 25%,
+    rgba(218,235,255,0.22) 50%,
+    rgba(200,222,255,0.14) 75%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
+/* Reflejo de luz que barre la tarjeta en hover */
+html.theme-lunar .post::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -80%;
+  width: 55%; height: 100%;
+  background: linear-gradient(
+    108deg,
+    transparent 35%,
+    rgba(168,205,248,0.038) 50%,
+    transparent 65%
+  );
+  transition: left .70s cubic-bezier(.40,.15,.20,1);
+  pointer-events: none;
+}
+
+html.theme-lunar .post:hover {
+  background: rgba(10, 16, 36, 0.80);
+  border-color: rgba(168, 200, 242, 0.20);
+  transform: translateY(-3px);
+  box-shadow:
+    0 8px 36px rgba(0, 6, 38, 0.56),
+    0 0 0 1px rgba(120,175,228,0.06),
+    inset 0 1px 0 rgba(168, 200, 242, 0.13),
+    0 0 28px rgba(120,162,222,0.05);
+}
+html.theme-lunar .post:hover::after {
+  left: 110%;
+}
+
+/* ── Topbar — Lunar Glass ──────────────────────────────────── */
+html.theme-lunar .topbar {
+  background: rgba(5, 8, 20, 0.88) !important;
+  backdrop-filter: blur(24px) saturate(1.35) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(1.35) !important;
+  border-bottom: 1px solid rgba(138,180,228,0.06);
+  box-shadow: 0 1px 22px rgba(0, 0, 20, 0.48);
+}
+
+/* ── Sidebar — Soul Glass ──────────────────────────────────── */
+html.theme-lunar .sidebar {
+  background: rgba(4, 7, 18, 0.80);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-color: rgba(138, 180, 228, 0.07);
+}
+
+/* ── Panel Tu Economía — Soul Glass ───────────────────────── */
+html.theme-lunar .eco-card {
+  background: rgba(8, 13, 30, 0.75) !important;
+  border-color: rgba(138, 180, 228, 0.09) !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow:
+    0 2px 20px rgba(0,4,28,0.42),
+    inset 0 1px 0 rgba(168,200,242,0.06);
+}
+
+/* ── Panel de widgets (derecha del feed) ───────────────────── */
+html.theme-lunar .feed-widgets {
+  background: rgba(3, 6, 16, 0.60);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-color: rgba(138,180,228,0.05);
+}
+
+/* ── Barra de búsqueda — glass ─────────────────────────────── */
+html.theme-lunar .topbar-search {
+  background: rgba(10, 16, 36, 0.72);
+  border-color: rgba(138, 180, 228, 0.12);
+}
+html.theme-lunar .topbar-search:focus {
+  border-color: rgba(168, 200, 242, 0.32);
+  background: rgba(14, 22, 46, 0.82);
+  box-shadow: 0 0 0 3px rgba(120,175,228,0.08);
+}
+
+/* ── Píldora de Oruns — lunar glass ───────────────────────── */
+html.theme-lunar .orun-pill {
+  background: rgba(40, 56, 90, 0.78) !important;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(138,180,228,0.10);
+}
+
+/* ── Botón de notificaciones — lunar ──────────────────────── */
+html.theme-lunar .notif-btn {
+  background: rgba(14, 22, 42, 0.78) !important;
+  border: 1px solid rgba(138,180,228,0.09);
+}
+html.theme-lunar .notif-btn:hover {
+  background: rgba(20, 30, 56, 0.88) !important;
+  border-color: rgba(168,200,242,0.18);
+  box-shadow: 0 0 18px rgba(120,175,228,0.14);
+}
+
+/* ── Botón Escribir — moonlight glow ──────────────────────── */
+html.theme-lunar .write-btn {
+  box-shadow: 0 0 0 rgba(120,172,204,0);
+  transition: all .38s cubic-bezier(.22,.82,.30,1);
+}
+html.theme-lunar .write-btn:hover {
+  background: var(--gold);
+  color: var(--page);
+  box-shadow:
+    0 0 24px rgba(120,172,204,0.38),
+    0 4px 18px rgba(0,8,40,0.52);
+  transform: translateY(-2px);
+}
+
+/* ── Auth card — tema lunar ────────────────────────────────── */
+html.theme-lunar .auth-card {
+  background: rgba(8, 12, 26, 0.82);
+  border-color: rgba(122,172,204,.18);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+html.theme-lunar .auth-glow {
+  background: radial-gradient(
+    ellipse at 50% 0%,
+    rgba(100,150,200,.30) 0%,
+    transparent 65%
+  );
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   SOUL GLASS — SANGRE & TINTA
+   Estudio literario gótico: cristal oscuro teñido de carmesí,
+   páginas de libro antiguo, iluminación de vela tenue.
+   La tinta reacciona al cursor (mousemove → sangre.js ripples).
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Textos — tinta oscura sobre pergamino ─────────────────── */
+html.theme-sangre .post-text         { color: #1a0810; }
+html.theme-sangre .post-text strong  { color: #0e0408; }
+html.theme-sangre .post-text em      { color: var(--amber); }
+html.theme-sangre .post-name         { color: #0e0408; }
+html.theme-sangre .post-handle,
+html.theme-sangre .post-time         { color: var(--fog); }
+
+/* ── Tarjetas — páginas de libro antiguo ──────────────────── */
+html.theme-sangre .post {
+  position: relative;
+  background: rgba(246, 238, 218, 0.82);
+  border-color: rgba(80, 18, 28, 0.12);
+  backdrop-filter: blur(10px) saturate(1.05);
+  -webkit-backdrop-filter: blur(10px) saturate(1.05);
+  box-shadow:
+    0 1px 6px  rgba(40, 10, 14, 0.09),
+    0 4px 22px rgba(40, 10, 14, 0.06),
+    inset 0 1px 0 rgba(255, 250, 240, 0.88);
+  transition:
+    transform .40s cubic-bezier(.22,.78,.28,1),
+    box-shadow .40s cubic-bezier(.22,.78,.28,1),
+    border-color .40s ease,
+    background .40s ease;
+}
+
+/* Línea de encuadernación superior */
+html.theme-sangre .post::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 8%; right: 8%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(80, 18, 28, 0.08) 25%,
+    rgba(100, 22, 35, 0.15) 50%,
+    rgba(80, 18, 28, 0.08) 75%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
+/* Mancha de tinta en hover */
+html.theme-sangre .post::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 58%; height: 100%;
+  background: linear-gradient(
+    112deg,
+    transparent 28%,
+    rgba(100, 18, 32, 0.035) 50%,
+    transparent 72%
+  );
+  transition: left .90s cubic-bezier(.32,.08,.16,1);
+  pointer-events: none;
+}
+
+html.theme-sangre .post:hover {
+  background: rgba(252, 244, 228, 0.92);
+  border-color: rgba(100, 22, 35, 0.22);
+  transform: translateY(-2px);
+  box-shadow:
+    0 4px 18px rgba(40, 10, 14, 0.14),
+    0 8px 34px rgba(40, 10, 14, 0.09),
+    inset 0 1px 0 rgba(255, 252, 244, 0.95);
+}
+html.theme-sangre .post:hover::after { left: 108%; }
+
+/* ── Topbar — pergamino translúcido ────────────────────────── */
+html.theme-sangre .topbar {
+  background: rgba(250, 244, 232, 0.92) !important;
+  backdrop-filter: blur(20px) saturate(1.08) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(1.08) !important;
+  border-bottom: 1px solid rgba(80,18,28,0.09);
+  box-shadow: 0 1px 16px rgba(40,10,14,0.10);
+}
+
+/* ── Sidebar ────────────────────────────────────────────────── */
+html.theme-sangre .sidebar {
+  background: rgba(242, 234, 216, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-color: rgba(80,18,28,0.08);
+}
+
+/* ── Economía — tintero oscuro sobre pergamino ──────────────── */
+/*    Contraste máximo: fondo ink sobre parchment.               */
+/*    La base CSS (.eco-card) ya usa --gold para texto, que      */
+/*    es #f8e8e0 (marfil claro) — perfecto para fondo oscuro.   */
+html.theme-sangre .eco-card {
+  background: rgba(20, 6, 12, 0.88) !important;
+  border-color: rgba(110, 22, 38, 0.35) !important;
+  border-width: 1px !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow:
+    0 4px 24px rgba(12, 3, 8, 0.28),
+    0 1px 6px rgba(12, 3, 8, 0.14),
+    inset 0 1px 0 rgba(255, 225, 200, 0.06);
+}
+html.theme-sangre .eco-pill {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(180, 80, 60, 0.16);
+}
+html.theme-sangre .eco-bar {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* ── Widgets ────────────────────────────────────────────────── */
+html.theme-sangre .feed-widgets {
+  background: rgba(234, 226, 210, 0.72);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-color: rgba(80,18,28,0.06);
+}
+
+/* ── Barra de búsqueda ─────────────────────────────────────── */
+html.theme-sangre .topbar-search {
+  background: rgba(238, 230, 214, 0.80);
+  border-color: rgba(80,18,28,0.14);
+  color: #1a0810;
+}
+html.theme-sangre .topbar-search::placeholder { color: rgba(80,18,28,0.35); }
+html.theme-sangre .topbar-search:focus {
+  border-color: rgba(100,22,35,0.30);
+  background: rgba(248,240,224,0.88);
+  box-shadow: 0 0 0 3px rgba(80,18,28,0.07);
+}
+
+/* ── Orun pill — borgoña sobre pergamino ───────────────────── */
+html.theme-sangre .orun-pill {
+  background: var(--fog) !important;
+  color: var(--gold) !important;
+}
+
+/* ── Notificaciones ────────────────────────────────────────── */
+html.theme-sangre .notif-btn {
+  background: rgba(228,218,202,0.88) !important;
+  border: 1px solid rgba(80,18,28,0.10);
+}
+html.theme-sangre .notif-btn:hover {
+  background: rgba(214,204,188,0.95) !important;
+  border-color: rgba(100,22,35,0.20);
+  box-shadow: 0 0 12px rgba(80,18,28,0.10);
+}
+
+/* ── Botón Escribir — pluma de borgoña ─────────────────────── */
+html.theme-sangre .write-btn {
+  background: var(--amber);
+  color: var(--gold);
+  box-shadow: 0 2px 10px rgba(80,18,28,0.22);
+  transition: all .40s cubic-bezier(.22,.78,.28,1);
+}
+html.theme-sangre .write-btn:hover {
+  background: var(--amber-dim);
+  color: var(--gold);
+  box-shadow:
+    0 0 20px rgba(100,18,32,0.32),
+    0 4px 16px rgba(40,10,14,0.22);
+  transform: translateY(-2px);
+}
+
+/* ── Auth card ─────────────────────────────────────────────── */
+html.theme-sangre .auth-card {
+  background: rgba(248,240,222,.92) !important;
+  border-color: rgba(80,18,28,.16) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+html.theme-sangre .auth-glow {
+  background: radial-gradient(ellipse at 50% 0%, rgba(100,16,30,.10) 0%, transparent 65%);
 }
