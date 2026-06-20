@@ -82,7 +82,7 @@
   <header class="topbar">
     <button class="hamburger-btn" onclick="toggleSidebar()"><span></span><span></span><span></span></button>
     <div class="logo" onclick="goView('feed')">
-      <div class="logo-hex"></div>ORAK
+      <div class="logo-bh"></div>ORAK
     </div>
     <input class="topbar-search" type="text" placeholder="Buscar libros, escritores…">
     <nav class="topbar-nav">
@@ -561,7 +561,9 @@ function renderFeed(posts) {
 
 function postHTML(p, i) {
   const av  = avColor(p.autor_id);
-  const ini = initials(p.autor_nombre || p.autor_handle);
+  const ini = p.autor_avatar
+    ? `<img src="${escapeHtml(p.autor_avatar)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" loading="lazy">`
+    : initials(p.autor_nombre || p.autor_handle);
   const badgeMap = { nuevo_libro:'pb-libro Nuevo Libro', capitulo:'pb-update Capítulo', fork:'pb-fork Fork', colaboracion:'pb-collab Colaboración', reflexion:'pb-libro Nota', compartido:'pb-glimmer Compartido' };
   const [bc, bt] = (badgeMap[p.tipo] || 'pb-libro Publicación').split(' ');
   const book = p.libro_id ? `
@@ -732,7 +734,9 @@ function renderPeople(list, filter='') {
   const meId = getPerfil()?.id;
   document.getElementById('people-list').innerHTML = filtered.filter(p => p.id !== meId).map((p, i) => {
     const av  = avColor(p.id);
-    const ini = initials(p.display_name || p.username);
+    const ini = p.avatar_url
+      ? `<img src="${escapeHtml(p.avatar_url)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" loading="lazy">`
+      : initials(p.display_name || p.username);
     return `<div class="person-card" style="animation-delay:${i*.04}s" id="pcard-${p.id}">
       <div class="person-av ${av}" data-username="${p.username}" style="cursor:pointer">${ini}</div>
       <div class="person-info">
@@ -740,8 +744,8 @@ function renderPeople(list, filter='') {
         <div class="person-handle">@${escapeHtml(p.username)}</div>
         <div class="person-stats">
           <span class="pstat-sm">⬡ <strong>${(p.oruns||0).toLocaleString()}</strong> Oruns</span>
-          <span class="pstat-sm">📚 <strong>${p.libros_publicados||0}</strong> libros</span>
-          <span class="pstat-sm">◷ <strong>${p.seguidores||0}</strong> seguidores</span>
+          <span class="pstat-sm">≡ <strong>${p.libros_publicados||0}</strong> libros</span>
+          <span class="pstat-sm">⊙ <strong>${p.seguidores||0}</strong> seguidores</span>
         </div>
       </div>
       <div class="person-btns">
