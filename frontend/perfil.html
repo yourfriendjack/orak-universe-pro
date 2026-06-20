@@ -7,6 +7,25 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/orak-social.css">
+<link rel="stylesheet" href="css/themes.css">
+<script>
+  // Aplicar tema guardado antes de que el browser pinte el primer frame
+  (function(){
+    const CLASES = {
+      'ui-aurora':       'theme-aurora',
+      'ui-cosmos':       'theme-cosmos',
+      'ui-lunar':        'theme-lunar',
+      'ui-sangre':       'theme-sangre',
+      'ui-dark-fantasy': 'theme-dark-fantasy',
+      'ui-glitch':       'theme-glitch',
+      'ui-rubi':         'theme-rubi',
+      'ui-esmeralda':    'theme-esmeralda',
+    };
+    const id = localStorage.getItem('orak_tema_ui');
+    const cls = CLASES[id];
+    if (cls) document.documentElement.classList.add(cls);
+  })();
+</script>
 <style>
 body{background:var(--page);}
 .pp-back{position:sticky;top:0;z-index:100;background:rgba(250,247,242,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--fog);display:flex;align-items:center;gap:10px;padding:0 24px;height:52px;}
@@ -85,6 +104,7 @@ body{background:var(--page);}
 <script type="module">
 import { getToken, getPerfil, actualizarOruns, actualizarGlimmers } from './js/services/auth.js';
 import { getPerfilPublico, getLibrosPerfil, seguir, dejarSeguir, invitarLector } from './js/services/api.js';
+import './js/themes/theme-engine.js';
 
 const params   = new URLSearchParams(location.search);
 const username = params.get('u');
