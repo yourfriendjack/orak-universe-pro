@@ -219,15 +219,6 @@ html.theme-sangre .auth-glow { background: radial-gradient(ellipse at 50% 0%, rg
 @keyframes sangre-fall    { from{background-position:0 -100px} to{background-position:60px 700px} }
 @keyframes sangre-pulse   { 0%,40%,60%,100%{opacity:.55} 50%{opacity:1} }
 @keyframes sangre-flicker { 0%,100%{opacity:.8} 18%{opacity:1} 38%{opacity:.55} 62%{opacity:.95} 78%{opacity:.5} }
-@keyframes aurora-drift   { from{background-position:center top,0 0} to{background-position:center top,-700px -350px} }
-@keyframes aurora-ribbon  {
-  0%   { opacity:.52; transform:translateX(-10%) scaleY(.82) rotate(-3deg); }
-  20%  { opacity:.92; transform:translateX(6%)   scaleY(1.22) rotate(1deg);  }
-  40%  { opacity:.72; transform:translateX(-5%)  scaleY(.92) rotate(-1deg); }
-  60%  { opacity:.98; transform:translateX(8%)   scaleY(1.32) rotate(2deg);  }
-  80%  { opacity:.62; transform:translateX(-3%)  scaleY(.88) rotate(-2deg); }
-  100% { opacity:.52; transform:translateX(-10%) scaleY(.82) rotate(-3deg); }
-}
 @keyframes rubi-petals    { from{background-position:0 -80px} to{background-position:50px 700px} }
 @keyframes rubi-shimmer   { 0%,100%{opacity:.5} 50%{opacity:.88} }
 @keyframes esm-rise       { from{background-position:0 700px} to{background-position:-80px 0} }
@@ -363,34 +354,9 @@ html.theme-sangre body::after {
   animation:sangre-fall 28s linear infinite, sangre-flicker 4s ease-in-out infinite;
 }
 
-/* ── ❋ AURORA BOREAL — añadir estrellas teal bajo las ondas ── */
-html.theme-aurora body::before {
-  content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
-  background-image:
-    radial-gradient(ellipse 60% 30% at 50% 8%, rgba(0,180,120,.06) 0%, transparent 80%),
-    radial-gradient(1px   1px   at 50px  30px,  rgba(220,255,245,.7)  0%,transparent 100%),
-    radial-gradient(1.5px 1.5px at 140px 90px,  rgba(180,240,220,.6)  0%,transparent 100%),
-    radial-gradient(1px   1px   at 235px 45px,  rgba(200,250,235,.75) 0%,transparent 100%),
-    radial-gradient(1px   1px   at 335px 120px, rgba(160,230,210,.55) 0%,transparent 100%),
-    radial-gradient(2px   2px   at 425px 35px,  rgba(220,255,245,.8)  0%,transparent 100%),
-    radial-gradient(1px   1px   at 535px 100px, rgba(190,245,228,.65) 0%,transparent 100%),
-    radial-gradient(1.5px 1.5px at 80px  205px, rgba(210,252,238,.7)  0%,transparent 100%),
-    radial-gradient(1px   1px   at 195px 275px, rgba(170,235,215,.6)  0%,transparent 100%),
-    radial-gradient(1px   1px   at 295px 225px, rgba(220,255,245,.75) 0%,transparent 100%),
-    radial-gradient(2px   2px   at 395px 295px, rgba(195,248,230,.65) 0%,transparent 100%),
-    radial-gradient(1px   1px   at 490px 245px, rgba(175,238,220,.5)  0%,transparent 100%),
-    radial-gradient(1.5px 1.5px at 35px  365px, rgba(210,252,238,.8)  0%,transparent 100%),
-    radial-gradient(1px   1px   at 155px 435px, rgba(220,255,245,.55) 0%,transparent 100%),
-    radial-gradient(1px   1px   at 265px 385px, rgba(180,242,224,.7)  0%,transparent 100%),
-    radial-gradient(2px   2px   at 375px 455px, rgba(205,250,235,.6)  0%,transparent 100%),
-    radial-gradient(1px   1px   at 480px 415px, rgba(185,244,226,.75) 0%,transparent 100%),
-    radial-gradient(1.5px 1.5px at 110px 515px, rgba(215,253,240,.5)  0%,transparent 100%),
-    radial-gradient(1px   1px   at 330px 545px, rgba(175,238,220,.65) 0%,transparent 100%),
-    radial-gradient(1px   1px   at 510px 525px, rgba(200,249,234,.8)  0%,transparent 100%);
-  background-size: 100% 100%, 700px 560px;
-  background-repeat: no-repeat, repeat;
-  animation: aurora-drift 95s linear infinite;
-}
+/* ── ❋ AURORA BOREAL — glow ambiente CSS (cortinas via Canvas) ── */
+/* El campo de estrellas y las cortinas de aurora las renderiza
+   frontend/js/themes/aurora.js con Canvas 2D */
 
 /* ── ✦ RUBÍ — pétalos de rubí que caen (elipses alargadas) ────── */
 html.theme-rubi body::after {
@@ -452,12 +418,6 @@ html.theme-esmeralda body::after {
 /* ── Keyframes compartidos ────────────────────────────────────── */
 @keyframes cosmos-drift   { from{background-position:0 0} to{background-position:-800px -400px} }
 @keyframes cosmos-twinkle { 0%,100%{opacity:.65} 50%{opacity:1} }
-@keyframes aurora-glow {
-  0%  {opacity:.25;transform:translateX(-12%) skewX(-4deg);}
-  35% {opacity:.52;transform:translateX(8%)   skewX(2deg);}
-  70% {opacity:.38;transform:translateX(-3%)  skewX(0deg);}
-  100%{opacity:.25;transform:translateX(-12%) skewX(-4deg);}
-}
 @keyframes estrellas-drift { from{background-position:0 0} to{background-position:-600px -300px} }
 @keyframes abismo-pulse { 0%,100%{filter:brightness(1)} 50%{filter:brightness(1.07)} }
 
@@ -534,26 +494,7 @@ html.theme-aurora body::before {
   content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
   background:radial-gradient(ellipse 60% 30% at 50% 8%,rgba(0,180,120,.06) 0%,transparent 80%);
 }
-html.theme-aurora body::after {
-  content:'';
-  position:fixed; top:-42%; left:-28%; width:156%; height:94%;
-  pointer-events:none; z-index:0;
-  background:
-    /* Banda verde brillante — la más característica de la aurora */
-    radial-gradient(ellipse 115% 22% at 50% 42%, rgba(0,255,130,.48) 0%,rgba(0,205,102,.22) 44%,transparent 70%),
-    /* Banda teal-cyan secundaria */
-    radial-gradient(ellipse 92%  17% at 24% 64%, rgba(0,225,204,.38) 0%,rgba(0,182,162,.16) 54%,transparent 78%),
-    /* Acento violeta/azul */
-    radial-gradient(ellipse 78%  14% at 74% 30%, rgba(132,62,255,.3)  0%,rgba(88,40,215,.13) 54%,transparent 82%),
-    /* Destello cyan vivo */
-    radial-gradient(ellipse 56%  10% at 62% 56%, rgba(0,255,224,.24) 0%,transparent 70%),
-    /* Brillo rosado suave (aurora rara pero hermosa) */
-    radial-gradient(ellipse 40%  8%  at 82% 48%, rgba(200,80,255,.14) 0%,transparent 68%),
-    /* Base azul profunda */
-    radial-gradient(ellipse 125% 40% at 50% 50%, rgba(0,42,145,.07) 0%,transparent 82%);
-  filter:blur(30px);
-  animation:aurora-ribbon 16s ease-in-out infinite;
-}
+/* body::after reemplazado por Canvas — ver js/themes/aurora.js */
 html.theme-aurora .topbar,
 html.theme-aurora .sidebar { border-color:rgba(0,200,160,.1); }
 html.theme-aurora .auth-card { background:#07161a; border-color:rgba(0,212,168,.2); }
