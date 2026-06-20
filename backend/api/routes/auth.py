@@ -102,7 +102,15 @@ async def get_me(usuario = Depends(get_current_user)):
                .eq("id", usuario["id"])\
                .single()\
                .execute()
-    return perfil.data or {}
+    extras = sb.table("perfiles")\
+               .select("glimmers_week,glimmers_total")\
+               .eq("id", usuario["id"])\
+               .single()\
+               .execute()
+    data = perfil.data or {}
+    if extras.data:
+        data.update(extras.data)
+    return data
 
 
 @router.patch("/me", response_model=OkResponse)
