@@ -271,7 +271,14 @@
     <div class="view" id="view-mensajes">
       <div class="msg-layout">
         <div class="msg-sidebar">
-          <div class="msg-sidebar-head">Mensajes</div>
+          <div class="msg-sidebar-head">
+            Mensajes
+            <button class="nota-send" style="padding:3px 9px;font-size:.58rem;margin-left:auto" onclick="toggleBuscadorMsg()">＋ Nuevo</button>
+          </div>
+          <div id="msg-buscar" style="display:none;padding:8px 10px;border-bottom:1px solid rgba(205,199,184,.08)">
+            <input id="msg-buscar-input" class="nota-textarea" style="width:100%;padding:5px 8px;font-size:.75rem;border-radius:5px" placeholder="Buscar usuario…" oninput="buscarUsuarioMsg(this.value)">
+            <div id="msg-buscar-resultados" style="margin-top:6px"></div>
+          </div>
           <div id="conv-list"><div class="loading" style="font-size:.75rem;padding:14px">Cargando…</div></div>
         </div>
         <div class="msg-thread" id="msg-thread">
@@ -759,6 +766,7 @@ function renderPeople(list, filter='') {
       <div class="person-btns">
         ${(()=>{const f=S.myFollows.has(p.id);return `<button class="follow-btn${f?' on':''}" id="fw-${p.id}" onclick="toggleFollow('${p.id}',this)">${f?'✓ Siguiendo':'+ Seguir'}</button>`;})()}
         <button class="reader-btn" id="rd-${p.id}" onclick="toggleReader('${p.id}',this)">❋ Lector fiel</button>
+        <button class="reader-btn" onclick="iniciarConvDesdeEscritor('${p.id}','${escapeHtml(p.username||'')}','${escapeHtml(p.display_name||p.username||'')}')">✉ Mensaje</button>
       </div>
     </div>`;
   }).join('') || '<div class="loading">No se encontraron escritores</div>';
@@ -918,6 +926,44 @@ async function loadMensajes() {
     }).join('');
   } catch(e) { c.innerHTML = `<div style="font-size:.72rem;color:#e08080;padding:10px">${e.message}</div>`; }
 }
+
+window.iniciarConvDesdeEscritor = (id, username, nombre) => {
+  goView('mensajes');
+  setTimeout(() => abrirConv(id, username, nombre), 100);
+};
+
+window.toggleBuscadorMsg = () => {
+  const el = document.getElementById('msg-buscar');
+  const visible = el.style.display !== 'none';
+  el.style.display = visible ? 'none' : 'block';
+  if (!visible) document.getElementById('msg-buscar-input').focus();
+};
+
+window.buscarUsuarioMsg = (q) => {
+  const c = document.getElementById('msg-buscar-resultados');
+  if (!q.trim()) { c.innerHTML = ''; return; }
+  const filtered = S.people.filter(p =>
+    p.id !== getPerfil()?.id &&
+    ((p.username||'').toLowerCase().includes(q.toLowerCase()) ||
+     (p.display_name||'').toLowerCase().includes(q.toLowerCase()))
+  ).slice(0, 5);
+  if (!filtered.length) { c.innerHTML = '<div style="font-size:.7rem;color:var(--fog)">Sin resultados</div>'; return; }
+  c.innerHTML = filtered.map(p => `
+    <div class="conv-item" style="border-radius:6px" onclick="seleccionarUsuarioMsg('${p.id}','${escapeHtml(p.username||'')}','${escapeHtml(p.display_name||p.username||'')}')">
+      <div class="pav ${avColor(p.id)}" style="width:26px;height:26px;font-size:.6rem;flex-shrink:0">${initials(p.display_name||p.username)}</div>
+      <div>
+        <div style="font-size:.78rem;color:var(--ink)">${escapeHtml(p.display_name||p.username)}</div>
+        <div style="font-size:.65rem;color:var(--fog)">@${escapeHtml(p.username)}</div>
+      </div>
+    </div>`).join('');
+};
+
+window.seleccionarUsuarioMsg = (id, username, nombre) => {
+  document.getElementById('msg-buscar').style.display = 'none';
+  document.getElementById('msg-buscar-input').value = '';
+  document.getElementById('msg-buscar-resultados').innerHTML = '';
+  abrirConv(id, username, nombre);
+};
 
 window.abrirConv = async (userId, username, nombre) => {
   CONV_ACTUAL = userId;
@@ -1251,7 +1297,7 @@ document.getElementById('glimmer-modal').addEventListener('click', e => { if (e.
 /* ── Mensajes ───────────────────────────────────────────── */
 .msg-layout{display:flex;height:calc(100vh - 120px);gap:0;border:1px solid rgba(205,199,184,.1);border-radius:8px;overflow:hidden;}
 .msg-sidebar{width:240px;flex-shrink:0;border-right:1px solid rgba(205,199,184,.1);display:flex;flex-direction:column;}
-.msg-sidebar-head{padding:12px 14px;font-family:'Cinzel',serif;font-size:.82rem;font-weight:600;border-bottom:1px solid rgba(205,199,184,.08);color:var(--ink);}
+.msg-sidebar-head{padding:10px 12px;font-family:'Cinzel',serif;font-size:.82rem;font-weight:600;border-bottom:1px solid rgba(205,199,184,.08);color:var(--ink);display:flex;align-items:center;gap:6px;}
 .conv-item{display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;border-bottom:1px solid rgba(205,199,184,.06);transition:background var(--transition);}
 .conv-item:hover,.conv-item.active{background:rgba(212,168,67,.07);}
 .msg-badge{background:var(--amber);color:#0e0d0b;font-size:.58rem;font-weight:700;border-radius:10px;padding:1px 6px;flex-shrink:0;}
