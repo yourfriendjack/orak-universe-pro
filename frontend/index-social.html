@@ -1238,8 +1238,12 @@ document.getElementById('glimmer-modal').addEventListener('click', e => { if (e.
 <style>
 /* ── Chat flotante ─────────────────────────────────────── */
 #chat-float{position:fixed;bottom:24px;right:24px;z-index:600;display:flex;flex-direction:column;align-items:flex-end;gap:10px;}
-#chat-float-btn{width:52px;height:52px;border-radius:50%;background:var(--amber);color:#0e0d0b;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 16px rgba(212,168,67,.4);position:relative;transition:transform .15s,box-shadow .15s;flex-shrink:0;}
-#chat-float-btn:hover{transform:scale(1.08);box-shadow:0 6px 22px rgba(212,168,67,.55);}
+#chat-float-btn{width:52px;height:52px;border-radius:50%;background:var(--amber);color:#0e0d0b;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 16px rgba(212,168,67,.4);position:relative;transition:transform .15s,box-shadow .15s;flex-shrink:0;animation:chat-breathe 4s ease-in-out infinite;}
+#chat-float-btn:hover{transform:scale(1.08);box-shadow:0 6px 22px rgba(212,168,67,.55);animation:none;}
+@keyframes chat-breathe{
+  0%,100%{transform:scale(1);box-shadow:0 4px 16px rgba(212,168,67,.4);}
+  50%{transform:scale(1.04);box-shadow:0 5px 20px rgba(212,168,67,.55);}
+}
 #chat-float-badge{position:absolute;top:-3px;right:-3px;background:#8b3a1a;color:#f5ecd7;font-size:.55rem;font-weight:700;border-radius:10px;padding:1px 5px;min-width:16px;text-align:center;}
 
 /* Papel de libreta antigua — compartido por ambas ventanas */
