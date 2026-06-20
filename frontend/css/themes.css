@@ -648,6 +648,148 @@ html[class*="theme-"] .notif-btn:hover {
 
 
 /* ═══════════════════════════════════════════════════════════════
+   SOUL GLASS — TEMA AURORA
+   Tormenta de luz cósmica: cristal oscuro energético, bordes
+   teal luminosos, microinteracciones con brillo auroral.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Texto ──────────────────────────────────────────────────── */
+html.theme-aurora .post-text        { color: var(--ink); }
+html.theme-aurora .post-text strong { color: #a0fce0; }
+html.theme-aurora .post-text em     { color: var(--gold); }
+html.theme-aurora .post-name        { color: var(--ink); }
+html.theme-aurora .post-handle,
+html.theme-aurora .post-time        { color: rgba(0,200,168,0.50); }
+
+/* ── Tarjetas post — Aurora Glass ───────────────────────────── */
+html.theme-aurora .post {
+  position: relative;
+  background: rgba(2, 12, 18, 0.72);
+  border-color: rgba(0, 212, 168, 0.10);
+  backdrop-filter: blur(18px) saturate(1.4);
+  -webkit-backdrop-filter: blur(18px) saturate(1.4);
+  box-shadow:
+    0 2px 20px rgba(0, 4, 18, 0.52),
+    inset 0 1px 0 rgba(0, 220, 180, 0.07);
+  transition:
+    transform .38s cubic-bezier(.22,.82,.30,1),
+    box-shadow .38s cubic-bezier(.22,.82,.30,1),
+    border-color .38s ease,
+    background .38s ease;
+}
+
+/* Línea de energía auroral en el borde superior */
+html.theme-aurora .post::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 8%; right: 8%; height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(0,212,168,0.16) 25%,
+    rgba(0,232,212,0.28) 50%,
+    rgba(0,212,168,0.16) 75%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
+/* Barrido de luz auroral en hover */
+html.theme-aurora .post::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -80%;
+  width: 55%; height: 100%;
+  background: linear-gradient(
+    108deg,
+    transparent 35%,
+    rgba(0,212,168,0.040) 50%,
+    transparent 65%
+  );
+  transition: left .68s cubic-bezier(.40,.15,.20,1);
+  pointer-events: none;
+}
+
+html.theme-aurora .post:hover {
+  background: rgba(3, 18, 28, 0.82);
+  border-color: rgba(0, 212, 168, 0.24);
+  transform: translateY(-3px);
+  box-shadow:
+    0 8px 40px rgba(0, 6, 28, 0.60),
+    0 0 0 1px rgba(0,188,148,0.06),
+    inset 0 1px 0 rgba(0,220,180,0.14),
+    0 0 32px rgba(0,180,148,0.06);
+}
+html.theme-aurora .post:hover::after { left: 110%; }
+
+/* ── Topbar — energía sólida ────────────────────────────────── */
+html.theme-aurora .topbar {
+  background: rgba(2, 10, 16, 0.90) !important;
+  backdrop-filter: blur(24px) saturate(1.45) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(1.45) !important;
+  border-bottom: 1px solid rgba(0,212,168,0.07);
+  box-shadow: 0 1px 24px rgba(0, 4, 18, 0.52);
+}
+
+/* ── Sidebar ─────────────────────────────────────────────────── */
+html.theme-aurora .sidebar {
+  background: rgba(2, 9, 14, 0.80);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-color: rgba(0,212,168,0.07);
+}
+
+/* ── Economía ────────────────────────────────────────────────── */
+html.theme-aurora .eco-card {
+  background: rgba(2, 12, 20, 0.78) !important;
+  border-color: rgba(0,212,168,0.10) !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow:
+    0 2px 22px rgba(0,4,20,0.44),
+    inset 0 1px 0 rgba(0,220,180,0.06);
+}
+
+/* ── Widgets (feed derecha) ──────────────────────────────────── */
+html.theme-aurora .feed-widgets {
+  background: rgba(1, 8, 12, 0.62);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-color: rgba(0,212,168,0.05);
+}
+
+/* ── Barra de búsqueda ──────────────────────────────────────── */
+html.theme-aurora .topbar-search {
+  background: rgba(3, 14, 22, 0.74);
+  border-color: rgba(0,212,168,0.13);
+  color: var(--ink);
+}
+html.theme-aurora .topbar-search::placeholder { color: rgba(0,200,168,0.35); }
+html.theme-aurora .topbar-search:focus {
+  border-color: rgba(0,212,168,0.34);
+  background: rgba(4, 18, 28, 0.84);
+  box-shadow: 0 0 0 3px rgba(0,180,148,0.09);
+}
+
+/* ── Orun pill ───────────────────────────────────────────────── */
+html.theme-aurora .orun-pill {
+  background: rgba(0,180,148,0.18) !important;
+  border: 1px solid rgba(0,212,168,0.22) !important;
+  color: var(--gold) !important;
+}
+
+/* ── Notificaciones ──────────────────────────────────────────── */
+html.theme-aurora .notif-btn {
+  background: rgba(2,12,20,0.85) !important;
+  border: 1px solid rgba(0,212,168,0.10);
+}
+html.theme-aurora .notif-btn:hover {
+  background: rgba(3,18,30,0.92) !important;
+  border-color: rgba(0,212,168,0.22);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
    SOUL GLASS — TEMA LUNAR
    Observatorio lunar: paneles translúcidos con backdrop-filter,
    iluminación de luz de luna, microinteracciones cinematográficas.
