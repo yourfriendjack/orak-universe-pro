@@ -21,9 +21,9 @@ const AuroraRenderer = (() => {
 
   // ── Cursor ──────────────────────────────────────────────────────────────
   let mouseX = -999, mouseY = -999;
-  let lastRing = 0;
-  let _onMove  = null;
-  const rings  = [];
+  let lastFrost = 0;
+  let _onMove   = null;
+  const frosts  = [];
 
   // ── Posición del núcleo ─────────────────────────────────────────────────
   const CORE_XF = 0.74;
@@ -317,10 +317,56 @@ const AuroraRenderer = (() => {
   }
 
   // ════════════════════════════════════════════════════════════════════════
-  //  CURSOR OVERLAY — halo de energía + anillos que se expanden
-  //  Renderiza en overCanvas (z:9998) para ser visible sobre posts,
-  //  sidebars y topbar. pointer-events:none → no bloquea ningún clic.
+  //  CURSOR OVERLAY — halo de brío + escarcha hexagonal
+  //  Cristales de hielo con 6 brazos y sub-ramas, como dendritas reales.
+  //  Renderiza en overCanvas (z:9998) sobre posts, sidebars y topbar.
   // ════════════════════════════════════════════════════════════════════════
+
+  // Dibuja un cristal de hielo hexagonal en (x,y)
+  function drawFrostCrystal(x, y, size, alpha, rotation) {
+    overCtx.save();
+    overCtx.translate(x, y);
+    overCtx.rotate(rotation);
+    overCtx.lineCap = 'round';
+
+    for (let i = 0; i < 6; i++) {
+      overCtx.save();
+      overCtx.rotate((i / 6) * Math.PI * 2);
+
+      // Brazo principal
+      overCtx.beginPath();
+      overCtx.moveTo(0, 0);
+      overCtx.lineTo(size, 0);
+      overCtx.strokeStyle = `rgba(225, 250, 255, ${alpha})`;
+      overCtx.lineWidth   = 0.85;
+      overCtx.stroke();
+
+      // Sub-ramas: dos puntos a lo largo del brazo, ángulo de 60°
+      const subAngle = Math.PI / 3;
+      [[size * 0.38, size * 0.30], [size * 0.64, size * 0.20]].forEach(([pos, len]) => {
+        [1, -1].forEach(sign => {
+          overCtx.beginPath();
+          overCtx.moveTo(pos, 0);
+          overCtx.lineTo(pos + Math.cos(subAngle * sign) * len,
+                              Math.sin(subAngle * sign) * len);
+          overCtx.strokeStyle = `rgba(200, 242, 255, ${alpha * 0.68})`;
+          overCtx.lineWidth   = 0.48;
+          overCtx.stroke();
+        });
+      });
+
+      overCtx.restore();
+    }
+
+    // Punto central — brillo blanco puro
+    overCtx.beginPath();
+    overCtx.arc(0, 0, 1.4, 0, Math.PI * 2);
+    overCtx.fillStyle = `rgba(255,255,255,${alpha * 0.90})`;
+    overCtx.fill();
+
+    overCtx.restore();
+  }
+
   function drawCursor(W, H) {
     overCtx.clearRect(0, 0, W, H);
     if (mouseX < 0) return;
@@ -334,56 +380,48 @@ const AuroraRenderer = (() => {
     overCtx.save();
     overCtx.globalCompositeOperation = 'screen';
 
-    // — Halo exterior suave (siempre presente mientras el cursor esté dentro) —
-    const outerGlow = overCtx.createRadialGradient(mouseX, mouseY, 0, mouseX, mouseY, 80);
+    // — Halo exterior suave —
+    const outerGlow = overCtx.createRadialGradient(mouseX, mouseY, 0, mouseX, mouseY, 72);
     outerGlow.addColorStop(0.00, `rgba(${cr},${cg},${cb},0.10)`);
-    outerGlow.addColorStop(0.38, `rgba(${cr},${cg},${cb},0.05)`);
+    outerGlow.addColorStop(0.40, `rgba(${cr},${cg},${cb},0.04)`);
     outerGlow.addColorStop(1.00,  'rgba(0,0,0,0)');
     overCtx.beginPath();
-    overCtx.arc(mouseX, mouseY, 80, 0, Math.PI * 2);
+    overCtx.arc(mouseX, mouseY, 72, 0, Math.PI * 2);
     overCtx.fillStyle = outerGlow;
     overCtx.fill();
 
-    // — Núcleo brillante cercano —
-    const innerGlow = overCtx.createRadialGradient(mouseX, mouseY, 0, mouseX, mouseY, 22);
-    innerGlow.addColorStop(0.00, 'rgba(255,255,255,0.22)');
-    innerGlow.addColorStop(0.25, `rgba(${cr},${cg},${cb},0.16)`);
-    innerGlow.addColorStop(0.65, `rgba(${cr},${cg},${cb},0.07)`);
+    // — Núcleo cercano —
+    const innerGlow = overCtx.createRadialGradient(mouseX, mouseY, 0, mouseX, mouseY, 20);
+    innerGlow.addColorStop(0.00, 'rgba(255,255,255,0.20)');
+    innerGlow.addColorStop(0.30, `rgba(${cr},${cg},${cb},0.14)`);
+    innerGlow.addColorStop(0.70, `rgba(${cr},${cg},${cb},0.05)`);
     innerGlow.addColorStop(1.00,  'rgba(0,0,0,0)');
     overCtx.beginPath();
-    overCtx.arc(mouseX, mouseY, 22, 0, Math.PI * 2);
+    overCtx.arc(mouseX, mouseY, 20, 0, Math.PI * 2);
     overCtx.fillStyle = innerGlow;
     overCtx.fill();
 
-    // — Punto central (la "estrella" del cursor) —
+    // — Bolita blanca central —
     overCtx.beginPath();
-    overCtx.arc(mouseX, mouseY, 2.4, 0, Math.PI * 2);
-    overCtx.fillStyle = `rgba(255,255,255,0.55)`;
+    overCtx.arc(mouseX, mouseY, 2.6, 0, Math.PI * 2);
+    overCtx.fillStyle = 'rgba(255,255,255,0.62)';
     overCtx.fill();
 
-    // — Anillos de energía que se expanden al moverse —
-    for (let i = rings.length - 1; i >= 0; i--) {
-      const rg = rings[i];
-      const al = rg.life * 0.30;
+    // — Cristales de escarcha —
+    for (let i = frosts.length - 1; i >= 0; i--) {
+      const f = frosts[i];
 
-      overCtx.beginPath();
-      overCtx.arc(rg.x, rg.y, rg.r, 0, Math.PI * 2);
-      overCtx.strokeStyle = `rgba(${cr},${cg},${cb},${al})`;
-      overCtx.lineWidth   = 1.1;
-      overCtx.stroke();
+      drawFrostCrystal(f.x, f.y, f.size, f.alpha, f.rotation);
 
-      // Anillo interior tenue
-      if (rg.r > 12) {
-        overCtx.beginPath();
-        overCtx.arc(rg.x, rg.y, rg.r * 0.50, 0, Math.PI * 2);
-        overCtx.strokeStyle = `rgba(${cr},${cg},${cb},${al * 0.38})`;
-        overCtx.lineWidth   = 0.5;
-        overCtx.stroke();
+      // Fase crecimiento (rápido) → desvanecimiento (lento)
+      if (f.growing) {
+        f.size  = Math.min(f.maxSize, f.size + f.maxSize * 0.16);
+        f.alpha = Math.min(f.maxAlpha, f.alpha + 0.11);
+        if (f.size >= f.maxSize) f.growing = false;
+      } else {
+        f.alpha -= 0.014;
       }
-
-      rg.r    += 0.55;
-      rg.life -= 0.0095;
-      if (rg.life <= 0) rings.splice(i, 1);
+      if (f.alpha <= 0) frosts.splice(i, 1);
     }
 
     overCtx.restore();
@@ -446,14 +484,23 @@ const AuroraRenderer = (() => {
 
       resize();
 
-      // Cursor: halo inmediato + anillo cada 150 ms
+      // Cursor: halo inmediato + cristal de escarcha cada 160 ms
       _onMove = (e) => {
         mouseX = e.clientX;
         mouseY = e.clientY;
         const now = performance.now();
-        if (now - lastRing > 150 && rings.length < 12) {
-          lastRing = now;
-          rings.push({ x: mouseX, y: mouseY, r: 2.0, life: 1.0 });
+        if (now - lastFrost > 160 && frosts.length < 10) {
+          lastFrost = now;
+          frosts.push({
+            x:        mouseX,
+            y:        mouseY,
+            size:     1.0,
+            maxSize:  14 + Math.random() * 10,   // 14-24 px
+            alpha:    0,
+            maxAlpha: 0.55 + Math.random() * 0.20,
+            growing:  true,
+            rotation: Math.random() * (Math.PI / 3), // simetría 6-fold: 0-60°
+          });
         }
       };
       document.addEventListener('mousemove', _onMove, { passive: true });
@@ -474,7 +521,7 @@ const AuroraRenderer = (() => {
       canvas.remove();     canvas     = ctx     = null;
       overCanvas.remove(); overCanvas = overCtx = null;
       dust = null;
-      rings.length = 0;
+      frosts.length = 0;
       mouseX = mouseY = -999;
       raf = null; t = 0;
     },
