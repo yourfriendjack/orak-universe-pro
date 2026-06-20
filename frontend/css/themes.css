@@ -790,6 +790,148 @@ html.theme-aurora .notif-btn:hover {
 
 
 /* ═══════════════════════════════════════════════════════════════
+   SOUL GLASS — TEMA RUBÍ
+   Interior de una gema: cristal oscuro carmesí, bordes sangre,
+   brillo en hover como luz atrapada en el rubí.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Texto ──────────────────────────────────────────────────── */
+html.theme-rubi .post-text        { color: var(--ink); }
+html.theme-rubi .post-text strong { color: #ffc8d8; }
+html.theme-rubi .post-text em     { color: var(--gold); }
+html.theme-rubi .post-name        { color: var(--ink); }
+html.theme-rubi .post-handle,
+html.theme-rubi .post-time        { color: rgba(232, 120, 152, 0.48); }
+
+/* ── Tarjetas post ──────────────────────────────────────────── */
+html.theme-rubi .post {
+  position: relative;
+  background: rgba(10, 2, 6, 0.72);
+  border-color: rgba(232, 80, 118, 0.10);
+  backdrop-filter: blur(18px) saturate(1.35);
+  -webkit-backdrop-filter: blur(18px) saturate(1.35);
+  box-shadow:
+    0 2px 20px rgba(8, 0, 4, 0.55),
+    inset 0 1px 0 rgba(232, 100, 138, 0.07);
+  transition:
+    transform .38s cubic-bezier(.22,.82,.30,1),
+    box-shadow .38s cubic-bezier(.22,.82,.30,1),
+    border-color .38s ease,
+    background .38s ease;
+}
+
+/* Vena de luz en el borde superior */
+html.theme-rubi .post::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 8%; right: 8%; height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(232, 80, 118, 0.16) 25%,
+    rgba(248, 110, 148, 0.26) 50%,
+    rgba(232, 80, 118, 0.16) 75%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
+/* Barrido carmesí en hover */
+html.theme-rubi .post::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -80%;
+  width: 55%; height: 100%;
+  background: linear-gradient(
+    108deg,
+    transparent 35%,
+    rgba(232, 80, 118, 0.038) 50%,
+    transparent 65%
+  );
+  transition: left .68s cubic-bezier(.40,.15,.20,1);
+  pointer-events: none;
+}
+
+html.theme-rubi .post:hover {
+  background: rgba(16, 3, 8, 0.82);
+  border-color: rgba(232, 80, 118, 0.24);
+  transform: translateY(-3px);
+  box-shadow:
+    0 8px 40px rgba(10, 0, 5, 0.62),
+    0 0 0 1px rgba(200, 50, 88, 0.06),
+    inset 0 1px 0 rgba(232, 100, 138, 0.14),
+    0 0 28px rgba(200, 40, 80, 0.06);
+}
+html.theme-rubi .post:hover::after { left: 110%; }
+
+/* ── Topbar ──────────────────────────────────────────────────── */
+html.theme-rubi .topbar {
+  background: rgba(8, 1, 4, 0.92) !important;
+  backdrop-filter: blur(24px) saturate(1.40) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(1.40) !important;
+  border-bottom: 1px solid rgba(232, 80, 118, 0.07);
+  box-shadow: 0 1px 22px rgba(8, 0, 4, 0.55);
+}
+
+/* ── Sidebar ─────────────────────────────────────────────────── */
+html.theme-rubi .sidebar {
+  background: rgba(8, 1, 4, 0.80);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-color: rgba(232, 80, 118, 0.07);
+}
+
+/* ── Economía ────────────────────────────────────────────────── */
+html.theme-rubi .eco-card {
+  background: rgba(10, 2, 6, 0.80) !important;
+  border-color: rgba(232, 80, 118, 0.10) !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow:
+    0 2px 22px rgba(8, 0, 4, 0.46),
+    inset 0 1px 0 rgba(232, 100, 138, 0.06);
+}
+
+/* ── Widgets ─────────────────────────────────────────────────── */
+html.theme-rubi .feed-widgets {
+  background: rgba(6, 1, 3, 0.62);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-color: rgba(232, 80, 118, 0.05);
+}
+
+/* ── Búsqueda ────────────────────────────────────────────────── */
+html.theme-rubi .topbar-search {
+  background: rgba(12, 2, 6, 0.75);
+  border-color: rgba(232, 80, 118, 0.14);
+  color: var(--ink);
+}
+html.theme-rubi .topbar-search::placeholder { color: rgba(232, 120, 152, 0.35); }
+html.theme-rubi .topbar-search:focus {
+  border-color: rgba(232, 80, 118, 0.35);
+  background: rgba(16, 3, 8, 0.85);
+  box-shadow: 0 0 0 3px rgba(200, 50, 88, 0.09);
+}
+
+/* ── Orun pill ───────────────────────────────────────────────── */
+html.theme-rubi .orun-pill {
+  background: rgba(180, 40, 75, 0.18) !important;
+  border: 1px solid rgba(232, 80, 118, 0.22) !important;
+  color: var(--gold) !important;
+}
+
+/* ── Notificaciones ──────────────────────────────────────────── */
+html.theme-rubi .notif-btn {
+  background: rgba(10, 2, 6, 0.88) !important;
+  border: 1px solid rgba(232, 80, 118, 0.10);
+}
+html.theme-rubi .notif-btn:hover {
+  background: rgba(16, 3, 8, 0.94) !important;
+  border-color: rgba(232, 80, 118, 0.24);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
    SOUL GLASS — TEMA LUNAR
    Observatorio lunar: paneles translúcidos con backdrop-filter,
    iluminación de luz de luna, microinteracciones cinematográficas.
