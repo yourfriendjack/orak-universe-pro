@@ -215,8 +215,7 @@ html.theme-sangre .auth-glow { background: radial-gradient(ellipse at 50% 0%, rg
 }
 /* lunar-drift / lunar-breathe / lunar-shimmer eliminados — Canvas los reemplaza */
 /* sangre-fall / sangre-pulse / sangre-flicker eliminados — Canvas los reemplaza */
-@keyframes rubi-petals    { from{background-position:0 -80px} to{background-position:50px 700px} }
-@keyframes rubi-shimmer   { 0%,100%{opacity:.5} 50%{opacity:.88} }
+/* rubi-petals / rubi-shimmer eliminados — Canvas los reemplaza */
 @keyframes esm-rise       { from{background-position:0 700px} to{background-position:-80px 0} }
 @keyframes esm-blink      { 0%{opacity:.3} 25%{opacity:.98} 50%{opacity:.18} 75%{opacity:.88} 100%{opacity:.3} }
 @keyframes esm-blink2     { 0%{opacity:.85} 28%{opacity:.12} 55%{opacity:.95} 82%{opacity:.18} 100%{opacity:.85} }
@@ -294,31 +293,7 @@ html.theme-glitch::after {
 /* El campo de estrellas y las cortinas de aurora las renderiza
    frontend/js/themes/aurora.js con Canvas 2D */
 
-/* ── ✦ RUBÍ — pétalos de rubí que caen (elipses alargadas) ────── */
-html.theme-rubi body::after {
-  content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
-  background-image:
-    /* Pétalos: elipses 4×11px simulan forma de pétalo de rosa */
-    radial-gradient(4px 11px at 50px  70px,  rgba(200,15,52,1)    0%,rgba(160,0,28,.52)  52%,transparent 100%),
-    radial-gradient(5px 9px  at 152px 30px,  rgba(180,10,42,.92)  0%,rgba(140,0,22,.42)  58%,transparent 100%),
-    radial-gradient(4px 12px at 258px 155px, rgba(220,22,62,.96)  0%,rgba(175,5,32,.5)   48%,transparent 100%),
-    radial-gradient(5px 9px  at 368px 82px,  rgba(192,12,48,.88)  0%,rgba(150,0,26,.42)  56%,transparent 100%),
-    radial-gradient(4px 11px at 472px 192px, rgba(212,18,58,.92)  0%,rgba(165,2,30,.48)  50%,transparent 100%),
-    radial-gradient(5px 8px  at 88px  288px, rgba(202,15,54,.84)  0%,rgba(158,0,28,.4)   54%,transparent 100%),
-    radial-gradient(4px 12px at 202px 358px, rgba(216,20,60,.96)  0%,rgba(170,4,32,.5)   48%,transparent 100%),
-    radial-gradient(5px 9px  at 312px 282px, rgba(186,10,46,.88)  0%,rgba(146,0,24,.42)  56%,transparent 100%),
-    radial-gradient(4px 11px at 438px 388px, rgba(207,16,55,.92)  0%,rgba(162,1,30,.48)  50%,transparent 100%),
-    radial-gradient(5px 8px  at 128px 462px, rgba(196,13,51,.84)  0%,rgba(153,0,27,.4)   54%,transparent 100%),
-    radial-gradient(4px 12px at 268px 498px, rgba(218,22,62,.96)  0%,rgba(172,5,33,.5)   48%,transparent 100%),
-    radial-gradient(5px 9px  at 398px 468px, rgba(189,11,48,.88)  0%,rgba(148,0,25,.42)  56%,transparent 100%),
-    radial-gradient(4px 11px at 518px 538px, rgba(204,16,54,.92)  0%,rgba(159,0,29,.48)  50%,transparent 100%),
-    radial-gradient(5px 8px  at 48px  568px, rgba(213,19,59,.84)  0%,rgba(167,3,31,.4)   54%,transparent 100%),
-    radial-gradient(4px 12px at 348px 582px, rgba(198,14,53,.96)  0%,rgba(155,0,28,.5)   48%,transparent 100%),
-    radial-gradient(5px 9px  at 482px 608px, rgba(209,17,57,.88)  0%,rgba(163,2,30,.42)  56%,transparent 100%),
-    radial-gradient(4px 11px at 178px 628px, rgba(183,9,45,.84)   0%,rgba(143,0,22,.4)   54%,transparent 100%);
-  background-size:570px 650px; background-repeat:repeat;
-  animation:rubi-petals 44s linear infinite, rubi-shimmer 7s ease-in-out infinite alternate;
-}
+/* ── ✦ RUBÍ — pétalos de rosa renderizados por Canvas (rubi.js) ── */
 
 /* ── ◈ ESMERALDA — luciérnagas brillantes en el bosque ─────── */
 html.theme-esmeralda body::after {

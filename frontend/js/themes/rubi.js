@@ -16,7 +16,7 @@ const RubiRenderer = (() => {
   let bgCanvas = null,   bgCtx   = null;
   let overCanvas = null, overCtx = null;
   let raf = null, t = 0;
-  let dust = null;
+  let dust = null, petals = null;
 
   // ── Cursor ──────────────────────────────────────────────────────────────
   let mouseX = -999, mouseY = -999;
@@ -72,6 +72,64 @@ const RubiRenderer = (() => {
              :                'deep',
       };
     });
+  }
+
+  // ── Pétalos de rosa — 40 partículas con rotación y caída suave ──────────
+  function makePetal(W, H, randomY) {
+    const deep = Math.random() < 0.42;
+    return {
+      x:          Math.random() * W,
+      y:          randomY ? Math.random() * H : -12,
+      rx:         2.4 + Math.random() * 2.2,       // 2.4-4.6px mitad-ancho
+      ry:         5.2 + Math.random() * 4.6,       // 5.2-9.8px mitad-alto
+      angle:      Math.random() * Math.PI * 2,
+      spin:       (Math.random() < 0.5 ? 1 : -1) * (0.003 + Math.random() * 0.005),
+      vx:         (Math.random() - 0.5) * 0.10,
+      vy:         0.22 + Math.random() * 0.36,
+      swayPhase:  Math.random() * Math.PI * 2,
+      alpha:      0.10 + Math.random() * 0.18,
+      cr: deep ? 198 + Math.floor(Math.random() * 22) : 232 + Math.floor(Math.random() * 18),
+      cg: deep ?  38 + Math.floor(Math.random() * 28) :  85 + Math.floor(Math.random() * 42),
+      cb: deep ?  68 + Math.floor(Math.random() * 28) : 115 + Math.floor(Math.random() * 38),
+    };
+  }
+
+  function initPetals(W, H) {
+    petals = Array.from({ length: 40 }, () => makePetal(W, H, true));
+  }
+
+  function drawPetals(W, H) {
+    if (!petals) return;
+    bgCtx.save();
+    bgCtx.globalCompositeOperation = 'screen';
+    petals.forEach(p => {
+      bgCtx.save();
+      bgCtx.translate(p.x, p.y);
+      bgCtx.rotate(p.angle);
+
+      const grad = bgCtx.createRadialGradient(0, -p.ry * 0.12, 0, 0, 0, p.ry);
+      grad.addColorStop(0.00, `rgba(255, 228, 238, ${p.alpha})`);
+      grad.addColorStop(0.35, `rgba(${p.cr}, ${p.cg}, ${p.cb}, ${p.alpha * 0.82})`);
+      grad.addColorStop(0.70, `rgba(${p.cr}, ${p.cg}, ${p.cb}, ${p.alpha * 0.32})`);
+      grad.addColorStop(1.00,  'rgba(0,0,0,0)');
+
+      bgCtx.beginPath();
+      bgCtx.ellipse(0, 0, p.rx, p.ry, 0, 0, Math.PI * 2);
+      bgCtx.fillStyle = grad;
+      bgCtx.fill();
+      bgCtx.restore();
+
+      p.x    += p.vx + Math.sin(t * 0.0052 + p.swayPhase) * 0.12;
+      p.y    += p.vy;
+      p.angle += p.spin;
+
+      if (p.y > H + 14) {
+        const next = makePetal(W, H, false);
+        next.x = Math.random() * W;
+        Object.assign(p, next);
+      }
+    });
+    bgCtx.restore();
   }
 
   // ════════════════════════════════════════════════════════════════════════
@@ -522,6 +580,7 @@ const RubiRenderer = (() => {
     drawAtmosphere(W, H);
     drawStars(W, H);
     drawDust(W, H);
+    drawPetals(W, H);
     VEINS.forEach(v => drawVein(v, W, H));
     drawHeart(W, H);
     updateFlashes(W, H);
@@ -537,6 +596,7 @@ const RubiRenderer = (() => {
     bgCanvas.width   = W;  bgCanvas.height   = H;
     overCanvas.width = W;  overCanvas.height = H;
     initDust(W, H);
+    initPetals(W, H);
   }
 
   // ════════════════════════════════════════════════════════════════════════
@@ -595,7 +655,7 @@ const RubiRenderer = (() => {
       if (_onMove) { document.removeEventListener('mousemove', _onMove); _onMove = null; }
       bgCanvas.remove();   bgCanvas   = bgCtx   = null;
       overCanvas.remove(); overCanvas = overCtx = null;
-      dust = null;
+      dust = null; petals = null;
       sparkles.length = flashes.length = 0;
       mouseX = mouseY = -999;
       raf = null; t = 0;
