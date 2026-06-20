@@ -295,32 +295,7 @@ html.theme-glitch::after {
 
 /* ── ✦ RUBÍ — pétalos de rosa renderizados por Canvas (rubi.js) ── */
 
-/* ── ◈ ESMERALDA — luciérnagas brillantes en el bosque ─────── */
-html.theme-esmeralda body::after {
-  content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
-  background-image:
-    /* Luciérnagas: núcleo 5px sólido + halo de glow amplio */
-    radial-gradient(5px 5px at 65px  90px,  rgba(120,255,148,1)   0%,rgba(60,220,100,.42) 55%,transparent 100%),
-    radial-gradient(4px 4px at 182px 52px,  rgba(80,240,118,.92)  0%,rgba(38,198,78,.35)  62%,transparent 100%),
-    radial-gradient(6px 6px at 282px 178px, rgba(140,255,162,1)   0%,rgba(68,228,108,.48) 52%,transparent 100%),
-    radial-gradient(4px 4px at 388px 82px,  rgba(90,235,124,.88)  0%,rgba(44,192,84,.32)  62%,transparent 100%),
-    radial-gradient(5px 5px at 488px 168px, rgba(110,250,144,1)   0%,rgba(54,214,94,.4)   56%,transparent 100%),
-    radial-gradient(4px 4px at 98px  278px, rgba(80,240,118,.85)  0%,rgba(38,198,78,.3)   62%,transparent 100%),
-    radial-gradient(6px 6px at 218px 328px, rgba(140,255,162,1)   0%,rgba(68,228,108,.5)  52%,transparent 100%),
-    radial-gradient(4px 4px at 338px 268px, rgba(95,242,128,.92)  0%,rgba(46,198,88,.35)  60%,transparent 100%),
-    radial-gradient(5px 5px at 452px 352px, rgba(115,252,146,1)   0%,rgba(56,216,96,.42)  56%,transparent 100%),
-    radial-gradient(4px 4px at 42px  428px, rgba(80,240,118,.88)  0%,rgba(38,198,78,.34)  62%,transparent 100%),
-    radial-gradient(6px 6px at 158px 488px, rgba(140,255,162,1)   0%,rgba(68,228,108,.46) 52%,transparent 100%),
-    radial-gradient(4px 4px at 312px 452px, rgba(90,235,124,.92)  0%,rgba(44,192,84,.32)  62%,transparent 100%),
-    radial-gradient(5px 5px at 522px 498px, rgba(110,250,144,.96) 0%,rgba(54,214,94,.4)   56%,transparent 100%),
-    radial-gradient(4px 4px at 202px 562px, rgba(85,242,120,.85)  0%,rgba(40,198,80,.3)   62%,transparent 100%),
-    radial-gradient(6px 6px at 422px 568px, rgba(140,255,162,1)   0%,rgba(68,228,108,.5)  52%,transparent 100%),
-    radial-gradient(4px 4px at 562px 208px, rgba(95,242,128,.88)  0%,rgba(46,198,88,.35)  60%,transparent 100%),
-    radial-gradient(5px 5px at 128px 388px, rgba(112,250,145,1)   0%,rgba(55,215,95,.42)  56%,transparent 100%),
-    radial-gradient(4px 4px at 478px 438px, rgba(80,240,118,.92)  0%,rgba(38,198,78,.35)  62%,transparent 100%);
-  background-size:590px 600px; background-repeat:repeat;
-  animation:esm-rise 50s linear infinite, esm-blink 3.5s ease-in-out infinite, esm-blink2 5.8s ease-in-out infinite reverse;
-}
+/* ── ◈ ESMERALDA — luciérnagas y esporas renderizadas por Canvas ── */
 
 /* ═══════════════════════════════════════════════════════════════
    PACK UNIVERSO — 4 temas UI + 4 temas de lectura
@@ -931,6 +906,163 @@ html.theme-rubi .notif-btn:hover {
   background: rgba(14, 2, 7, 0.96) !important;
   border-color: rgba(215, 65, 102, 0.28);
   box-shadow: 0 0 12px rgba(188, 40, 78, 0.10);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   ORGANIC GLASS — TEMA ESMERALDA
+   Superficies vivas: musgo suave, bordes orgánicos, luz filtrada
+   a través de hojas y ramas ancestrales.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Texto ──────────────────────────────────────────────────── */
+html.theme-esmeralda .post-text        { color: var(--ink); }
+html.theme-esmeralda .post-text strong { color: #a8ffc8; }
+html.theme-esmeralda .post-text em     { color: var(--gold); }
+html.theme-esmeralda .post-name        { color: var(--ink); }
+html.theme-esmeralda .post-handle,
+html.theme-esmeralda .post-time        { color: rgba(53, 216, 120, 0.44); }
+
+/* ── Tarjetas post — fragmento de bosque ────────────────────── */
+html.theme-esmeralda .post {
+  position: relative;
+  overflow: hidden;
+  background: rgba(3, 14, 6, 0.72);
+  border-color: rgba(48, 195, 95, 0.12);
+  backdrop-filter: blur(20px) saturate(1.35) brightness(0.96);
+  -webkit-backdrop-filter: blur(20px) saturate(1.35) brightness(0.96);
+  box-shadow:
+    0 3px 24px rgba(2, 10, 4, 0.60),
+    inset 0 1px 0 rgba(80, 220, 130, 0.10),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.42),
+    inset 0 28px 55px rgba(8, 68, 28, 0.05);
+  transition:
+    transform .42s cubic-bezier(.22,.82,.30,1),
+    box-shadow .42s cubic-bezier(.22,.82,.30,1),
+    border-color .42s ease,
+    background .42s ease;
+}
+
+/* Luz filtrada entre ramas — línea de luz en el borde superior */
+html.theme-esmeralda .post::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 4%; right: 4%; height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(55, 200, 100, 0.18) 20%,
+    rgba(120, 255, 165, 0.44) 48%,
+    rgba(55, 200, 100, 0.18) 80%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Barrido orgánico en hover — luz que entra por una apertura */
+html.theme-esmeralda .post::after {
+  content: '';
+  position: absolute;
+  top: -15%; left: -90%;
+  width: 65%; height: 130%;
+  background: linear-gradient(
+    115deg,
+    transparent 28%,
+    rgba(48, 180, 88, 0.048) 50%,
+    rgba(120, 255, 165, 0.018) 60%,
+    transparent 75%
+  );
+  transition: left .75s cubic-bezier(.35,.10,.18,1);
+  pointer-events: none;
+}
+
+html.theme-esmeralda .post:hover {
+  background: rgba(4, 18, 8, 0.82);
+  border-color: rgba(48, 195, 95, 0.28);
+  transform: translateY(-3px);
+  box-shadow:
+    0 10px 44px rgba(2, 10, 4, 0.68),
+    0 0   32px rgba(22, 145, 65, 0.10),
+    inset 0  1px 0 rgba(120, 255, 165, 0.20),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.52),
+    inset 0 35px 70px rgba(10, 75, 32, 0.09),
+    0 0 0 1px rgba(38, 168, 78, 0.08);
+}
+html.theme-esmeralda .post:hover::after { left: 110%; }
+
+/* ── Topbar ──────────────────────────────────────────────────── */
+html.theme-esmeralda .topbar {
+  background: rgba(2, 10, 4, 0.94) !important;
+  backdrop-filter: blur(26px) saturate(1.40) !important;
+  -webkit-backdrop-filter: blur(26px) saturate(1.40) !important;
+  border-bottom: 1px solid rgba(48, 195, 95, 0.08);
+  box-shadow:
+    0 1px 26px rgba(2, 8, 4, 0.58),
+    inset 0 -1px 0 rgba(48, 195, 95, 0.05);
+}
+
+/* ── Sidebar ─────────────────────────────────────────────────── */
+html.theme-esmeralda .sidebar {
+  background: rgba(2, 10, 4, 0.80);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-color: rgba(48, 195, 95, 0.07);
+  box-shadow: inset -1px 0 0 rgba(48, 195, 95, 0.04);
+}
+
+/* ── Economía ────────────────────────────────────────────────── */
+html.theme-esmeralda .eco-card {
+  background: rgba(3, 12, 5, 0.82) !important;
+  border-color: rgba(48, 195, 95, 0.10) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow:
+    0 2px 22px rgba(2, 8, 3, 0.48),
+    inset 0  1px 0 rgba(88, 225, 130, 0.08),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.35);
+}
+
+/* ── Widgets ─────────────────────────────────────────────────── */
+html.theme-esmeralda .feed-widgets {
+  background: rgba(2, 8, 3, 0.64);
+  backdrop-filter: blur(13px);
+  -webkit-backdrop-filter: blur(13px);
+  border-color: rgba(48, 195, 95, 0.05);
+}
+
+/* ── Búsqueda ────────────────────────────────────────────────── */
+html.theme-esmeralda .topbar-search {
+  background: rgba(3, 12, 5, 0.76);
+  border-color: rgba(48, 195, 95, 0.15);
+  color: var(--ink);
+}
+html.theme-esmeralda .topbar-search::placeholder { color: rgba(53, 216, 120, 0.32); }
+html.theme-esmeralda .topbar-search:focus {
+  border-color: rgba(48, 195, 95, 0.38);
+  background: rgba(4, 18, 8, 0.86);
+  box-shadow:
+    0 0 0 3px rgba(28, 155, 68, 0.10),
+    inset 0 1px 0 rgba(88, 225, 130, 0.07);
+}
+
+/* ── Orun pill ───────────────────────────────────────────────── */
+html.theme-esmeralda .orun-pill {
+  background: rgba(18, 120, 55, 0.18) !important;
+  border: 1px solid rgba(48, 195, 95, 0.24) !important;
+  color: var(--gold) !important;
+  box-shadow: inset 0 1px 0 rgba(88, 225, 130, 0.09);
+}
+
+/* ── Notificaciones ──────────────────────────────────────────── */
+html.theme-esmeralda .notif-btn {
+  background: rgba(3, 12, 5, 0.90) !important;
+  border: 1px solid rgba(48, 195, 95, 0.10);
+}
+html.theme-esmeralda .notif-btn:hover {
+  background: rgba(4, 18, 8, 0.96) !important;
+  border-color: rgba(48, 195, 95, 0.26);
+  box-shadow: 0 0 12px rgba(22, 155, 68, 0.10);
 }
 
 

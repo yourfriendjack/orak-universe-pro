@@ -26,15 +26,16 @@ import { AuroraRenderer }  from './aurora.js';
 import { CosmosRenderer }  from './cosmos.js';
 import { LunarRenderer }   from './lunar.js';
 import { SangreRenderer }  from './sangre.js';
-import { RubiRenderer }    from './rubi.js';
+import { RubiRenderer }      from './rubi.js';
+import { EsmeraldaRenderer } from './esmeralda.js';
 
 const RENDERERS = {
-  'theme-aurora':  AuroraRenderer,
-  'theme-cosmos':  CosmosRenderer,
-  'theme-lunar':   LunarRenderer,
-  'theme-sangre':  SangreRenderer,
-  'theme-rubi':    RubiRenderer,
-  // 'theme-esmeralda': EsmeraldaRenderer,
+  'theme-aurora':     AuroraRenderer,
+  'theme-cosmos':     CosmosRenderer,
+  'theme-lunar':      LunarRenderer,
+  'theme-sangre':     SangreRenderer,
+  'theme-rubi':       RubiRenderer,
+  'theme-esmeralda':  EsmeraldaRenderer,
 };
 
 let activeRenderer = null;
