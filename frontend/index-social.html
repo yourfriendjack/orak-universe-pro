@@ -380,6 +380,7 @@ const S = {
   notifs: [],
   genreFilter: null,
   likedPosts: new Set(JSON.parse(localStorage.getItem('orak_likes') || '[]')),
+  myFollows: new Set(),
 };
 
 // ── Colores de avatares ─────────────────────────────────────────
@@ -646,7 +647,8 @@ async function loadExplore(genero) {
   const c = document.getElementById('books-grid');
   c.innerHTML = '<div class="loading">Cargando libros</div>';
   try {
-    const data = await getExplorar(genero);
+    const url = `/v2/libros?limite=20${genero ? `&genero=${encodeURIComponent(genero)}` : ''}`;
+    const data = await apiGet(url);
     renderBooks('books-grid', data);
   } catch(e) { c.innerHTML = `<div class="loading" style="color:#e08080">${e.message}</div>`; }
 }
@@ -685,6 +687,13 @@ async function loadPeople() {
   try {
     const data = await fetch('/api/social/ranking?limite=20').then(r=>r.json());
     S.people = data;
+    const meId = getPerfil()?.id;
+    if (meId && getToken()) {
+      try {
+        const follows = await apiGet(`/api/social/follows/siguiendo/${meId}`, getToken());
+        S.myFollows = new Set((follows || []).map(f => f.seguido_id));
+      } catch(_) {}
+    }
     renderPeople(data);
   } catch(e) { document.getElementById('people-list').innerHTML = `<div class="loading" style="color:#e08080">${e.message}</div>`; }
 }
@@ -707,7 +716,7 @@ function renderPeople(list, filter='') {
         </div>
       </div>
       <div class="person-btns">
-        <button class="follow-btn" id="fw-${p.id}" onclick="toggleFollow('${p.id}',this)">+ Seguir</button>
+        ${(()=>{const f=S.myFollows.has(p.id);return `<button class="follow-btn${f?' on':''}" id="fw-${p.id}" onclick="toggleFollow('${p.id}',this)">${f?'✓ Siguiendo':'+ Seguir'}</button>`;})()}
         <button class="reader-btn" id="rd-${p.id}" onclick="toggleReader('${p.id}',this)">❋ Lector fiel</button>
       </div>
     </div>`;
@@ -719,8 +728,18 @@ window.filterPeople = (v) => renderPeople(S.people, v);
 window.toggleFollow = async (id, btn) => {
   const on = btn.classList.contains('on');
   try {
-    if (on) { await dejarSeguir(id, getToken()); btn.classList.remove('on'); btn.textContent = '+ Seguir'; toast('Dejaste de seguir'); }
-    else     { await seguir(id, getToken()); btn.classList.add('on'); btn.textContent = '✓ Siguiendo'; actualizarOruns(5); updateUserUI(); toast('✦ Siguiendo · +5 Oruns'); }
+    if (on) {
+      await dejarSeguir(id, getToken());
+      btn.classList.remove('on'); btn.textContent = '+ Seguir';
+      S.myFollows.delete(id);
+      toast('Dejaste de seguir');
+    } else {
+      await seguir(id, getToken());
+      btn.classList.add('on'); btn.textContent = '✓ Siguiendo';
+      S.myFollows.add(id);
+      actualizarOruns(5); updateUserUI();
+      toast('✦ Siguiendo · +5 Oruns');
+    }
   } catch(e) { toast(e.message,'err'); }
 };
 
