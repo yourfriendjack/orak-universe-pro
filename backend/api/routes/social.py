@@ -10,7 +10,8 @@ from typing import Optional
 from backend.database.supabase_client import get_supabase, get_supabase_user
 from backend.models.schemas import (
     PostIn, FollowIn, LectorFielIn, LectorFielAccion,
-    GlimmerIn, NotaIn, CoescritorIn, CoescritorRespuesta, MensajeIn, OkResponse
+    GlimmerIn, NotaIn, CoescritorIn, CoescritorRespuesta, MensajeIn,
+    CompraIn, EquiparIn, OkResponse
 )
 from backend.api.deps import get_current_user
 from backend.utils.helpers import ok, error
@@ -470,6 +471,62 @@ async def leer_todas_notifs(usuario = Depends(get_current_user)):
       .eq("usuario_id", usuario["id"])\
       .execute()
     return ok("Notificaciones marcadas como leídas")
+
+
+# ══════════════════════════════════════════════════════════
+#  TIENDA DE ORUNS
+# ══════════════════════════════════════════════════════════
+
+PRECIOS = {
+    "ui-dark-fantasy": 350, "ui-glitch": 500, "ui-lunar": 400, "ui-sangre": 450,
+    "rl-libreta": 150, "rl-pergamino": 200, "rl-maquina": 150, "rl-noche": 100, "rl-bosque": 300,
+    "titulo-narrador": 300, "titulo-tejedor": 500, "titulo-guardian": 800, "titulo-oraculo": 1500,
+}
+
+@router.get("/tienda/mis-compras")
+async def mis_compras(usuario = Depends(get_current_user)):
+    sb = get_supabase_user(usuario["_token"])
+    compras = sb.table("tienda_compras").select("item_id").eq("user_id", usuario["id"]).execute()
+    perfil  = sb.table("perfiles").select("tema_ui,tema_lectura,titulo_activo").eq("id", usuario["id"]).single().execute()
+    return {
+        "compras":        [c["item_id"] for c in (compras.data or [])],
+        "tema_ui":        (perfil.data or {}).get("tema_ui"),
+        "tema_lectura":   (perfil.data or {}).get("tema_lectura"),
+        "titulo_activo":  (perfil.data or {}).get("titulo_activo"),
+    }
+
+@router.post("/tienda/comprar", response_model=OkResponse)
+async def comprar_item(datos: CompraIn, usuario = Depends(get_current_user)):
+    if datos.item_id not in PRECIOS:
+        error("Ítem no válido")
+    precio = PRECIOS[datos.item_id]
+    sb = get_supabase()
+    perfil = sb.table("perfiles").select("oruns").eq("id", usuario["id"]).single().execute()
+    if not perfil.data or (perfil.data["oruns"] or 0) < precio:
+        error("Oruns insuficientes")
+    ya = sb.table("tienda_compras").select("id").eq("user_id", usuario["id"]).eq("item_id", datos.item_id).execute()
+    if ya.data:
+        error("Ya compraste este ítem")
+    sb.table("perfiles").update({"oruns": perfil.data["oruns"] - precio}).eq("id", usuario["id"]).execute()
+    sb.table("tienda_compras").insert({"user_id": usuario["id"], "item_id": datos.item_id}).execute()
+    return ok(f"¡{datos.item_id} desbloqueado!")
+
+@router.post("/tienda/equipar", response_model=OkResponse)
+async def equipar_item(datos: EquiparIn, usuario = Depends(get_current_user)):
+    if datos.item_id not in PRECIOS and datos.item_id != "default":
+        error("Ítem no válido")
+    if datos.item_id != "default":
+        ya = sb_check = get_supabase().table("tienda_compras").select("id")\
+            .eq("user_id", usuario["id"]).eq("item_id", datos.item_id).execute()
+        if not ya.data:
+            error("No has comprado este ítem")
+    campo = {"tema_ui": "tema_ui", "tema_lectura": "tema_lectura", "titulo": "titulo_activo"}.get(datos.tipo)
+    if not campo:
+        error("Tipo inválido")
+    sb = get_supabase()
+    sb.table("perfiles").update({campo: None if datos.item_id == "default" else datos.item_id})\
+      .eq("id", usuario["id"]).execute()
+    return ok("Equipado")
 
 
 # ══════════════════════════════════════════════════════════

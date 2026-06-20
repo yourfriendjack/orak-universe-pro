@@ -47,3 +47,8 @@ export const leerNotificaciones = (token)       => apiPatch('/api/social/notific
 export const getPerfilPublico = (username)      => apiGet(`/api/auth/perfil/${username}`);
 export const getLibrosPerfil  = (username, token)  => apiGet(`/api/auth/perfil/${username}/libros`, token);
 export const getCapitulos     = (libroId)       => apiGet(`/api/libros/${libroId}/capitulos`);
+
+// ── Tienda ───────────────────────────────────────────────────────
+export const getMisCompras  = (token)           => apiGet('/api/social/tienda/mis-compras', token);
+export const comprarItem    = (item_id, token)  => apiPost('/api/social/tienda/comprar', { item_id }, token);
+export const equiparItem    = (item_id, tipo, token) => apiPost('/api/social/tienda/equipar', { item_id, tipo }, token);

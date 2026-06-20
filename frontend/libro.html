@@ -6,6 +6,7 @@
 <title>Libro — ORAK Universe</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/themes.css">
 <style>
 :root{
   --ink:#0e0d0b;--page:#faf7f2;--parchment:#f5f0e8;
@@ -717,9 +718,8 @@ function renderWorldbuilding() {
 // ── Forks ───────────────────────────────────────────────────────
 async function cargarForks() {
   try {
-    const r    = await fetch(`/v2/libros?limite=10`);
-    const all  = await r.json();
-    const forks= all.filter(l => l.fork_de === LIBRO_ID);
+    const r    = await fetch(`/v2/libros?fork_de=${LIBRO_ID}&limite=50`);
+    const forks= await r.json();
     document.getElementById('nc-forks').textContent = forks.length;
     const spines = ['bpb1','bpb2','bpb3','bpb4'];
     document.getElementById('forks-container').innerHTML = forks.length
@@ -743,7 +743,43 @@ async function cargarForks() {
 
 // ── Notas ────────────────────────────────────────────────────────
 async function cargarNotas() {
-  document.getElementById('notas-container').innerHTML = `<div class="wb-empty"><div class="wb-empty-icon">✎</div>Notas próximamente</div>`;
+  const c = document.getElementById('notas-container');
+  c.innerHTML = '<div class="loading">Cargando notas</div>';
+  try {
+    if (!CAPS_CACHE.length) {
+      const r = await fetch('/api/libros/' + LIBRO_ID + '/capitulos');
+      CAPS_CACHE = await r.json();
+    }
+    const resultados = await Promise.all(
+      CAPS_CACHE.map(cap =>
+        fetch('/api/social/notas/' + cap.id).then(r => r.json()).then(notas => ({ cap, notas }))
+      )
+    );
+    const conNotas = resultados.filter(x => x.notas.length > 0);
+    if (!conNotas.length) {
+      c.innerHTML = `<div class="wb-empty"><div class="wb-empty-icon">✎</div>Sin notas todavía<br><small>Los lectores pueden comentar párrafos desde el lector</small></div>`;
+      return;
+    }
+    c.innerHTML = conNotas.map(({ cap, notas }) => `
+      <div style="margin-bottom:22px;">
+        <div style="font-family:'Cinzel',serif;font-size:.82rem;font-weight:600;letter-spacing:.04em;color:rgba(205,199,184,.5);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid rgba(205,199,184,.08);">
+          Cap. ${cap.numero} — ${escapeHtml(cap.titulo)}
+        </div>
+        ${notas.map(n => {
+          const per = n.perfiles || {};
+          const ini = (per.display_name || per.username || '?')[0].toUpperCase();
+          return `<div style="display:flex;gap:9px;padding:8px 0;border-bottom:1px solid rgba(205,199,184,.06);">
+            <div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--amber),var(--rust));display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-size:.55rem;font-weight:700;color:#fff;flex-shrink:0;">${escapeHtml(ini)}</div>
+            <div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--amber);margin-bottom:3px;">@${escapeHtml(per.username||'anónimo')} · párrafo ${(n.parrafo_idx||0)+1}</div>
+              <div style="font-size:.88rem;color:rgba(205,199,184,.7);line-height:1.5;">${escapeHtml(n.texto)}</div>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>`).join('');
+  } catch(e) {
+    c.innerHTML = `<div class="wb-empty"><div class="wb-empty-icon">✎</div>Error al cargar notas</div>`;
+  }
 }
 
 // ── Navegación ───────────────────────────────────────────────────
@@ -756,33 +792,23 @@ window.switchView = (name, el) => {
 };
 
 // ── Glimmer ──────────────────────────────────────────────────────
-window.openGlimmer = () => {
-  const m = document.getElementById('glimmer-modal');
-  m.style.display = 'flex';
-};
-window.closeGlimmer = () => {
-  document.getElementById('glimmer-modal').style.display = 'none';
-};
-window.selGL = (el, val) => {
-  document.querySelectorAll('.gl-o').forEach(o => {
-    o.style.borderColor = 'var(--fog)'; o.style.background = 'transparent'; o.style.color = 'var(--ink)';
-  });
-  el.style.borderColor = 'var(--amber)'; el.style.background = 'rgba(200,134,10,.08)'; el.style.color = 'var(--amber-dim)';
-  GL_AMT = val;
-};
-window.sendGlimmer = async () => {
+window.openGlimmer = async () => {
+  if (!TOKEN) { toast('Inicia sesión para dar Glimmer', 'err'); return; }
+  const btn = document.getElementById('btn-glimmer');
+  if (btn.classList.contains('glimmered')) { toast('Ya diste Glimmer a este libro'); return; }
   try {
     const r = await fetch('/api/social/glimmers', {
       method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},
-      body: JSON.stringify({ libro_id: LIBRO_ID, cantidad: GL_AMT })
+      body: JSON.stringify({ libro_id: LIBRO_ID, cantidad: 1 })
     });
     const d = await r.json();
     if (!r.ok) throw new Error(d.detail?.mensaje || d.detail || 'Error');
-    LIBRO.glimmers = (LIBRO.glimmers||0) + GL_AMT;
+    LIBRO.glimmers = (LIBRO.glimmers||0) + 1;
     document.getElementById('sb-glimmers').textContent = LIBRO.glimmers;
-    closeGlimmer();
-    toast(`✦ ${GL_AMT} Glimmer${GL_AMT>1?'s':''} enviado${GL_AMT>1?'s':''}`);
-  } catch(e) { closeGlimmer(); toast(e.message,'err'); }
+    btn.classList.add('glimmered');
+    btn.textContent = '⬡ Glimmer dado';
+    toast('⬡ Glimmer enviado');
+  } catch(e) { toast(e.message,'err'); }
 };
 
 // ── Fork ─────────────────────────────────────────────────────────
@@ -829,7 +855,13 @@ window.abrirCapitulo = async (numero) => {
     const idx = CAPS_CACHE.findIndex(c => c.numero === numero);
     CAP_ACTUAL = idx >= 0 ? idx : 0;
     mostrarCap();
-    document.getElementById('reading-overlay').classList.add('open','light');
+    const overlay = document.getElementById('reading-overlay');
+    overlay.classList.add('open','light');
+    // Aplicar tema de lectura del usuario
+    const temaLectura = localStorage.getItem('orak_tema_lectura');
+    const rb = document.getElementById('reading-body');
+    rb.classList.remove('rl-libreta','rl-pergamino','rl-maquina','rl-noche','rl-bosque');
+    if (temaLectura) rb.classList.add(temaLectura);
   } catch(e) { toast(e.message,'err'); }
 };
 

@@ -18,6 +18,7 @@ router = APIRouter(prefix="/v2/libros", tags=["Libros Social"])
 @router.get("")
 async def listar_libros(
     genero:  str  = Query(None),
+    fork_de: int  = Query(None),
     limite:  int  = Query(20, le=50),
     pagina:  int  = Query(1, ge=1),
 ):
@@ -28,6 +29,8 @@ async def listar_libros(
       .eq("es_publico", True)
     if genero:
         q = q.eq("genero", genero)
+    if fork_de:
+        q = q.eq("fork_de", fork_de)
     res = q.order("creado_en", desc=True).range(offset, offset+limite-1).execute()
     return res.data or []
 

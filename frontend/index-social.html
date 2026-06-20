@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/orak-social.css">
+<link rel="stylesheet" href="css/themes.css">
 </head>
 <body>
 
@@ -305,11 +306,25 @@
 
     <!-- ── TIENDA ORUNS ── -->
     <div class="view" id="view-tienda">
-      <div class="explore-head">
-        <div class="explore-title">Rangos de Escritor</div>
-        <div class="explore-sub">Gana Oruns escribiendo y sube de rango</div>
+      <div class="tienda-hero">
+        <div class="tienda-hero-left">
+          <div class="tienda-hero-label">TIENDA ORUNS</div>
+          <div class="tienda-hero-balance"><span id="tienda-oruns">—</span> <span class="th-ico">⬡</span></div>
+          <div class="tienda-hero-sub">Tus Oruns acumulados</div>
+        </div>
+        <div class="tienda-hero-right">
+          <div class="tienda-equipado-label">EQUIPADO</div>
+          <div class="tienda-equipado-val" id="tienda-equipado-ui">Sin tema</div>
+          <div class="tienda-equipado-val" id="tienda-equipado-lectura" style="font-size:.7rem;opacity:.7">Lectura: estándar</div>
+        </div>
       </div>
-      <div id="tienda-container"></div>
+      <div class="tienda-tabs">
+        <button class="ttab active" onclick="tiendaTab(this,'ui')">⊛ Temas UI</button>
+        <button class="ttab" onclick="tiendaTab(this,'lectura')">≡ Lectura</button>
+        <button class="ttab" onclick="tiendaTab(this,'titulos')">✦ Títulos</button>
+        <button class="ttab" onclick="tiendaTab(this,'rangos')">◉ Rangos</button>
+      </div>
+      <div class="tienda-grid" id="tienda-grid"></div>
     </div>
 
     <!-- ── MIS LIBROS ── -->
@@ -421,7 +436,7 @@
 
 <script type="module">
 import { initAuth, login, logout, registro, getPerfil, getToken, getOruns, getGlimmers, actualizarOruns, actualizarGlimmers, actualizarPerfil, estaLogueado } from './js/services/auth.js';
-import { getFeed, getExplorar, crearPost, borrarPost, seguir, dejarSeguir, darGlimmer, quitarGlimmer, getRanking, getNotificaciones, leerNotificaciones, getLibrosPerfil, apiGet, apiPost, apiPatch } from './js/services/api.js';
+import { getFeed, getExplorar, crearPost, borrarPost, seguir, dejarSeguir, darGlimmer, quitarGlimmer, getRanking, getNotificaciones, leerNotificaciones, getLibrosPerfil, getMisCompras, comprarItem, equiparItem, apiGet, apiPost, apiPatch } from './js/services/api.js';
 
 // ── Estado ─────────────────────────────────────────────────────
 const S = {
@@ -444,6 +459,10 @@ function initials(name) { return (name||'?').split(' ').map(w=>w[0]).join('').sl
 
 // ── Arranque ────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', async () => {
+  // Aplicar tema UI guardado antes de pintar
+  const temaUI = localStorage.getItem('orak_tema_ui');
+  if (temaUI) document.documentElement.classList.add(CATALOGO.find(x=>x.id===temaUI)?.clase || '');
+
   const sesion = await initAuth();
   if (!sesion) {
     document.getElementById('screen-auth').classList.add('active');
@@ -927,30 +946,161 @@ const RANGOS = [
   { min:5000, max:Infinity, nombre:'Maestro del Universo', color:'#e0b860', icono:'⬡', perks:['Badge legendario','Nombre en oro en el ranking','Rango de élite'] },
 ];
 
-function renderTienda() {
+// ── Catálogo de la Tienda ───────────────────────────────────────
+const CATALOGO = [
+  // TEMAS UI
+  { id:'ui-dark-fantasy', tipo:'tema_ui',     nombre:'Dark Fantasy',       desc:'Púrpuras abisales y magia oscura',           precio:350, req:200, clase:'theme-dark-fantasy', preview:'linear-gradient(135deg,#0d0a1a 0%,#2a1060 100%)', acento:'#b57bff' },
+  { id:'ui-glitch',       tipo:'tema_ui',     nombre:'Glitch · Cyber',     desc:'Neones digitales sobre oscuridad absoluta',   precio:500, req:200, clase:'theme-glitch',       preview:'linear-gradient(135deg,#05100a 0%,#003320 100%)', acento:'#00e890' },
+  { id:'ui-lunar',        tipo:'tema_ui',     nombre:'Lunar',              desc:'Plateados y azules de medianoche profunda',   precio:400, req:200, clase:'theme-lunar',        preview:'linear-gradient(135deg,#080c14 0%,#102040 100%)', acento:'#7aaccc' },
+  { id:'ui-sangre',       tipo:'tema_ui',     nombre:'Sangre & Tinta',     desc:'Gótico. Rojos carmesí y negro absoluto',      precio:450, req:200, clase:'theme-sangre',       preview:'linear-gradient(135deg,#0a0000 0%,#3a0808 100%)', acento:'#c04040' },
+  // TEMAS LECTURA
+  { id:'rl-libreta',   tipo:'tema_lectura', nombre:'Libreta Antigua',    desc:'Rayas de cuaderno en crema envejecida',       precio:150, req:0,   clase:'rl-libreta',   preview:'linear-gradient(135deg,#f5ead8,#ede3c8)', acento:'#8b6040', dark:false },
+  { id:'rl-pergamino', tipo:'tema_lectura', nombre:'Pergamino',          desc:'Papel antiguo con tonos dorados',             precio:200, req:0,   clase:'rl-pergamino', preview:'linear-gradient(135deg,#d4b896,#b08860)', acento:'#7a5020', dark:false },
+  { id:'rl-maquina',   tipo:'tema_lectura', nombre:'Máquina de Escribir',desc:'Blanco prístino con fuente monoespaciada',    precio:150, req:0,   clase:'rl-maquina',   preview:'linear-gradient(135deg,#fafafa,#f0f0f0)', acento:'#333',   dark:false },
+  { id:'rl-noche',     tipo:'tema_lectura', nombre:'Noche Eterna',       desc:'Negro absoluto, letras claras',               precio:100, req:0,   clase:'rl-noche',     preview:'linear-gradient(135deg,#000000,#0a0a0a)', acento:'#cccccc', dark:true  },
+  { id:'rl-bosque',    tipo:'tema_lectura', nombre:'Bosque Encantado',   desc:'Verdes profundos y papel de musgo',           precio:300, req:200, clase:'rl-bosque',    preview:'linear-gradient(135deg,#0a1a0a,#0f2510)', acento:'#5a9a6a', dark:true  },
+  // TÍTULOS
+  { id:'titulo-narrador', tipo:'titulo', nombre:'Narrador de Mundos',   desc:'Se muestra en tu perfil y publicaciones',    precio:300,  req:100,  color:'#d4a843' },
+  { id:'titulo-tejedor',  tipo:'titulo', nombre:'Tejedor de Historias', desc:'Para quienes crean con hilos invisibles',    precio:500,  req:500,  color:'#b57bff' },
+  { id:'titulo-guardian', tipo:'titulo', nombre:'Guardián del Cosmos',  desc:'Elegido por el universo ORAK',               precio:800,  req:1000, color:'#7aaccc' },
+  { id:'titulo-oraculo',  tipo:'titulo', nombre:'Oráculo',              desc:'El rango más místico de ORAK',               precio:1500, req:2500, color:'#e0b860' },
+];
+
+let T = { compras:[], tema_ui:null, tema_lectura:null, titulo:null, tab:'ui' };
+
+async function renderTienda() {
   const oruns = getPerfil()?.oruns || 0;
-  const c = document.getElementById('tienda-container');
-  c.innerHTML = `<div style="margin-bottom:18px;padding:14px 18px;background:rgba(212,168,67,.08);border:1px solid rgba(212,168,67,.2);border-radius:8px;">
-    <div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--fog);margin-bottom:4px">TUS ORUNS</div>
-    <div style="font-size:1.6rem;font-weight:700;color:var(--amber)">${oruns.toLocaleString()} ⬡</div>
-  </div>` + RANGOS.map(r => {
-    const activo  = oruns >= r.min && oruns <= r.max;
-    const desbloq = oruns >= r.min;
-    const progreso = activo ? Math.round(((oruns - r.min) / (r.max === Infinity ? oruns + 1 : r.max - r.min + 1)) * 100) : (desbloq ? 100 : 0);
-    return `<div class="rango-card ${activo ? 'rango-activo' : ''}" style="border-color:${desbloq ? r.color+'44' : 'rgba(205,199,184,.08)'}">
-      <div class="rango-head">
-        <div class="rango-icono" style="color:${desbloq ? r.color : 'var(--fog)'}">${r.icono}</div>
-        <div>
-          <div class="rango-nombre" style="color:${desbloq ? r.color : 'var(--fog)'}">${r.nombre}</div>
-          <div class="rango-req">${r.max === Infinity ? `${r.min.toLocaleString()}+ Oruns` : `${r.min.toLocaleString()}–${r.max.toLocaleString()} Oruns`}</div>
+  _set('tienda-oruns', oruns.toLocaleString());
+  // Cargar compras del servidor
+  try {
+    const d = await getMisCompras(getToken());
+    T.compras      = d.compras      || [];
+    T.tema_ui      = d.tema_ui      || null;
+    T.tema_lectura = d.tema_lectura || null;
+    T.titulo       = d.titulo_activo|| null;
+    _set('tienda-equipado-ui',      T.tema_ui      ? (CATALOGO.find(x=>x.id===T.tema_ui)?.nombre      || T.tema_ui)      : 'Sin tema');
+    _set('tienda-equipado-lectura', 'Lectura: ' + (T.tema_lectura ? (CATALOGO.find(x=>x.id===T.tema_lectura)?.nombre || T.tema_lectura) : 'estándar'));
+  } catch {}
+  tiendaTab(document.querySelector('.ttab.active') || document.querySelector('.ttab'), T.tab, true);
+}
+
+window.tiendaTab = (el, tab, silent) => {
+  T.tab = tab;
+  document.querySelectorAll('.ttab').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  const oruns = getPerfil()?.oruns || 0;
+  const grid  = document.getElementById('tienda-grid');
+  if (tab === 'rangos') { renderRangos(grid, oruns); return; }
+  const items = CATALOGO.filter(x => x.tipo === (tab === 'ui' ? 'tema_ui' : tab === 'lectura' ? 'tema_lectura' : 'titulo'));
+  grid.innerHTML = items.map(it => {
+    const comprado = T.compras.includes(it.id) || it.precio === 0;
+    const equipado = (it.tipo==='tema_ui' && T.tema_ui===it.id) || (it.tipo==='tema_lectura' && T.tema_lectura===it.id) || (it.tipo==='titulo' && T.titulo===it.id);
+    const puedeComprar = oruns >= it.precio && !comprado;
+    const bloqueado    = it.req > 0 && oruns < it.req;
+    if (it.tipo === 'titulo') {
+      return `<div class="titem titem-titulo ${equipado?'titem-eq':''} ${bloqueado?'titem-lock':''}" style="--tc:${it.color}">
+        <div class="tit-nombre" style="color:${bloqueado?'var(--fog)':it.color}">${it.nombre}</div>
+        <div class="tit-desc">${it.desc}</div>
+        ${bloqueado ? `<div class="tit-req">Requiere ${it.req.toLocaleString()} Oruns</div>` : ''}
+        <div class="tit-footer">
+          <div class="tit-precio">${it.precio} ⬡</div>
+          ${equipado   ? `<button class="titem-btn titem-btn-eq" onclick="quitarEquipo('${it.id}','titulo')">✓ Equipado</button>` : ''}
+          ${!equipado && comprado  ? `<button class="titem-btn" onclick="equipar('${it.id}','titulo')">Equipar</button>` : ''}
+          ${!comprado && !bloqueado ? `<button class="titem-btn titem-btn-buy ${puedeComprar?'':'titem-btn-dim'}" onclick="comprar('${it.id}')" ${puedeComprar?'':'disabled'}>Comprar</button>` : ''}
+          ${bloqueado ? `<button class="titem-btn titem-btn-dim" disabled>Bloqueado</button>` : ''}
         </div>
-        ${activo ? '<div class="rango-badge">RANGO ACTUAL</div>' : ''}
-        ${desbloq && !activo ? '<div class="rango-badge" style="background:rgba(106,170,136,.15);color:#6aaa88">✓ Completado</div>' : ''}
+      </div>`;
+    }
+    return `<div class="titem ${equipado?'titem-eq':''} ${bloqueado?'titem-lock':''}">
+      <div class="titem-preview" style="background:${it.preview}">
+        ${equipado ? '<div class="titem-eq-badge">✓ ACTIVO</div>' : ''}
+        ${bloqueado ? `<div class="titem-lock-badge">⊘ ${it.req}+ Oruns</div>` : ''}
+        <div class="titem-dot" style="background:${it.acento};box-shadow:0 0 8px ${it.acento}"></div>
       </div>
-      ${activo ? `<div class="prog-bar" style="margin:8px 0"><div class="prog-fill" style="width:${progreso}%;background:${r.color}"></div></div>` : ''}
-      <div class="rango-perks">${r.perks.map(p => `<span class="rango-perk" style="color:${desbloq?'var(--ink)':'var(--fog)'}">${desbloq?'✓':'○'} ${p}</span>`).join('')}</div>
+      <div class="titem-info">
+        <div class="titem-nombre">${it.nombre}</div>
+        <div class="titem-desc">${it.desc}</div>
+        <div class="titem-footer">
+          <div class="titem-precio">${it.precio} ⬡</div>
+          ${equipado   ? `<button class="titem-btn titem-btn-eq" onclick="quitarEquipo('${it.id}','${it.tipo}')">✓ Activo</button>` : ''}
+          ${!equipado && comprado  ? `<button class="titem-btn" onclick="equipar('${it.id}','${it.tipo}')">Equipar</button>` : ''}
+          ${!comprado && !bloqueado ? `<button class="titem-btn titem-btn-buy ${puedeComprar?'':'titem-btn-dim'}" onclick="comprar('${it.id}')" ${puedeComprar?'':'disabled'}>Comprar</button>` : ''}
+          ${bloqueado ? `<button class="titem-btn titem-btn-dim" disabled>Bloqueado</button>` : ''}
+        </div>
+      </div>
     </div>`;
   }).join('');
+};
+
+function renderRangos(grid, oruns) {
+  grid.innerHTML = RANGOS.map(r => {
+    const activo  = oruns >= r.min && oruns <= r.max;
+    const desbloq = oruns >= r.min;
+    const pct = activo ? Math.round(((oruns-r.min)/((r.max===Infinity?oruns+1:r.max)-r.min+1))*100) : (desbloq?100:0);
+    return `<div class="rango-card ${activo?'rango-activo':''}" style="border-color:${desbloq?r.color+'44':'rgba(205,199,184,.08)'}">
+      <div class="rango-head">
+        <div class="rango-icono" style="color:${desbloq?r.color:'var(--fog)'}">${r.icono}</div>
+        <div>
+          <div class="rango-nombre" style="color:${desbloq?r.color:'var(--fog)'}">${r.nombre}</div>
+          <div class="rango-req">${r.max===Infinity?`${r.min.toLocaleString()}+ Oruns`:`${r.min.toLocaleString()}–${r.max.toLocaleString()} Oruns`}</div>
+        </div>
+        ${activo?'<div class="rango-badge">RANGO ACTUAL</div>':''}
+        ${desbloq&&!activo?'<div class="rango-badge" style="background:rgba(106,170,136,.15);color:#6aaa88">✓ Completado</div>':''}
+      </div>
+      ${activo?`<div class="prog-bar" style="margin:8px 0"><div class="prog-fill" style="width:${pct}%;background:${r.color}"></div></div>`:''}
+      <div class="rango-perks">${r.perks.map(p=>`<span class="rango-perk" style="color:${desbloq?'var(--ink)':'var(--fog)'}">${desbloq?'✓':'○'} ${p}</span>`).join('')}</div>
+    </div>`;
+  }).join('');
+}
+
+window.comprar = async (itemId) => {
+  const it = CATALOGO.find(x=>x.id===itemId);
+  if (!it) return;
+  if (!confirm(`¿Comprar "${it.nombre}" por ${it.precio} ⬡ Oruns?`)) return;
+  try {
+    await comprarItem(itemId, getToken());
+    actualizarOruns(-it.precio);
+    T.compras.push(itemId);
+    toast(`✦ "${it.nombre}" desbloqueado`);
+    tiendaTab(document.querySelector('.ttab.active'), T.tab, true);
+  } catch(e) { toast(e.message, 'err'); }
+};
+
+window.equipar = async (itemId, tipo) => {
+  try {
+    await equiparItem(itemId, tipo, getToken());
+    const campo = tipo==='tema_ui'?'tema_ui':tipo==='tema_lectura'?'tema_lectura':'titulo';
+    T[campo==='titulo_activo'?'titulo':campo] = itemId;
+    aplicarTema(itemId, tipo);
+    _set('tienda-equipado-ui', T.tema_ui ? (CATALOGO.find(x=>x.id===T.tema_ui)?.nombre||T.tema_ui) : 'Sin tema');
+    _set('tienda-equipado-lectura', 'Lectura: '+(T.tema_lectura?(CATALOGO.find(x=>x.id===T.tema_lectura)?.nombre||T.tema_lectura):'estándar'));
+    toast('✦ Tema equipado');
+    tiendaTab(document.querySelector('.ttab.active'), T.tab, true);
+  } catch(e) { toast(e.message, 'err'); }
+};
+
+window.quitarEquipo = async (itemId, tipo) => {
+  try {
+    await equiparItem('default', tipo, getToken());
+    const campo = tipo==='tema_ui'?'tema_ui':tipo==='tema_lectura'?'tema_lectura':'titulo';
+    T[campo] = null;
+    aplicarTema('default', tipo);
+    _set('tienda-equipado-ui', T.tema_ui ? (CATALOGO.find(x=>x.id===T.tema_ui)?.nombre||T.tema_ui) : 'Sin tema');
+    _set('tienda-equipado-lectura', 'Lectura: '+(T.tema_lectura?(CATALOGO.find(x=>x.id===T.tema_lectura)?.nombre||T.tema_lectura):'estándar'));
+    toast('Tema removido');
+    tiendaTab(document.querySelector('.ttab.active'), T.tab, true);
+  } catch(e) { toast(e.message, 'err'); }
+};
+
+function aplicarTema(itemId, tipo) {
+  if (tipo === 'tema_ui') {
+    document.documentElement.classList.remove('theme-dark-fantasy','theme-glitch','theme-lunar','theme-sangre');
+    if (itemId !== 'default') document.documentElement.classList.add(CATALOGO.find(x=>x.id===itemId)?.clase || '');
+    localStorage.setItem('orak_tema_ui', itemId === 'default' ? '' : itemId);
+  }
+  if (tipo === 'tema_lectura') {
+    localStorage.setItem('orak_tema_lectura', itemId === 'default' ? '' : itemId);
+  }
 }
 
 // ── PERFIL ──────────────────────────────────────────────────────
@@ -1514,7 +1664,46 @@ const _origLoadPeople = window.loadPeople;
 .msg-suyo{align-self:flex-start;background:rgba(205,199,184,.08);color:var(--parchment);}
 .msg-input-row{display:flex;gap:8px;padding:10px 14px;border-top:1px solid rgba(205,199,184,.08);align-items:flex-end;}
 
-/* ── Tienda / Rangos ────────────────────────────────────── */
+/* ── Tienda ─────────────────────────────────────────────── */
+.tienda-hero{display:flex;justify-content:space-between;align-items:center;padding:20px 24px;background:linear-gradient(135deg,rgba(212,168,67,.06),rgba(212,168,67,.02));border-bottom:1px solid rgba(212,168,67,.12);margin-bottom:0;}
+.tienda-hero-label{font-family:'JetBrains Mono',monospace;font-size:.58rem;letter-spacing:.14em;color:var(--fog);margin-bottom:6px;}
+.tienda-hero-balance{font-family:'Cinzel',serif;font-size:2rem;font-weight:900;color:var(--amber);line-height:1;}
+.th-ico{font-size:1.4rem;}
+.tienda-hero-sub{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--fog);margin-top:4px;}
+.tienda-hero-right{text-align:right;}
+.tienda-equipado-label{font-family:'JetBrains Mono',monospace;font-size:.55rem;letter-spacing:.1em;color:var(--fog);margin-bottom:4px;}
+.tienda-equipado-val{font-family:'Cinzel',serif;font-size:.85rem;color:var(--amber);}
+.tienda-tabs{display:flex;gap:2px;padding:12px 16px 0;border-bottom:1px solid rgba(205,199,184,.08);}
+.ttab{padding:8px 16px;background:none;border:none;border-bottom:2px solid transparent;font-family:'JetBrains Mono',monospace;font-size:.66rem;letter-spacing:.06em;color:var(--fog);cursor:pointer;transition:all var(--transition);}
+.ttab:hover{color:var(--ink);}
+.ttab.active{color:var(--amber);border-bottom-color:var(--amber);}
+.tienda-grid{padding:20px 16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;}
+.titem{background:var(--mist);border:1px solid rgba(205,199,184,.1);border-radius:10px;overflow:hidden;transition:border-color var(--transition),transform var(--transition);}
+.titem:hover{border-color:rgba(212,168,67,.3);transform:translateY(-2px);}
+.titem-eq{border-color:rgba(212,168,67,.5);box-shadow:0 0 0 1px rgba(212,168,67,.25);}
+.titem-lock{opacity:.55;}
+.titem-preview{height:90px;position:relative;display:flex;align-items:center;justify-content:center;}
+.titem-eq-badge{position:absolute;top:8px;left:8px;background:rgba(212,168,67,.9);color:#000;font-family:'JetBrains Mono',monospace;font-size:.55rem;font-weight:700;padding:2px 7px;border-radius:4px;}
+.titem-lock-badge{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.55);font-family:'JetBrains Mono',monospace;font-size:.65rem;color:rgba(205,199,184,.8);}
+.titem-dot{width:18px;height:18px;border-radius:50%;}
+.titem-info{padding:10px 12px 12px;}
+.titem-nombre{font-family:'Cinzel',serif;font-size:.82rem;font-weight:700;color:var(--ink);margin-bottom:3px;}
+.titem-desc{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--fog);line-height:1.5;margin-bottom:10px;}
+.titem-footer{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.titem-precio{font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;color:var(--amber);}
+.titem-btn{padding:5px 12px;border:1px solid var(--amber);border-radius:5px;background:transparent;color:var(--amber);font-family:'JetBrains Mono',monospace;font-size:.62rem;cursor:pointer;transition:all var(--transition);}
+.titem-btn:hover{background:var(--amber);color:var(--deep);}
+.titem-btn-eq{background:rgba(212,168,67,.12);}
+.titem-btn-buy{background:var(--amber);color:var(--deep);border-color:var(--amber);}
+.titem-btn-buy:hover{background:var(--gold);}
+.titem-btn-dim{opacity:.4;cursor:not-allowed;pointer-events:none;}
+.titem-titulo{padding:16px;display:flex;flex-direction:column;gap:6px;border-left:3px solid var(--tc,var(--amber));}
+.tit-nombre{font-family:'Cinzel',serif;font-size:.9rem;font-weight:700;}
+.tit-desc{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--fog);line-height:1.5;}
+.tit-req{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--rust);}
+.tit-footer{display:flex;align-items:center;justify-content:space-between;margin-top:6px;}
+.tit-precio{font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;color:var(--amber);}
+/* ── Rangos ──────────────────────────────────────────────── */
 .rango-card{border:1px solid rgba(205,199,184,.08);border-radius:8px;padding:14px 16px;margin-bottom:12px;transition:border-color var(--transition);}
 .rango-activo{border-width:1.5px;}
 .rango-head{display:flex;align-items:center;gap:12px;margin-bottom:8px;}

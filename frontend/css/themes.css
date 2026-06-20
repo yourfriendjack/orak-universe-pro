@@ -1,0 +1,151 @@
+/* ═══════════════════════════════════════════════════════════════
+   ORAK Universe — Temas de interfaz y lectura
+   Se activan añadiendo una clase a <html> o a .reading-body
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── DARK FANTASY ─────────────────────────────────────────────── */
+html.theme-dark-fantasy {
+  --page:      #0d0a1a;
+  --mist:      #161228;
+  --fog:       #3d3060;
+  --ink:       #e4dcff;
+  --gold:      #d4aaff;
+  --amber:     #b57bff;
+  --amber-dim: #8a50d0;
+  --rust:      #7a3a8a;
+  --deep:      #060410;
+  --white:     #12101e;
+  --parchment: #161228;
+}
+html.theme-dark-fantasy body { background: var(--page); }
+html.theme-dark-fantasy .topbar,
+html.theme-dark-fantasy .sidebar { border-color: rgba(180,120,255,.15); }
+html.theme-dark-fantasy .auth-card { background: #100d20; border-color: rgba(181,123,255,.2); }
+html.theme-dark-fantasy .auth-glow { background: radial-gradient(ellipse at 50% 0%, rgba(140,60,220,.35) 0%, transparent 65%); }
+
+/* ── GLITCH · CYBER ───────────────────────────────────────────── */
+html.theme-glitch {
+  --page:      #05100a;
+  --mist:      #0a1a10;
+  --fog:       #1a4025;
+  --ink:       #c0ffd8;
+  --gold:      #80ffb0;
+  --amber:     #00e890;
+  --amber-dim: #00b870;
+  --rust:      #ff3060;
+  --deep:      #020806;
+  --white:     #081208;
+  --parchment: #0a1a10;
+}
+html.theme-glitch body { background: var(--page); }
+html.theme-glitch .topbar { border-color: rgba(0,232,144,.12); }
+html.theme-glitch .sidebar { border-color: rgba(0,232,144,.1); }
+html.theme-glitch .auth-card { background: #080f0a; border-color: rgba(0,232,144,.2); }
+html.theme-glitch .auth-glow { background: radial-gradient(ellipse at 50% 0%, rgba(0,200,100,.3) 0%, transparent 65%); }
+html.theme-glitch .logo,
+html.theme-glitch .auth-title { letter-spacing: .18em; }
+html.theme-glitch * { transition: color .1s, background-color .1s; }
+
+/* ── LUNAR ────────────────────────────────────────────────────── */
+html.theme-lunar {
+  --page:      #080c14;
+  --mist:      #101828;
+  --fog:       #2a3a5a;
+  --ink:       #c8d8f0;
+  --gold:      #a8c8e8;
+  --amber:     #7aaccc;
+  --amber-dim: #507090;
+  --rust:      #4a6080;
+  --deep:      #04060c;
+  --white:     #101828;
+  --parchment: #101828;
+}
+html.theme-lunar body { background: var(--page); }
+html.theme-lunar .auth-card { background: #0c1020; border-color: rgba(122,172,204,.2); }
+html.theme-lunar .auth-glow { background: radial-gradient(ellipse at 50% 0%, rgba(100,150,200,.25) 0%, transparent 65%); }
+
+/* ── SANGRE & TINTA ───────────────────────────────────────────── */
+html.theme-sangre {
+  --page:      #0a0000;
+  --mist:      #140404;
+  --fog:       #3a1010;
+  --ink:       #f0d4d4;
+  --gold:      #ff9090;
+  --amber:     #c04040;
+  --amber-dim: #8a2020;
+  --rust:      #6a1010;
+  --deep:      #050000;
+  --white:     #100000;
+  --parchment: #140404;
+}
+html.theme-sangre body { background: var(--page); }
+html.theme-sangre .auth-card { background: #100202; border-color: rgba(192,64,64,.2); }
+html.theme-sangre .auth-glow { background: radial-gradient(ellipse at 50% 0%, rgba(160,20,20,.35) 0%, transparent 65%); }
+
+
+/* ═══════════════════════════════════════════════════════════════
+   TEMAS DE LECTURA — se aplican a .reading-body
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── LIBRETA ANTIGUA ──────────────────────────────────────────── */
+.reading-body.rl-libreta {
+  background-color: #f5ead8;
+  background-image:
+    linear-gradient(90deg, transparent 44px, rgba(180,80,80,.35) 44px, rgba(180,80,80,.35) 46px, transparent 46px),
+    repeating-linear-gradient(transparent, transparent 27px, rgba(100,130,180,.22) 28px);
+  color: #2c1a0e;
+}
+.reading-body.rl-libreta .reading-book-header,
+.reading-body.rl-libreta .reading-cap-title { color: #5a3010; }
+.reading-body.rl-libreta .reading-ornament  { color: #8b6040; }
+.reading-body.rl-libreta .rnav-btn { background: rgba(100,60,20,.1); border-color: rgba(100,60,20,.3); color: #5a3010; }
+
+/* ── PERGAMINO ────────────────────────────────────────────────── */
+.reading-body.rl-pergamino {
+  background: radial-gradient(ellipse at center, #d4b896 0%, #c4a07a 60%, #b08860 100%);
+  color: #2a1505;
+  box-shadow: inset 0 0 60px rgba(80,40,0,.3);
+}
+.reading-body.rl-pergamino .reading-book-header,
+.reading-body.rl-pergamino .reading-cap-title { color: #4a2a08; }
+.reading-body.rl-pergamino .reading-ornament  { color: #8b5a20; }
+.reading-body.rl-pergamino .rnav-btn { background: rgba(80,40,0,.12); border-color: rgba(80,40,0,.3); color: #4a2a08; }
+.reading-body.rl-pergamino .reading-progress  { background: rgba(80,40,0,.15); }
+.reading-body.rl-pergamino .reading-progress-fill { background: #8b5a20; }
+
+/* ── MÁQUINA DE ESCRIBIR ──────────────────────────────────────── */
+.reading-body.rl-maquina {
+  background: #fafafa;
+  color: #111111;
+  font-family: 'JetBrains Mono', 'Courier New', Courier, monospace !important;
+}
+.reading-body.rl-maquina * { font-family: 'JetBrains Mono', 'Courier New', Courier, monospace !important; }
+.reading-body.rl-maquina .reading-book-header,
+.reading-body.rl-maquina .reading-cap-title { color: #222; }
+.reading-body.rl-maquina .reading-ornament  { color: #888; }
+.reading-body.rl-maquina .rnav-btn { background: #eee; border-color: #ccc; color: #333; }
+.reading-body.rl-maquina .reading-progress-fill { background: #333; }
+
+/* ── NOCHE ETERNA ─────────────────────────────────────────────── */
+.reading-body.rl-noche {
+  background: #000000;
+  color: #d8d8d8;
+}
+.reading-body.rl-noche .reading-book-header,
+.reading-body.rl-noche .reading-cap-title { color: #ffffff; }
+.reading-body.rl-noche .reading-ornament  { color: #555; }
+.reading-body.rl-noche .rnav-btn { background: #111; border-color: #333; color: #aaa; }
+.reading-body.rl-noche .reading-progress  { background: #111; }
+.reading-body.rl-noche .reading-progress-fill { background: #888; }
+
+/* ── BOSQUE ENCANTADO ─────────────────────────────────────────── */
+.reading-body.rl-bosque {
+  background: linear-gradient(180deg, #0a1a0a 0%, #0f2010 100%);
+  color: #b0d8a8;
+}
+.reading-body.rl-bosque .reading-book-header,
+.reading-body.rl-bosque .reading-cap-title { color: #d8f0c8; }
+.reading-body.rl-bosque .reading-ornament  { color: #4a8a5a; }
+.reading-body.rl-bosque .rnav-btn { background: rgba(80,160,80,.1); border-color: rgba(80,160,80,.25); color: #90c890; }
+.reading-body.rl-bosque .reading-progress  { background: rgba(80,160,80,.1); }
+.reading-body.rl-bosque .reading-progress-fill { background: #5a9a6a; }

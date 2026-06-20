@@ -214,6 +214,18 @@ class MensajeIn(BaseModel):
 
 
 # ══════════════════════════════════════════════════════════
+#  TIENDA
+# ══════════════════════════════════════════════════════════
+
+class CompraIn(BaseModel):
+    item_id: str = Field(..., min_length=1, max_length=60)
+
+class EquiparIn(BaseModel):
+    item_id: str = Field(..., min_length=1, max_length=60)
+    tipo:    str  # "tema_ui" | "tema_lectura" | "titulo"
+
+
+# ══════════════════════════════════════════════════════════
 #  WORLDBUILDING (sin cambios — compatibilidad total)
 # ══════════════════════════════════════════════════════════
 
