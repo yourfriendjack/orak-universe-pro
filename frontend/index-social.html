@@ -778,7 +778,7 @@ async function cargarNotasPost(id) {
   try {
     const notas = await apiGet('/api/social/notas/post/' + id);
     if (!notas.length) {
-      c.innerHTML = '<div style="font-size:.75rem;color:var(--fog);padding:4px 0 8px">Sin notas todavía. ¡Sé el primero!</div>';
+      c.innerHTML = '<div style="font-size:.78rem;color:rgba(205,199,184,.65);padding:4px 0 8px">Sin notas todavía. ¡Sé el primero!</div>';
       return;
     }
     c.innerHTML = notas.map(n => {
