@@ -112,11 +112,11 @@
       <div class="snav-item"        id="snav-profile" onclick="goView('profile')"><span class="snav-icon">◧</span>Mi Perfil</div>
       <div class="snav-label">Biblioteca</div>
       <div class="snav-item" id="snav-misLibros" onclick="goView('misLibros')"><span class="snav-icon">◫</span>Mis Libros</div>
-      <div class="snav-item" onclick="toast('◈ Colaboraciones próximamente')"><span class="snav-icon">◆</span>Colaboraciones</div>
+      <div class="snav-item" id="snav-collab"   onclick="goView('collab')"><span class="snav-icon">◆</span>Colaboraciones</div>
       <div class="snav-label">Comunidad</div>
       <div class="snav-item" onclick="toggleNotif()"><span class="snav-icon">🔔</span>Notificaciones<span class="snav-badge" id="snav-badge" style="display:none">0</span></div>
-      <div class="snav-item" onclick="toast('💬 Mensajes próximamente')"><span class="snav-icon">✉</span>Mensajes</div>
-      <div class="snav-item" onclick="toast('⬡ Tienda próximamente')"><span class="snav-icon">❋</span>Tienda Oruns</div>
+      <div class="snav-item" id="snav-mensajes" onclick="goView('mensajes')"><span class="snav-icon">✉</span>Mensajes</div>
+      <div class="snav-item" id="snav-tienda"   onclick="goView('tienda')"><span class="snav-icon">❋</span>Tienda Oruns</div>
       <div class="snav-label">Cuenta</div>
       <div class="snav-item" onclick="doLogout()"><span class="snav-icon">←</span>Cerrar sesión</div>
     </nav>
@@ -258,6 +258,37 @@
       </div>
     </div>
 
+    <!-- ── COLABORACIONES ── -->
+    <div class="view" id="view-collab">
+      <div class="explore-head">
+        <div class="explore-title">Colaboraciones</div>
+        <div class="explore-sub">Libros en los que colaboras como co-escritor</div>
+      </div>
+      <div id="collab-container"><div class="loading">Cargando…</div></div>
+    </div>
+
+    <!-- ── MENSAJES ── -->
+    <div class="view" id="view-mensajes">
+      <div class="msg-layout">
+        <div class="msg-sidebar">
+          <div class="msg-sidebar-head">Mensajes</div>
+          <div id="conv-list"><div class="loading" style="font-size:.75rem;padding:14px">Cargando…</div></div>
+        </div>
+        <div class="msg-thread" id="msg-thread">
+          <div class="msg-thread-empty">Selecciona una conversación</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TIENDA ORUNS ── -->
+    <div class="view" id="view-tienda">
+      <div class="explore-head">
+        <div class="explore-title">Rangos de Escritor</div>
+        <div class="explore-sub">Gana Oruns escribiendo y sube de rango</div>
+      </div>
+      <div id="tienda-container"></div>
+    </div>
+
     <!-- ── MIS LIBROS ── -->
     <div class="view" id="view-misLibros">
       <div class="explore-head">
@@ -367,7 +398,7 @@
 
 <script type="module">
 import { initAuth, login, logout, registro, getPerfil, getToken, getOruns, getGlimmers, actualizarOruns, actualizarGlimmers, actualizarPerfil, estaLogueado } from './js/services/auth.js';
-import { getFeed, getExplorar, crearPost, borrarPost, seguir, dejarSeguir, darGlimmer, quitarGlimmer, getRanking, getNotificaciones, leerNotificaciones, getLibrosPerfil, apiGet, apiPost } from './js/services/api.js';
+import { getFeed, getExplorar, crearPost, borrarPost, seguir, dejarSeguir, darGlimmer, quitarGlimmer, getRanking, getNotificaciones, leerNotificaciones, getLibrosPerfil, apiGet, apiPost, apiPatch } from './js/services/api.js';
 
 // ── Estado ─────────────────────────────────────────────────────
 const S = {
@@ -519,6 +550,9 @@ window.goView = (view) => {
   if (view === 'people'     && !S.people.length) loadPeople();
   if (view === 'profile')     loadProfile();
   if (view === 'misLibros')   loadMisLibros();
+  if (view === 'collab')      loadCollab();
+  if (view === 'mensajes')    loadMensajes();
+  if (view === 'tienda')      renderTienda();
 };
 
 // ── FEED ────────────────────────────────────────────────────────
@@ -817,6 +851,152 @@ window.enviarNotaPost = async (id) => {
   } catch(e) { toast(e.message, 'err'); }
 };
 
+// ── COLABORACIONES ──────────────────────────────────────────────
+async function loadCollab() {
+  if (!getToken()) { goView('feed'); toast('Inicia sesión', 'err'); return; }
+  const c = document.getElementById('collab-container');
+  c.innerHTML = '<div class="loading">Cargando colaboraciones…</div>';
+  try {
+    const data = await apiGet('/api/social/coescritores/mis-colaboraciones', getToken());
+    if (!data.length) {
+      c.innerHTML = '<div class="wb-empty" style="padding:40px 0"><div class="wb-empty-icon">◆</div>Sin colaboraciones todavía<br><small style="color:var(--fog)">Cuando alguien te invite a co-escribir aparecerá aquí</small></div>';
+      return;
+    }
+    const estadoColor = { pendiente:'#d4a843', activo:'#6aaa88', rechazado:'#c06040' };
+    c.innerHTML = data.map(col => {
+      const libro = col.libros || {};
+      const autor = libro.autor || {};
+      const color = estadoColor[col.estado] || '#888';
+      return `<div class="collab-card">
+        <div class="collab-titulo">${escapeHtml(libro.titulo || 'Libro sin título')}</div>
+        <div class="collab-meta">por @${escapeHtml(autor.username || '—')} · ${escapeHtml(libro.genero || '')}</div>
+        <div class="collab-estado" style="color:${color}">● ${col.estado}</div>
+        ${col.estado === 'pendiente' ? `
+        <div class="collab-btns">
+          <button class="nota-send" onclick="responderCollab(${libro.id},'aceptar',this)">Aceptar</button>
+          <button class="nota-send" style="background:rgba(192,96,64,.2);color:#c06040" onclick="responderCollab(${libro.id},'rechazar',this)">Rechazar</button>
+        </div>` : `<button class="nota-send" style="margin-top:8px;background:rgba(212,168,67,.15);color:var(--amber)" onclick="window.location.href='/libro?id=${libro.id}'">Abrir libro →</button>`}
+      </div>`;
+    }).join('');
+  } catch(e) { document.getElementById('collab-container').innerHTML = `<div class="loading" style="color:#e08080">${e.message}</div>`; }
+}
+
+window.responderCollab = async (libroId, accion, btn) => {
+  try {
+    await apiPatch(`/api/social/coescritores/${libroId}/responder`, { accion }, getToken());
+    toast(accion === 'aceptar' ? '✓ Colaboración aceptada' : 'Invitación rechazada');
+    loadCollab();
+  } catch(e) { toast(e.message, 'err'); }
+};
+
+// ── MENSAJES ────────────────────────────────────────────────────
+let CONV_ACTUAL = null;
+
+async function loadMensajes() {
+  if (!getToken()) { goView('feed'); toast('Inicia sesión', 'err'); return; }
+  const c = document.getElementById('conv-list');
+  c.innerHTML = '<div style="font-size:.72rem;color:var(--fog);padding:10px">Cargando…</div>';
+  try {
+    const data = await apiGet('/api/social/mensajes', getToken());
+    if (!data.length) {
+      c.innerHTML = '<div style="font-size:.75rem;color:var(--fog);padding:14px">Sin conversaciones todavía</div>';
+      return;
+    }
+    c.innerHTML = data.map(conv => {
+      const otro = conv.interlocutor || {};
+      const ini  = (otro.display_name || otro.username || '?')[0].toUpperCase();
+      const av   = avColor(otro.id);
+      const badge = conv.no_leidos > 0 ? `<span class="msg-badge">${conv.no_leidos}</span>` : '';
+      return `<div class="conv-item" id="conv-${otro.id}" onclick="abrirConv('${otro.id}','${escapeHtml(otro.username||'')}','${escapeHtml(otro.display_name||otro.username||'')}')">
+        <div class="pav ${av}" style="width:32px;height:32px;font-size:.65rem;flex-shrink:0">${escapeHtml(ini)}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:.8rem;font-weight:600;color:var(--ink)">${escapeHtml(otro.display_name||otro.username)}</div>
+          <div style="font-size:.7rem;color:var(--fog);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(conv.texto?.slice(0,40)||'')}</div>
+        </div>
+        ${badge}
+      </div>`;
+    }).join('');
+  } catch(e) { c.innerHTML = `<div style="font-size:.72rem;color:#e08080;padding:10px">${e.message}</div>`; }
+}
+
+window.abrirConv = async (userId, username, nombre) => {
+  CONV_ACTUAL = userId;
+  document.querySelectorAll('.conv-item').forEach(el => el.classList.remove('active'));
+  document.getElementById('conv-' + userId)?.classList.add('active');
+  const thread = document.getElementById('msg-thread');
+  thread.innerHTML = `
+    <div class="msg-thread-head">@${escapeHtml(username)} — ${escapeHtml(nombre)}</div>
+    <div class="msg-bubbles" id="msg-bubbles"><div style="font-size:.72rem;color:var(--fog);padding:10px">Cargando…</div></div>
+    <div class="msg-input-row">
+      <textarea class="nota-textarea" id="msg-input" rows="2" placeholder="Escribe un mensaje…"></textarea>
+      <button class="nota-send" onclick="enviarMsg('${userId}')">Enviar</button>
+    </div>`;
+  try {
+    const msgs = await apiGet(`/api/social/mensajes/${userId}`, getToken());
+    renderMsgs(msgs);
+  } catch(e) { document.getElementById('msg-bubbles').innerHTML = `<div style="color:#e08080;font-size:.72rem;padding:10px">${e.message}</div>`; }
+};
+
+function renderMsgs(msgs) {
+  const meId = getPerfil()?.id;
+  const c = document.getElementById('msg-bubbles');
+  if (!c) return;
+  if (!msgs.length) { c.innerHTML = '<div style="font-size:.75rem;color:var(--fog);padding:10px">Sin mensajes. ¡Di hola!</div>'; return; }
+  c.innerHTML = msgs.map(m => {
+    const mio = m.emisor_id === meId;
+    return `<div class="msg-bubble ${mio ? 'msg-mio' : 'msg-suyo'}">${escapeHtml(m.texto)}</div>`;
+  }).join('');
+  c.scrollTop = c.scrollHeight;
+}
+
+window.enviarMsg = async (userId) => {
+  const input = document.getElementById('msg-input');
+  const texto = input?.value.trim();
+  if (!texto) return;
+  try {
+    await apiPost('/api/social/mensajes', { receptor_id: userId, texto }, getToken());
+    input.value = '';
+    const msgs = await apiGet(`/api/social/mensajes/${userId}`, getToken());
+    renderMsgs(msgs);
+  } catch(e) { toast(e.message, 'err'); }
+};
+
+// ── TIENDA / RANGOS ─────────────────────────────────────────────
+const RANGOS = [
+  { min:0,    max:99,   nombre:'Lector Curioso',       color:'#8899aa', icono:'◎', perks:['Acceso al feed','Explorar universos','Dar Glimmers'] },
+  { min:100,  max:499,  nombre:'Escritor Novato',       color:'#7ab87a', icono:'✦', perks:['Publicar libros','Comentar capítulos','Forkear libros'] },
+  { min:500,  max:999,  nombre:'Cronista',              color:'#d4a843', icono:'◈', perks:['Invitar co-escritores','Lectores fieles','Badge dorado'] },
+  { min:1000, max:2499, nombre:'Narrador',              color:'#c47a8a', icono:'◆', perks:['Narrador badge','Prioridad en explorar','Perfil destacado'] },
+  { min:2500, max:4999, nombre:'Arquitecto de Mundos',  color:'#a080d0', icono:'❋', perks:['Badge púrpura','Acceso anticipado a features','Rango visible en posts'] },
+  { min:5000, max:Infinity, nombre:'Maestro del Universo', color:'#e0b860', icono:'⬡', perks:['Badge legendario','Nombre en oro en el ranking','Rango de élite'] },
+];
+
+function renderTienda() {
+  const oruns = getPerfil()?.oruns || 0;
+  const c = document.getElementById('tienda-container');
+  c.innerHTML = `<div style="margin-bottom:18px;padding:14px 18px;background:rgba(212,168,67,.08);border:1px solid rgba(212,168,67,.2);border-radius:8px;">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--fog);margin-bottom:4px">TUS ORUNS</div>
+    <div style="font-size:1.6rem;font-weight:700;color:var(--amber)">${oruns.toLocaleString()} ⬡</div>
+  </div>` + RANGOS.map(r => {
+    const activo  = oruns >= r.min && oruns <= r.max;
+    const desbloq = oruns >= r.min;
+    const progreso = activo ? Math.round(((oruns - r.min) / (r.max === Infinity ? oruns + 1 : r.max - r.min + 1)) * 100) : (desbloq ? 100 : 0);
+    return `<div class="rango-card ${activo ? 'rango-activo' : ''}" style="border-color:${desbloq ? r.color+'44' : 'rgba(205,199,184,.08)'}">
+      <div class="rango-head">
+        <div class="rango-icono" style="color:${desbloq ? r.color : 'var(--fog)'}">${r.icono}</div>
+        <div>
+          <div class="rango-nombre" style="color:${desbloq ? r.color : 'var(--fog)'}">${r.nombre}</div>
+          <div class="rango-req">${r.max === Infinity ? `${r.min.toLocaleString()}+ Oruns` : `${r.min.toLocaleString()}–${r.max.toLocaleString()} Oruns`}</div>
+        </div>
+        ${activo ? '<div class="rango-badge">RANGO ACTUAL</div>' : ''}
+        ${desbloq && !activo ? '<div class="rango-badge" style="background:rgba(106,170,136,.15);color:#6aaa88">✓ Completado</div>' : ''}
+      </div>
+      ${activo ? `<div class="prog-bar" style="margin:8px 0"><div class="prog-fill" style="width:${progreso}%;background:${r.color}"></div></div>` : ''}
+      <div class="rango-perks">${r.perks.map(p => `<span class="rango-perk" style="color:${desbloq?'var(--ink)':'var(--fog)'}">${desbloq?'✓':'○'} ${p}</span>`).join('')}</div>
+    </div>`;
+  }).join('');
+}
+
 // ── PERFIL ──────────────────────────────────────────────────────
 async function loadProfile() {
   const p = getPerfil();
@@ -1061,6 +1241,40 @@ document.getElementById('glimmer-modal').addEventListener('click', e => { if (e.
 </body>
 </html>
 <style>
+/* ── Colaboraciones ────────────────────────────────────── */
+.collab-card{background:var(--surface);border:1px solid rgba(205,199,184,.1);border-radius:8px;padding:14px 16px;margin-bottom:12px;}
+.collab-titulo{font-family:'Cinzel',serif;font-size:.95rem;font-weight:600;color:var(--ink);margin-bottom:4px;}
+.collab-meta{font-size:.72rem;color:var(--fog);margin-bottom:6px;}
+.collab-estado{font-family:'JetBrains Mono',monospace;font-size:.65rem;font-weight:700;margin-bottom:10px;}
+.collab-btns{display:flex;gap:8px;margin-top:10px;}
+
+/* ── Mensajes ───────────────────────────────────────────── */
+.msg-layout{display:flex;height:calc(100vh - 120px);gap:0;border:1px solid rgba(205,199,184,.1);border-radius:8px;overflow:hidden;}
+.msg-sidebar{width:240px;flex-shrink:0;border-right:1px solid rgba(205,199,184,.1);display:flex;flex-direction:column;}
+.msg-sidebar-head{padding:12px 14px;font-family:'Cinzel',serif;font-size:.82rem;font-weight:600;border-bottom:1px solid rgba(205,199,184,.08);color:var(--ink);}
+.conv-item{display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;border-bottom:1px solid rgba(205,199,184,.06);transition:background var(--transition);}
+.conv-item:hover,.conv-item.active{background:rgba(212,168,67,.07);}
+.msg-badge{background:var(--amber);color:#0e0d0b;font-size:.58rem;font-weight:700;border-radius:10px;padding:1px 6px;flex-shrink:0;}
+.msg-thread{flex:1;display:flex;flex-direction:column;min-width:0;}
+.msg-thread-empty{flex:1;display:flex;align-items:center;justify-content:center;color:var(--fog);font-size:.82rem;font-style:italic;}
+.msg-thread-head{padding:12px 16px;border-bottom:1px solid rgba(205,199,184,.08);font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--amber);font-weight:600;}
+.msg-bubbles{flex:1;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:6px;}
+.msg-bubble{max-width:70%;padding:8px 12px;border-radius:12px;font-size:.83rem;line-height:1.5;word-break:break-word;}
+.msg-mio{align-self:flex-end;background:rgba(212,168,67,.18);color:var(--ink);}
+.msg-suyo{align-self:flex-start;background:rgba(205,199,184,.08);color:var(--parchment);}
+.msg-input-row{display:flex;gap:8px;padding:10px 14px;border-top:1px solid rgba(205,199,184,.08);align-items:flex-end;}
+
+/* ── Tienda / Rangos ────────────────────────────────────── */
+.rango-card{border:1px solid rgba(205,199,184,.08);border-radius:8px;padding:14px 16px;margin-bottom:12px;transition:border-color var(--transition);}
+.rango-activo{border-width:1.5px;}
+.rango-head{display:flex;align-items:center;gap:12px;margin-bottom:8px;}
+.rango-icono{font-size:1.4rem;width:32px;text-align:center;flex-shrink:0;}
+.rango-nombre{font-family:'Cinzel',serif;font-size:.9rem;font-weight:700;}
+.rango-req{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--fog);margin-top:2px;}
+.rango-badge{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:.58rem;font-weight:700;background:rgba(212,168,67,.15);color:var(--amber);padding:3px 8px;border-radius:4px;white-space:nowrap;}
+.rango-perks{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.rango-perk{font-family:'JetBrains Mono',monospace;font-size:.62rem;padding:3px 8px;background:rgba(205,199,184,.05);border-radius:4px;}
+
 /* ── Panel de notas en posts ───────────────────────────── */
 .notas-panel{padding:10px 14px 14px;border-top:1px solid rgba(205,199,184,.08);}
 .nota-item{display:flex;gap:8px;padding:7px 0;border-bottom:1px solid rgba(205,199,184,.05);}

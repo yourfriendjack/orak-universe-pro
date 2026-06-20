@@ -200,6 +200,18 @@ class CoescritorIn(BaseModel):
     perfil_id:  str
     porcentaje: int = Field(50, ge=1, le=99)
 
+class CoescritorRespuesta(BaseModel):
+    accion: str  # "aceptar" | "rechazar"
+
+
+# ══════════════════════════════════════════════════════════
+#  MENSAJES
+# ══════════════════════════════════════════════════════════
+
+class MensajeIn(BaseModel):
+    receptor_id: str
+    texto:       str = Field(..., min_length=1, max_length=1000)
+
 
 # ══════════════════════════════════════════════════════════
 #  WORLDBUILDING (sin cambios — compatibilidad total)

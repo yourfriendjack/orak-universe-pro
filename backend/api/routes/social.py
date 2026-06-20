@@ -10,7 +10,7 @@ from typing import Optional
 from backend.database.supabase_client import get_supabase, get_supabase_user
 from backend.models.schemas import (
     PostIn, FollowIn, LectorFielIn, LectorFielAccion,
-    GlimmerIn, NotaIn, CoescritorIn, OkResponse
+    GlimmerIn, NotaIn, CoescritorIn, CoescritorRespuesta, MensajeIn, OkResponse
 )
 from backend.api.deps import get_current_user
 from backend.utils.helpers import ok, error
@@ -326,6 +326,31 @@ async def get_notas_capitulo(capitulo_id: int):
 #  CO-ESCRITORES
 # ══════════════════════════════════════════════════════════
 
+@router.get("/coescritores/mis-colaboraciones")
+async def mis_colaboraciones(usuario = Depends(get_current_user)):
+    sb = get_supabase_user(usuario["_token"])
+    res = sb.table("coescritores")\
+        .select("*, libros(id, titulo, portada_url, genero, autor:perfiles!libros_autor_id_fkey(username,display_name))")\
+        .eq("perfil_id", usuario["id"])\
+        .order("creado_en", desc=True)\
+        .execute()
+    return res.data or []
+
+
+@router.patch("/coescritores/{libro_id}/responder", response_model=OkResponse)
+async def responder_colaboracion(libro_id: int, datos: CoescritorRespuesta, usuario = Depends(get_current_user)):
+    if datos.accion not in ("aceptar", "rechazar"):
+        error("Acción inválida")
+    sb = get_supabase_user(usuario["_token"])
+    estado = "activo" if datos.accion == "aceptar" else "rechazado"
+    sb.table("coescritores")\
+        .update({"estado": estado})\
+        .eq("libro_id", libro_id)\
+        .eq("perfil_id", usuario["id"])\
+        .execute()
+    return ok(f"Invitación {estado}")
+
+
 @router.post("/coescritores/{libro_id}", response_model=OkResponse)
 async def invitar_coescritor(libro_id: int, datos: CoescritorIn, usuario = Depends(get_current_user)):
     sb = get_supabase_user(usuario["_token"])
@@ -344,6 +369,66 @@ async def invitar_coescritor(libro_id: int, datos: CoescritorIn, usuario = Depen
                  f"{usuario.get('username','alguien')} te invitó a co-escribir un libro",
                  str(libro_id))
     return ok("Invitación de co-escritor enviada")
+
+
+# ══════════════════════════════════════════════════════════
+#  MENSAJES DIRECTOS
+# ══════════════════════════════════════════════════════════
+
+@router.post("/mensajes", response_model=OkResponse)
+async def enviar_mensaje(datos: MensajeIn, usuario = Depends(get_current_user)):
+    if datos.receptor_id == usuario["id"]:
+        error("No puedes enviarte mensajes a ti mismo")
+    sb = get_supabase_user(usuario["_token"])
+    res = sb.table("mensajes").insert({
+        "emisor_id":   usuario["id"],
+        "receptor_id": datos.receptor_id,
+        "texto":       datos.texto,
+    }).execute()
+    if not res.data:
+        error("No se pudo enviar el mensaje")
+    _crear_notif(get_supabase(), datos.receptor_id, "mensaje",
+                 "Nuevo mensaje",
+                 f"{usuario.get('username','alguien')} te envió un mensaje",
+                 str(usuario["id"]))
+    return ok("Mensaje enviado")
+
+
+@router.get("/mensajes")
+async def listar_conversaciones(usuario = Depends(get_current_user)):
+    sb = get_supabase_user(usuario["_token"])
+    res = sb.table("mensajes")\
+        .select("*, emisor:perfiles!mensajes_emisor_id_fkey(id,username,display_name,avatar_url), receptor:perfiles!mensajes_receptor_id_fkey(id,username,display_name,avatar_url)")\
+        .or_(f"emisor_id.eq.{usuario['id']},receptor_id.eq.{usuario['id']}")\
+        .order("creado_en", desc=True)\
+        .execute()
+    # Agrupar por conversación (último mensaje por interlocutor)
+    vistas = {}
+    for m in (res.data or []):
+        otro_id = m["receptor_id"] if m["emisor_id"] == usuario["id"] else m["emisor_id"]
+        otro    = m["receptor"]    if m["emisor_id"] == usuario["id"] else m["emisor"]
+        if otro_id not in vistas:
+            vistas[otro_id] = {**m, "interlocutor": otro, "no_leidos": 0}
+        if not m["leido"] and m["receptor_id"] == usuario["id"]:
+            vistas[otro_id]["no_leidos"] += 1
+    return list(vistas.values())
+
+
+@router.get("/mensajes/{otro_id}")
+async def hilo_mensajes(otro_id: str, usuario = Depends(get_current_user)):
+    sb = get_supabase_user(usuario["_token"])
+    res = sb.table("mensajes")\
+        .select("*, emisor:perfiles!mensajes_emisor_id_fkey(username,display_name)")\
+        .or_(f"and(emisor_id.eq.{usuario['id']},receptor_id.eq.{otro_id}),and(emisor_id.eq.{otro_id},receptor_id.eq.{usuario['id']})")\
+        .order("creado_en")\
+        .execute()
+    # Marcar como leídos los mensajes recibidos
+    sb.table("mensajes")\
+        .update({"leido": True})\
+        .eq("emisor_id", otro_id)\
+        .eq("receptor_id", usuario["id"])\
+        .execute()
+    return res.data or []
 
 
 # ══════════════════════════════════════════════════════════
