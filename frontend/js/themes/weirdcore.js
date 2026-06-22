@@ -41,8 +41,16 @@ const WeirdcoreRenderer = (() => {
     'THIS IS FINE',               'BLINK',
   ];
 
+  // ── Colores del piso pastel ──────────────────────────────────────────────
+  const FLOOR_COLS = [
+    [255, 182, 205],   // rosa
+    [168, 230, 190],   // menta verde
+    [255, 236, 158],   // amarillo
+    [195, 178, 238],   // lavanda
+  ];
+
   // ── Estado global ────────────────────────────────────────────────────────
-  let doors    = null;
+  let windows  = null;
   let eyes     = null;
   let frags    = null;   // fragmentos de texto activos
 
@@ -62,24 +70,25 @@ const WeirdcoreRenderer = (() => {
   // ════════════════════════════════════════════════════════════════════════
   //  Init
   // ════════════════════════════════════════════════════════════════════════
-  function initDoors(W, H) {
-    doors = Array.from({ length: 5 }, (_, i) => {
-      const scale   = 0.09 + (i * 0.07 % 1.0) * 0.14;
-      const doorH   = scale * H;
-      const doorW   = doorH * 0.48;
+  function initWindows(W, H) {
+    // Colores de luz exterior por ventana (pasteles)
+    const GLOW_COLS = ['255,240,200', '255,200,225', '190,240,210', '210,200,255', '255,230,170'];
+    windows = Array.from({ length: 6 }, (_, i) => {
+      const scale = 0.07 + (i * 0.053 % 1.0) * 0.10;
+      const winH  = scale * H;
+      const winW  = winH * 1.65;   // ventana más ancha que alta
       return {
-        x:         (i * 0.21 + 0.06) * W,
-        y:         (0.10 + (i * 0.11 % 1.0) * 0.36) * H,
-        doorW, doorH,
-        vx:        (Math.sin(i * 1.73) * 0.020),
-        vy:        (Math.cos(i * 2.51) * 0.012),
-        open:      0,           // 0=cerrada, 1=abierta (ángulo visual)
-        phase:     'wait',      // wait / opening / hold / closing
-        timer:     60 + Math.floor((i * 173.7) % 300),
-        holdMax:   140 + Math.floor((i * 211.3) % 200),
-        holdCount: 0,
-        glow:      i % 3 !== 2,
-        glowR:     i % 2 === 0 ? '255,245,200' : '255,200,220',
+        x:        (i * 0.18 + 0.06) * W,
+        y:        (0.08 + (i * 0.13 % 1.0) * 0.40) * H,
+        winW, winH,
+        vx:       Math.sin(i * 1.73) * 0.016,
+        vy:       Math.cos(i * 2.51) * 0.010,
+        fog:      1.0,          // 1=completamente empañada, 0=transparente
+        phase:    'fogged',     // fogged / clearing / clear / fogging
+        timer:    80 + Math.floor((i * 173.7) % 280),
+        holdMax:  120 + Math.floor((i * 211.3) % 180),
+        holdCount:0,
+        glowR:    GLOW_COLS[i % GLOW_COLS.length],
       };
     });
   }
@@ -184,11 +193,13 @@ const WeirdcoreRenderer = (() => {
         const x2r  = vpX + (bxR - vpX) * t2;
         const fill = 0.025 + t2 * 0.065;
 
+        const ci = ((row + col) / 2 | 0) % 4;
+        const [cr, cg, cb] = FLOOR_COLS[ci];
         bgCtx.beginPath();
         bgCtx.moveTo(x1l, y1); bgCtx.lineTo(x1r, y1);
         bgCtx.lineTo(x2r, y2); bgCtx.lineTo(x2l, y2);
         bgCtx.closePath();
-        bgCtx.fillStyle = `rgba(210,190,235,${fill})`;
+        bgCtx.fillStyle = `rgba(${cr},${cg},${cb},${fill})`;
         bgCtx.fill();
       }
     }
@@ -225,80 +236,89 @@ const WeirdcoreRenderer = (() => {
   }
 
   // ════════════════════════════════════════════════════════════════════════
-  //  BG — Puertas flotantes
+  //  BG — Ventanas flotantes que se empañan y desempañan
   // ════════════════════════════════════════════════════════════════════════
-  function drawDoors(W, H) {
-    if (!doors) return;
-    doors.forEach(d => {
-      // Física de flotación
-      d.x += d.vx; d.y += d.vy;
-      if (d.x < -d.doorW * 2) d.x = W + d.doorW;
-      if (d.x > W + d.doorW * 2) d.x = -d.doorW;
-      if (d.y < -d.doorH * 0.5) d.vy =  Math.abs(d.vy);
-      if (d.y + d.doorH > H * 0.90) d.vy = -Math.abs(d.vy);
+  function drawWindows(W, H) {
+    if (!windows) return;
+    windows.forEach(w => {
+      // Flotación
+      w.x += w.vx; w.y += w.vy;
+      if (w.x < -w.winW)      w.x = W + w.winW;
+      if (w.x > W + w.winW)   w.x = -w.winW;
+      if (w.y < -w.winH * 0.5)        w.vy =  Math.abs(w.vy);
+      if (w.y + w.winH > H * 0.88)    w.vy = -Math.abs(w.vy);
 
-      // Máquina de estado de apertura
-      d.timer--;
-      if (d.phase === 'wait' && d.timer <= 0) {
-        d.phase = 'opening';
-      } else if (d.phase === 'opening') {
-        d.open = Math.min(1, d.open + 0.008);
-        if (d.open >= 1) { d.phase = 'hold'; d.holdCount = 0; }
-      } else if (d.phase === 'hold') {
-        d.holdCount++;
-        if (d.holdCount >= d.holdMax) d.phase = 'closing';
-      } else if (d.phase === 'closing') {
-        d.open = Math.max(0, d.open - 0.006);
-        if (d.open <= 0) {
-          d.phase = 'wait';
-          d.timer = 180 + Math.floor(Math.random() * 360);
+      // Máquina de estado: niebla que se despeja y vuelve
+      w.timer--;
+      if (w.phase === 'fogged' && w.timer <= 0) {
+        w.phase = 'clearing';
+      } else if (w.phase === 'clearing') {
+        w.fog = Math.max(0, w.fog - 0.007);
+        if (w.fog <= 0) { w.phase = 'clear'; w.holdCount = 0; }
+      } else if (w.phase === 'clear') {
+        w.holdCount++;
+        if (w.holdCount >= w.holdMax) w.phase = 'fogging';
+      } else if (w.phase === 'fogging') {
+        w.fog = Math.min(1, w.fog + 0.005);
+        if (w.fog >= 1) {
+          w.phase = 'fogged';
+          w.timer = 100 + Math.floor(Math.random() * 320);
         }
       }
 
-      const { x, y, doorW, doorH, open, glow, glowR } = d;
-      const bottom = y + doorH;
+      const { x, y, winW, winH, fog, glowR } = w;
+      const cx  = x, cy = y + winH * 0.5;
+      const clarity = 1 - fog;
 
       bgCtx.save();
 
-      // Luz detrás de la puerta abierta
-      if (glow && open > 0) {
-        const gi = bgCtx.createRadialGradient(x, y + doorH * 0.5, 0, x, y + doorH * 0.5, doorW * 2.5);
-        gi.addColorStop(0,   `rgba(${glowR},${0.16 * open})`);
-        gi.addColorStop(0.5, `rgba(${glowR},${0.06 * open})`);
-        gi.addColorStop(1,   'rgba(0,0,0,0)');
-        bgCtx.fillStyle = gi;
-        bgCtx.fillRect(x - doorW * 3, y - doorH * 0.2, doorW * 6, doorH * 1.6);
+      // Halo exterior pastel — luz del otro lado
+      if (clarity > 0.05) {
+        const glow = bgCtx.createRadialGradient(cx, cy, 0, cx, cy, winW * 1.8);
+        glow.addColorStop(0,   `rgba(${glowR},${0.18 * clarity})`);
+        glow.addColorStop(0.5, `rgba(${glowR},${0.07 * clarity})`);
+        glow.addColorStop(1,   'rgba(0,0,0,0)');
+        bgCtx.fillStyle = glow;
+        bgCtx.fillRect(cx - winW * 2, cy - winH * 1.6, winW * 4, winH * 3.2);
       }
 
-      // Interior (hueco de la puerta abierta)
-      if (open > 0.05) {
-        const interiorW = doorW * open * 0.88;
-        const innerGrad = bgCtx.createLinearGradient(x - interiorW * 0.5, 0, x + interiorW * 0.5, 0);
-        innerGrad.addColorStop(0,   'rgba(0,0,0,0)');
-        innerGrad.addColorStop(0.3, `rgba(${glowR},${0.07 * open})`);
-        innerGrad.addColorStop(0.7, `rgba(${glowR},${0.07 * open})`);
-        innerGrad.addColorStop(1,   'rgba(0,0,0,0)');
-        bgCtx.fillStyle = innerGrad;
-        bgCtx.fillRect(x - interiorW * 0.5, y, interiorW, doorH);
+      // Cristal — empañado o claro
+      const glassAlpha = 0.03 + clarity * 0.10;
+      bgCtx.fillStyle = `rgba(${glowR},${glassAlpha})`;
+      bgCtx.fillRect(x - winW * 0.5, y, winW, winH);
+
+      // Condensación en el cristal (visible cuando está empañado)
+      if (fog > 0.3) {
+        bgCtx.fillStyle = `rgba(220,210,240,${fog * 0.06})`;
+        bgCtx.fillRect(x - winW * 0.5, y, winW, winH);
       }
 
-      // Marco de la puerta
-      const fa = 0.25 + open * 0.25;
-      bgCtx.strokeStyle = `rgba(210,195,235,${fa})`;
-      bgCtx.lineWidth = 1.4;
+      // Marco exterior
+      const frameA = 0.22 + clarity * 0.22;
+      bgCtx.strokeStyle = `rgba(215,200,240,${frameA})`;
+      bgCtx.lineWidth = 1.6;
+      bgCtx.strokeRect(x - winW * 0.5, y, winW, winH);
+
+      // Travesaño horizontal (divide la ventana en 2 filas)
+      bgCtx.lineWidth = 1.0;
       bgCtx.beginPath();
-      bgCtx.moveTo(x - doorW * 0.5, bottom);
-      bgCtx.lineTo(x - doorW * 0.5, y);
-      bgCtx.lineTo(x + doorW * 0.5, y);
-      bgCtx.lineTo(x + doorW * 0.5, bottom);
+      bgCtx.moveTo(x - winW * 0.5, y + winH * 0.5);
+      bgCtx.lineTo(x + winW * 0.5, y + winH * 0.5);
       bgCtx.stroke();
 
-      // Pomo de la puerta
-      const knobX = x + doorW * 0.28 * (open > 0.3 ? (1 - open * 0.4) : 1);
+      // Montante vertical (divide en 2 columnas)
       bgCtx.beginPath();
-      bgCtx.arc(knobX, y + doorH * 0.55, 2.2, 0, Math.PI * 2);
-      bgCtx.fillStyle = `rgba(220,200,245,${fa * 0.85})`;
-      bgCtx.fill();
+      bgCtx.moveTo(x, y);
+      bgCtx.lineTo(x, y + winH);
+      bgCtx.stroke();
+
+      // Alféizar — pequeño saliente en la base
+      bgCtx.lineWidth = 2.2;
+      bgCtx.strokeStyle = `rgba(215,200,240,${frameA * 0.75})`;
+      bgCtx.beginPath();
+      bgCtx.moveTo(x - winW * 0.55, y + winH);
+      bgCtx.lineTo(x + winW * 0.55, y + winH);
+      bgCtx.stroke();
 
       bgCtx.restore();
     });
@@ -570,7 +590,7 @@ const WeirdcoreRenderer = (() => {
     bgCtx.clearRect(0, 0, W, H);
     drawBackground(W, H);
     drawFloorGrid(W, H);
-    drawDoors(W, H);
+    drawWindows(W, H);
     drawEyes(W, H);
     drawFrags(W, H);
     drawVHS(W, H);
@@ -587,7 +607,7 @@ const WeirdcoreRenderer = (() => {
     const W = window.innerWidth, H = window.innerHeight;
     bgCanvas.width   = W; bgCanvas.height   = H;
     overCanvas.width = W; overCanvas.height = H;
-    initDoors(W, H);
+    initWindows(W, H);
     initEyes(W, H);
     initFrags(W, H);
   }
@@ -643,7 +663,7 @@ const WeirdcoreRenderer = (() => {
       if (_onClick) { document.removeEventListener('click',     _onClick); _onClick = null; }
       bgCanvas.remove();   bgCanvas   = bgCtx   = null;
       overCanvas.remove(); overCanvas = overCtx = null;
-      doors = eyes = frags = null;
+      windows = eyes = frags = null;
       letterTrail.length = blooms.length = 0;
       mouseX = mouseY = -999; raf = null; t = 0;
     },
