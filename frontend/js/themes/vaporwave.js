@@ -24,8 +24,18 @@ const VaporwaveRenderer = (() => {
   ];
 
   // ── Estado ────────────────────────────────────────────────────
-  let floaters = null;
-  let stars    = null;
+  let floaters   = null;
+  let stars      = null;
+  let speedLines = null;
+
+  // ── Carriles de los faros: [lado, distancia lateral relativa] ─
+  // 4 carriles como una carretera de doble vía vista desde atrás
+  const LANES = [
+    { side: -1, laneF: 0.20 },   // izq exterior (faro externo)
+    { side: -1, laneF: 0.10 },   // izq interior (faro interno)
+    { side:  1, laneF: 0.10 },   // der interior
+    { side:  1, laneF: 0.20 },   // der exterior
+  ];
 
   // ── Cursor ────────────────────────────────────────────────────
   let mouseX = -999, mouseY = -999;
@@ -65,6 +75,25 @@ const VaporwaveRenderer = (() => {
   function initFloaters(W, H) {
     floaters = Array.from({ length: 9 }, () => spawnFloater(W, H));
     floaters.forEach((f, i) => { f.life = Math.floor(i * 42); });
+  }
+
+  function initSpeedLines(W, H) {
+    // 5 luces por carril = 20 en total
+    speedLines = [];
+    LANES.forEach((lane, li) => {
+      for (let i = 0; i < 5; i++) {
+        speedLines.push({
+          t:     (i / 5) + Math.random() * 0.18,  // profundidad inicial distribuida
+          spd:   0.0055 + Math.random() * 0.0060,  // velocidad hacia horizonte
+          side:  lane.side,
+          laneF: lane.laneF,
+          // faros exteriores más rojos, interiores más magenta
+          r: lane.laneF > 0.14 ? 255 : 255,
+          g: lane.laneF > 0.14 ? 20  : 0,
+          b: lane.laneF > 0.14 ? 60  : 100,
+        });
+      }
+    });
   }
 
   // ════════════════════════════════════════════════════════════════
@@ -255,6 +284,71 @@ const VaporwaveRenderer = (() => {
   }
 
   // ════════════════════════════════════════════════════════════════
+  //  BG — Faros traseros: líneas de velocidad convergiendo al sol
+  // ════════════════════════════════════════════════════════════════
+  function drawSpeedLines(W, H) {
+    if (!speedLines) return;
+    const vpX = W * 0.50, vpY = H * 0.48;
+
+    bgCtx.save();
+    bgCtx.globalCompositeOperation = 'screen';
+    bgCtx.lineCap = 'round';
+
+    speedLines.forEach(sl => {
+      // Mover hacia el horizonte
+      sl.t -= sl.spd * (0.5 + sl.t * 1.5);  // acelera al acercarse
+      if (sl.t <= 0.01) {
+        sl.t   = 0.92 + Math.random() * 0.08;  // renace en el fondo
+        sl.spd = 0.0050 + Math.random() * 0.0065;
+      }
+
+      const y  = vpY + (H - vpY) * sl.t;
+      const x  = vpX + sl.side * sl.laneF * W * sl.t;
+
+      // Longitud del streak: cuanto más cerca más larga (motion blur perspectiva)
+      const dashLen = (30 + sl.t * sl.t * 320);
+      // El streak se extiende HACIA donde venimos (alejándose del horizonte)
+      const x1 = x;
+      const x2 = x + sl.side * dashLen * sl.t;
+
+      // Opacidad: máxima en la zona media, se desvanece al fondo y al pasar
+      const a = Math.min(1, sl.t * 2.8) * Math.min(1, (1 - sl.t) * 8 + 0.4);
+      const lw = 0.6 + sl.t * sl.t * 4.5;   // grosor por perspectiva
+
+      const { r, g, b } = sl;
+
+      // Halo exterior ancho y suave
+      bgCtx.beginPath();
+      bgCtx.moveTo(x1, y); bgCtx.lineTo(x2, y);
+      bgCtx.strokeStyle = `rgba(${r},${g},${b},${a * 0.18})`;
+      bgCtx.lineWidth = lw * 9;
+      bgCtx.stroke();
+
+      // Glow medio
+      bgCtx.beginPath();
+      bgCtx.moveTo(x1, y); bgCtx.lineTo(x2, y);
+      bgCtx.strokeStyle = `rgba(${r},${g},${b},${a * 0.42})`;
+      bgCtx.lineWidth = lw * 3.5;
+      bgCtx.stroke();
+
+      // Core nítido y brillante
+      bgCtx.beginPath();
+      bgCtx.moveTo(x1, y); bgCtx.lineTo(x2, y);
+      bgCtx.strokeStyle = `rgba(${r},${g},${b},${a * 0.95})`;
+      bgCtx.lineWidth = lw;
+      bgCtx.stroke();
+
+      // Punto de luz en la cabeza del faro (el más brillante)
+      bgCtx.beginPath();
+      bgCtx.arc(x1, y, lw * 1.4, 0, Math.PI * 2);
+      bgCtx.fillStyle = `rgba(255,200,230,${a * 0.80})`;
+      bgCtx.fill();
+    });
+
+    bgCtx.restore();
+  }
+
+  // ════════════════════════════════════════════════════════════════
   //  BG — Scanlines CRT globales
   // ════════════════════════════════════════════════════════════════
   function drawScanlines(W, H) {
@@ -385,6 +479,7 @@ const VaporwaveRenderer = (() => {
     drawStars(W, H);
     drawSun(W, H);
     drawGrid(W, H);
+    drawSpeedLines(W, H);
     drawPalms(W, H);
     drawFloaters(W, H);
     drawScanlines(W, H);
@@ -401,6 +496,7 @@ const VaporwaveRenderer = (() => {
     overCanvas.width = W; overCanvas.height = H;
     initStars(W, H);
     initFloaters(W, H);
+    initSpeedLines(W, H);
   }
 
   // ════════════════════════════════════════════════════════════════
@@ -446,7 +542,7 @@ const VaporwaveRenderer = (() => {
       if (_onClick) { document.removeEventListener('click',     _onClick); _onClick = null; }
       bgCanvas.remove();   bgCanvas   = bgCtx   = null;
       overCanvas.remove(); overCanvas = overCtx = null;
-      floaters = stars = null;
+      floaters = stars = speedLines = null;
       trail.length = blooms.length = 0;
       mouseX = mouseY = -999; raf = null; t = 0;
     },
