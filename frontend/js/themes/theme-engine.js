@@ -30,6 +30,7 @@ import { RubiRenderer }        from './rubi.js';
 import { EsmeraldaRenderer }   from './esmeralda.js';
 import { EldergloomRenderer }  from './eldergloom.js';
 import { DarkFantasyRenderer } from './dark-fantasy.js';
+import { GlitchRenderer }      from './glitch.js';
 
 const RENDERERS = {
   'theme-aurora':       AuroraRenderer,
@@ -40,6 +41,7 @@ const RENDERERS = {
   'theme-esmeralda':    EsmeraldaRenderer,
   'theme-eldergloom':   EldergloomRenderer,
   'theme-dark-fantasy': DarkFantasyRenderer,
+  'theme-glitch':       GlitchRenderer,
 };
 
 let activeRenderer = null;

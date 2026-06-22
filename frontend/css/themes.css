@@ -36,8 +36,9 @@ html.theme-glitch {
   --deep:      #020806;
   --white:     #081208;
   --parchment: #0a1a10;
+  background:  #05100a !important;
 }
-html.theme-glitch body { background: var(--page); }
+html.theme-glitch body { background: transparent !important; }
 html.theme-glitch .topbar { border-color: rgba(0,232,144,.12); }
 html.theme-glitch .sidebar { border-color: rgba(0,232,144,.1); }
 html.theme-glitch .auth-card { background: #080f0a; border-color: rgba(0,232,144,.2); }
@@ -1800,4 +1801,166 @@ html.theme-dark-fantasy .auth-card {
 }
 html.theme-dark-fantasy .auth-glow {
   background: radial-gradient(ellipse at 50% 0%, rgba(140, 60, 220, 0.28) 0%, transparent 65%);
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   NEON TERMINAL GLASS — GLITCH
+   Posts, topbar, sidebar y widgets con cristal oscuro verde-neón.
+   Borde superior: arista de fósforo verde · barrido: estela de datos
+   ══════════════════════════════════════════════════════════════════ */
+
+/* ── Tipografía del feed ─────────────────────────────────────────── */
+html.theme-glitch .post-text        { color: var(--ink); }
+html.theme-glitch .post-text strong { color: #a0ffcc; }
+html.theme-glitch .post-text em     { color: var(--gold); }
+html.theme-glitch .post-name        { color: var(--ink); }
+html.theme-glitch .post-handle,
+html.theme-glitch .post-time        { color: rgba(0, 232, 144, 0.45); }
+
+/* ── Posts — terminal de datos ───────────────────────────────────── */
+html.theme-glitch .post {
+  background:    rgba(5, 14, 8, 0.80);
+  border:        1px solid rgba(0, 232, 144, 0.10);
+  border-radius: 10px;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow:
+    0 2px 18px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(0, 232, 144, 0.07);
+  position: relative;
+  overflow: hidden;
+  transition: border-color .30s ease, box-shadow .30s ease;
+}
+
+/* Arista de fósforo superior */
+html.theme-glitch .post::before {
+  content: '';
+  position: absolute; top: 0; left: 8%; right: 8%; height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%, rgba(0, 232, 144, 0.55) 40%,
+    rgba(0, 255, 180, 0.80) 50%,
+    rgba(0, 232, 144, 0.55) 60%, transparent 100%
+  );
+  pointer-events: none;
+}
+
+/* Barrido de datos — aparece en hover */
+html.theme-glitch .post::after {
+  content: '';
+  position: absolute; top: 0; bottom: 0;
+  left: -110%; width: 55%;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(0, 232, 144, 0.04) 50%,
+    transparent 100%
+  );
+  pointer-events: none;
+  transition: left .55s cubic-bezier(.22,.78,.28,1);
+}
+html.theme-glitch .post:hover {
+  border-color: rgba(0, 232, 144, 0.22);
+  box-shadow:
+    0 4px 28px rgba(0, 0, 0, 0.60),
+    0 0 22px rgba(0, 232, 144, 0.06),
+    inset 0 1px 0 rgba(0, 232, 144, 0.12);
+}
+html.theme-glitch .post:hover::after { left: 110%; }
+
+/* ── Topbar — consola superior ───────────────────────────────────── */
+html.theme-glitch .topbar {
+  background: rgba(3, 9, 5, 0.96) !important;
+  border-bottom: 1px solid rgba(0, 232, 144, 0.10) !important;
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  box-shadow: 0 1px 18px rgba(0, 0, 0, 0.55), 0 0 40px rgba(0, 232, 144, 0.03);
+}
+
+/* ── Sidebar ─────────────────────────────────────────────────────── */
+html.theme-glitch .sidebar {
+  background: rgba(4, 11, 6, 0.86);
+  border-color: rgba(0, 232, 144, 0.08) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* ── Eco-card ────────────────────────────────────────────────────── */
+html.theme-glitch .eco-card {
+  background: rgba(4, 12, 7, 0.84);
+  border: 1px solid rgba(0, 232, 144, 0.09);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(0, 232, 144, 0.06);
+}
+
+/* ── Feed widgets ────────────────────────────────────────────────── */
+html.theme-glitch .feed-widgets {
+  background: rgba(4, 12, 7, 0.80);
+  border: 1px solid rgba(0, 232, 144, 0.08);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+/* ── Buscador ────────────────────────────────────────────────────── */
+html.theme-glitch .topbar-search {
+  background: rgba(6, 16, 9, 0.88);
+  border: 1px solid rgba(0, 232, 144, 0.14);
+  color: var(--ink);
+}
+html.theme-glitch .topbar-search::placeholder { color: rgba(0, 232, 144, 0.30); }
+html.theme-glitch .topbar-search:focus {
+  border-color: rgba(0, 232, 144, 0.40);
+  background: rgba(6, 18, 10, 0.92);
+  box-shadow:
+    0 0 0 3px rgba(0, 232, 144, 0.09),
+    inset 0 1px 0 rgba(0, 232, 144, 0.06);
+}
+
+/* ── Orun pill ───────────────────────────────────────────────────── */
+html.theme-glitch .orun-pill {
+  background: rgba(0, 80, 40, 0.22) !important;
+  border: 1px solid rgba(0, 232, 144, 0.24) !important;
+  color: var(--gold) !important;
+  box-shadow: inset 0 1px 0 rgba(0, 255, 160, 0.08);
+}
+
+/* ── Notificaciones ──────────────────────────────────────────────── */
+html.theme-glitch .notif-btn {
+  background: rgba(4, 12, 7, 0.94) !important;
+  border: 1px solid rgba(0, 232, 144, 0.10);
+}
+html.theme-glitch .notif-btn:hover {
+  background: rgba(6, 18, 10, 0.98) !important;
+  border-color: rgba(0, 232, 144, 0.28);
+  box-shadow: 0 0 14px rgba(0, 232, 144, 0.10);
+}
+
+/* ── Botón Escribir — terminal activa ────────────────────────────── */
+html.theme-glitch .write-btn {
+  background: linear-gradient(135deg, #00b870 0%, #008050 100%);
+  color: #c0ffd8;
+  box-shadow:
+    0 2px 12px rgba(0, 180, 100, 0.32),
+    inset 0 1px 0 rgba(0, 255, 160, 0.20);
+  transition: all .38s cubic-bezier(.22,.78,.28,1);
+}
+html.theme-glitch .write-btn:hover {
+  background: linear-gradient(135deg, #00d880 0%, #009a60 100%);
+  color: #e0fff0;
+  box-shadow:
+    0 0 24px rgba(0, 232, 144, 0.28),
+    0 4px 18px rgba(0, 60, 30, 0.30),
+    inset 0 1px 0 rgba(0, 255, 180, 0.28);
+  transform: translateY(-2px);
+}
+
+/* ── Auth card ───────────────────────────────────────────────────── */
+html.theme-glitch .auth-card {
+  background: rgba(4, 12, 7, 0.96) !important;
+  border-color: rgba(0, 232, 144, 0.18) !important;
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  box-shadow:
+    0 8px 48px rgba(0, 0, 0, 0.70),
+    inset 0 1px 0 rgba(0, 232, 144, 0.08);
+}
+html.theme-glitch .auth-glow {
+  background: radial-gradient(ellipse at 50% 0%, rgba(0, 200, 100, 0.24) 0%, transparent 65%);
 }
