@@ -2147,3 +2147,80 @@ html.theme-weirdcore .auth-card {
 html.theme-weirdcore .auth-glow {
   background: radial-gradient(ellipse at 50% 0%, rgba(140, 90, 210, 0.24) 0%, transparent 65%);
 }
+
+
+/* ══════════════════════════════════════════════════════════════════
+   VAPORWAVE — Retrowave Neon Glass
+   ══════════════════════════════════════════════════════════════════ */
+html.theme-vaporwave { background: #08001a !important; }
+html.theme-vaporwave body { background: transparent !important; }
+
+html.theme-vaporwave .topbar,
+html.theme-vaporwave .sidebar { border-color: rgba(255,0,200,.14); }
+
+/* Paneles: cristal magenta/cyan */
+html.theme-vaporwave .post-card,
+html.theme-vaporwave .eco-card,
+html.theme-vaporwave .widget-box,
+html.theme-vaporwave .sidebar > *,
+html.theme-vaporwave .topbar {
+  background: rgba(18, 0, 38, 0.72) !important;
+  border-color: rgba(255, 0, 200, 0.16) !important;
+  backdrop-filter: blur(18px) saturate(1.6);
+  -webkit-backdrop-filter: blur(18px) saturate(1.6);
+  box-shadow:
+    0 0 0 1px rgba(0, 235, 255, 0.06),
+    0 2px 20px rgba(255, 0, 200, 0.12),
+    inset 0 1px 0 rgba(255, 180, 255, 0.07);
+}
+
+html.theme-vaporwave .post-card:hover {
+  border-color: rgba(255, 0, 200, 0.32) !important;
+  box-shadow:
+    0 0 0 1px rgba(0, 235, 255, 0.12),
+    0 4px 28px rgba(255, 0, 200, 0.22),
+    inset 0 1px 0 rgba(255, 200, 255, 0.10);
+}
+
+html.theme-vaporwave .topbar { border-bottom: 1px solid rgba(255,0,200,.18) !important; }
+html.theme-vaporwave .sidebar { border-right: 1px solid rgba(255,0,200,.10) !important; }
+
+/* Texto */
+html.theme-vaporwave .post-content,
+html.theme-vaporwave .post-author,
+html.theme-vaporwave .eco-label { color: rgba(255, 210, 255, 0.88); }
+html.theme-vaporwave .post-meta,
+html.theme-vaporwave .widget-label { color: rgba(200, 140, 255, 0.50); }
+
+/* Botones de acción */
+html.theme-vaporwave .btn-action,
+html.theme-vaporwave .action-btn {
+  color: rgba(255, 0, 200, 0.65);
+  border-color: rgba(255, 0, 200, 0.18);
+}
+html.theme-vaporwave .btn-action:hover { color: #ff00cc; border-color: rgba(255,0,200,.40); }
+
+/* Botón escribir */
+html.theme-vaporwave .write-btn {
+  background: linear-gradient(135deg, #c0107a 0%, #8000cc 100%);
+  color: #fff0ff;
+  box-shadow: 0 2px 16px rgba(200, 0, 180, 0.35), inset 0 1px 0 rgba(255,200,255,.18);
+  transition: all .40s cubic-bezier(.22,.78,.28,1);
+}
+html.theme-vaporwave .write-btn:hover {
+  background: linear-gradient(135deg, #e01898 0%, #a000ff 100%);
+  box-shadow: 0 0 28px rgba(255, 0, 200, 0.45), 0 4px 20px rgba(80,0,160,.30), inset 0 1px 0 rgba(255,220,255,.22);
+  transform: translateY(-2px);
+}
+
+/* Auth card */
+html.theme-vaporwave .auth-card {
+  background: rgba(12, 0, 28, 0.96) !important;
+  border-color: rgba(255, 0, 200, 0.20) !important;
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  box-shadow: 0 8px 48px rgba(0,0,0,.75), inset 0 1px 0 rgba(255,180,255,.06);
+}
+html.theme-vaporwave .auth-glow {
+  background: radial-gradient(ellipse at 50% 0%, rgba(200, 0, 160, 0.28) 0%, transparent 65%);
+}

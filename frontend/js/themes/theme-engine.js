@@ -32,6 +32,7 @@ import { EldergloomRenderer }  from './eldergloom.js';
 import { DarkFantasyRenderer } from './dark-fantasy.js';
 import { GlitchRenderer }      from './glitch.js';
 import { WeirdcoreRenderer }   from './weirdcore.js';
+import { VaporwaveRenderer }  from './vaporwave.js';
 
 const RENDERERS = {
   'theme-aurora':       AuroraRenderer,
@@ -44,6 +45,7 @@ const RENDERERS = {
   'theme-dark-fantasy': DarkFantasyRenderer,
   'theme-glitch':       GlitchRenderer,
   'theme-weirdcore':    WeirdcoreRenderer,
+  'theme-vaporwave':   VaporwaveRenderer,
 };
 
 let activeRenderer = null;
