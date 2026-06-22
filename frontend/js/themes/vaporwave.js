@@ -24,11 +24,8 @@ const VaporwaveRenderer = (() => {
   ];
 
   // ── Estado ────────────────────────────────────────────────────
-  let floaters   = null;
-  let stars      = null;
-  let speedLines = [];
-  let spawnTimer = 0;
-  const SPAWN_INTERVAL = 130;  // frames entre cada par de faros
+  let floaters = null;
+  let stars    = null;
 
   // ── Cursor ────────────────────────────────────────────────────
   let mouseX = -999, mouseY = -999;
@@ -68,27 +65,6 @@ const VaporwaveRenderer = (() => {
   function initFloaters(W, H) {
     floaters = Array.from({ length: 9 }, () => spawnFloater(W, H));
     floaters.forEach((f, i) => { f.life = Math.floor(i * 42); });
-  }
-
-  function initSpeedLines() {
-    speedLines = [];
-    spawnTimer = 0;
-  }
-
-  function spawnPair() {
-    // Un par: faro izquierdo y derecho, angostos y juntos
-    const laneF = 0.065 + Math.random() * 0.030;
-    const spd   = 0.0045 + Math.random() * 0.0035;
-    [-1, 1].forEach(side => {
-      speedLines.push({
-        tHead:  1.0,          // nace en la base
-        spd,
-        side,
-        laneF,
-        alpha:  1.0,
-        fading: false,
-      });
-    });
   }
 
   // ════════════════════════════════════════════════════════════════
@@ -279,80 +255,6 @@ const VaporwaveRenderer = (() => {
   }
 
   // ════════════════════════════════════════════════════════════════
-  //  BG — Faros traseros: un par cada cierto tiempo, con estela
-  // ════════════════════════════════════════════════════════════════
-  function drawSpeedLines(W, H) {
-    const vpX = W * 0.50, vpY = H * 0.48;
-
-    // Spawner: un par cada SPAWN_INTERVAL frames
-    spawnTimer++;
-    if (spawnTimer >= SPAWN_INTERVAL) {
-      spawnPair();
-      spawnTimer = 0;
-    }
-
-    bgCtx.save();
-    bgCtx.globalCompositeOperation = 'screen';
-    bgCtx.lineCap = 'round';
-
-    for (let i = speedLines.length - 1; i >= 0; i--) {
-      const sl = speedLines[i];
-
-      // Avanzar hacia el horizonte (acelera cuanto más se acerca)
-      sl.tHead -= sl.spd * (0.6 + (1 - sl.tHead) * 1.2);
-
-      // Empezar a desvanecer cuando cruza el horizonte
-      if (sl.tHead <= 0.12) sl.fading = true;
-      if (sl.fading) sl.alpha -= 0.022;
-      if (sl.alpha <= 0) { speedLines.splice(i, 1); continue; }
-
-      // Posición de la cabeza del faro
-      const yHead = vpY + (H - vpY) * sl.tHead;
-      const xHead = vpX + sl.side * sl.laneF * W * sl.tHead;
-
-      // La estela va desde la cabeza hasta un punto más abajo (donde estuvo)
-      const tTail  = Math.min(1.0, sl.tHead + 0.40);
-      const yTail  = vpY + (H - vpY) * tTail;
-      const xTail  = vpX + sl.side * sl.laneF * W * tTail;
-
-      // Grosor: fino y angosto, escala suave con perspectiva
-      const lw = 0.7 + sl.tHead * 1.8;
-
-      // ── Estela con gradiente: brillante en la cabeza, transparente en la cola ──
-      const grad = bgCtx.createLinearGradient(xHead, yHead, xTail, yTail);
-      grad.addColorStop(0,   `rgba(255,80,160,${sl.alpha * 0.90})`);
-      grad.addColorStop(0.3, `rgba(255,20,80,${sl.alpha * 0.55})`);
-      grad.addColorStop(0.7, `rgba(200,0,60,${sl.alpha * 0.18})`);
-      grad.addColorStop(1,   `rgba(180,0,40,0)`);
-
-      // Glow exterior suave
-      bgCtx.beginPath();
-      bgCtx.moveTo(xHead, yHead); bgCtx.lineTo(xTail, yTail);
-      bgCtx.strokeStyle = `rgba(255,40,100,${sl.alpha * 0.14})`;
-      bgCtx.lineWidth = lw * 7;
-      bgCtx.stroke();
-
-      // Core con gradiente
-      bgCtx.beginPath();
-      bgCtx.moveTo(xHead, yHead); bgCtx.lineTo(xTail, yTail);
-      bgCtx.strokeStyle = grad;
-      bgCtx.lineWidth = lw;
-      bgCtx.stroke();
-
-      // Punto de luz brillante en la cabeza
-      bgCtx.beginPath();
-      bgCtx.arc(xHead, yHead, lw * 1.8, 0, Math.PI * 2);
-      const ptGrad = bgCtx.createRadialGradient(xHead, yHead, 0, xHead, yHead, lw * 3.5);
-      ptGrad.addColorStop(0, `rgba(255,200,230,${sl.alpha})`);
-      ptGrad.addColorStop(1, `rgba(255,0,80,0)`);
-      bgCtx.fillStyle = ptGrad;
-      bgCtx.fill();
-    }
-
-    bgCtx.restore();
-  }
-
-  // ════════════════════════════════════════════════════════════════
   //  BG — Scanlines CRT globales
   // ════════════════════════════════════════════════════════════════
   function drawScanlines(W, H) {
@@ -483,7 +385,6 @@ const VaporwaveRenderer = (() => {
     drawStars(W, H);
     drawSun(W, H);
     drawGrid(W, H);
-    drawSpeedLines(W, H);
     drawPalms(W, H);
     drawFloaters(W, H);
     drawScanlines(W, H);
@@ -500,7 +401,6 @@ const VaporwaveRenderer = (() => {
     overCanvas.width = W; overCanvas.height = H;
     initStars(W, H);
     initFloaters(W, H);
-    initSpeedLines();
   }
 
   // ════════════════════════════════════════════════════════════════
@@ -547,8 +447,6 @@ const VaporwaveRenderer = (() => {
       bgCanvas.remove();   bgCanvas   = bgCtx   = null;
       overCanvas.remove(); overCanvas = overCtx = null;
       floaters = stars = null;
-      speedLines.length = 0;
-      spawnTimer = 0;
       trail.length = blooms.length = 0;
       mouseX = mouseY = -999; raf = null; t = 0;
     },
