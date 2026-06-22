@@ -55,6 +55,7 @@ const WeirdcoreRenderer = (() => {
   let frags       = null;
   let silhouettes = null;
   let polaroids   = null;
+  let flowers     = null;
 
   // ── Cursor ───────────────────────────────────────────────────────────────
   let mouseX = -999, mouseY = -999;
@@ -97,6 +98,7 @@ const WeirdcoreRenderer = (() => {
         holdMax:  120 + Math.floor((i * 211.3) % 180),
         holdCount:0,
         glowR:    GLOW_COLS[i % GLOW_COLS.length],
+        eyeInWindow: i % 3 === 1,   // cada 3ra ventana revela un ojo
       };
     });
   }
@@ -327,6 +329,18 @@ const WeirdcoreRenderer = (() => {
       bgCtx.moveTo(x - winW * 0.55, y + winH);
       bgCtx.lineTo(x + winW * 0.55, y + winH);
       bgCtx.stroke();
+
+      // Ojo que mira desde el otro lado cuando el cristal se despeja
+      if (w.eyeInWindow && clarity > 0.35) {
+        const ecx = x, ecy = y + winH * 0.5;
+        const er   = Math.min(winW, winH) * 0.36;
+        bgCtx.save();
+        bgCtx.beginPath();
+        bgCtx.rect(x - winW * 0.5, y, winW, winH);
+        bgCtx.clip();
+        drawEyeShape(ecx, ecy, er, Math.min(1, clarity * 1.1), clarity * 0.82, '100,80,150');
+        bgCtx.restore();
+      }
 
       bgCtx.restore();
     });
@@ -646,6 +660,17 @@ const WeirdcoreRenderer = (() => {
   // ════════════════════════════════════════════════════════════════════════
   const DRAWINGS = ['house','tree','stickfigure','eye','star','flower'];
 
+  // Flores grandes: [fracción x, fracción y, fracción radio, color pétalo]
+  const FLOWER_SPECS = [
+    { xF:-0.07, yF:0.68, rF:0.21, petal:'245,245,245' },   // margarita blanca izq (cortada)
+    { xF: 1.04, yF:0.15, rF:0.16, petal:'245,245,245' },   // margarita blanca der-sup (cortada)
+    { xF: 0.88, yF:0.88, rF:0.14, petal:'255,200,218' },   // rosa der-inf (cortada)
+    { xF: 0.22, yF:-0.04,rF:0.11, petal:'255,232,130' },   // amarilla top (cortada)
+    { xF: 0.52, yF:0.17, rF:0.056,petal:'245,245,245' },   // margarita media centro
+    { xF: 0.16, yF:0.40, rF:0.046,petal:'255,185,208' },   // rosa media izq
+    { xF: 0.76, yF:0.55, rF:0.050,petal:'245,245,245' },   // margarita media der
+  ];
+
   function initPolaroids(W, H) {
     polaroids = Array.from({ length: 5 }, (_, i) => ({
       x: W * (0.10 + Math.random() * 0.80),
@@ -777,6 +802,67 @@ const WeirdcoreRenderer = (() => {
 
       // Rebote en bordes
       if (p.x < -pw || p.x > W + pw || p.y < -ph * 2) p.phase = 'fadeout';
+    });
+  }
+
+  // ════════════════════════════════════════════════════════════════════════
+  //  BG — Flores gigantes fuera de proporción (inspiradas en foto weirdcore)
+  // ════════════════════════════════════════════════════════════════════════
+  function initFlowers(W, H) {
+    flowers = FLOWER_SPECS.map((spec, i) => ({
+      x:        spec.xF * W,
+      y:        spec.yF * H,
+      r:        spec.rF * Math.min(W, H),
+      petal:    spec.petal,
+      alpha:    0.24 + (i % 3) * 0.06,
+      rot:      ((i * 0.618) % 1) * Math.PI * 2,
+      breathOff: i * 0.73,
+    }));
+  }
+
+  function _drawDaisy(cx, cy, r, alpha, petalCol, rot) {
+    bgCtx.save();
+    bgCtx.translate(cx, cy);
+    bgCtx.rotate(rot);
+
+    // Pétalos como elipses orbitando el centro
+    const numP = 14;
+    for (let i = 0; i < numP; i++) {
+      bgCtx.save();
+      bgCtx.rotate((i / numP) * Math.PI * 2);
+      bgCtx.beginPath();
+      bgCtx.ellipse(0, -r * 0.64, r * 0.148, r * 0.40, 0, 0, Math.PI * 2);
+      bgCtx.fillStyle = `rgba(${petalCol},${alpha})`;
+      bgCtx.fill();
+      // Vena central del pétalo
+      bgCtx.strokeStyle = `rgba(${petalCol},${alpha * 0.28})`;
+      bgCtx.lineWidth = 0.6;
+      bgCtx.beginPath();
+      bgCtx.moveTo(0, -r * 0.27); bgCtx.lineTo(0, -r * 0.62);
+      bgCtx.stroke();
+      bgCtx.restore();
+    }
+
+    // Centro con gradiente dorado
+    const g = bgCtx.createRadialGradient(0, 0, 0, 0, 0, r * 0.30);
+    g.addColorStop(0,    `rgba(255,235,85,${alpha})`);
+    g.addColorStop(0.55, `rgba(220,172,38,${alpha * 0.92})`);
+    g.addColorStop(1,    `rgba(180,115,18,${alpha * 0.78})`);
+    bgCtx.beginPath();
+    bgCtx.arc(0, 0, r * 0.30, 0, Math.PI * 2);
+    bgCtx.fillStyle = g;
+    bgCtx.fill();
+
+    bgCtx.restore();
+  }
+
+  function drawFlowers(W, H) {
+    if (!flowers) return;
+    flowers.forEach(f => {
+      const breathe = 0.5 + 0.5 * Math.sin(t * 0.007 + f.breathOff);
+      const a   = f.alpha * (0.88 + breathe * 0.12);
+      const rot = f.rot + t * 0.00022;
+      _drawDaisy(f.x, f.y, f.r, a, f.petal, rot);
     });
   }
 
@@ -959,6 +1045,7 @@ const WeirdcoreRenderer = (() => {
     drawPolaroids(W, H);
     drawEyes(W, H);
     drawFrags(W, H);
+    drawFlowers(W, H);    // primer plano: flores gigantes sobre todo lo demás
     drawVHS(W, H);
     drawGrain(W, H);
     drawBlooms(W, H);
@@ -978,6 +1065,7 @@ const WeirdcoreRenderer = (() => {
     initFrags(W, H);
     initSilhouettes(W, H);
     initPolaroids(W, H);
+    initFlowers(W, H);
   }
 
   // ════════════════════════════════════════════════════════════════════════
@@ -1031,7 +1119,7 @@ const WeirdcoreRenderer = (() => {
       if (_onClick) { document.removeEventListener('click',     _onClick); _onClick = null; }
       bgCanvas.remove();   bgCanvas   = bgCtx   = null;
       overCanvas.remove(); overCanvas = overCtx = null;
-      windows = eyes = frags = silhouettes = polaroids = null;
+      windows = eyes = frags = silhouettes = polaroids = flowers = null;
       letterTrail.length = blooms.length = cursorHistory.length = 0;
       mouseX = mouseY = -999; raf = null; t = 0;
     },
