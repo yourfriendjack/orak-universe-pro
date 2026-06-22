@@ -19,9 +19,14 @@ async function _fetch(method, path, body, token) {
 
   if (!res.ok) {
     const detail = data.detail;
-    const msg = Array.isArray(detail)
-      ? detail.map(e => e.msg || JSON.stringify(e)).join(' · ')
-      : (detail || data.mensaje || `Error ${res.status}`);
+    let msg;
+    if (Array.isArray(detail)) {
+      msg = detail.map(e => e.msg || JSON.stringify(e)).join(' · ');
+    } else if (detail && typeof detail === 'object') {
+      msg = detail.mensaje || detail.message || detail.msg || `Error ${res.status}`;
+    } else {
+      msg = detail || data.mensaje || `Error ${res.status}`;
+    }
     throw new Error(msg);
   }
   return data;
