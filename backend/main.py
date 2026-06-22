@@ -9,6 +9,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
+from starlette.middleware.base import BaseHTTPMiddleware
 
 from backend.core.config import get_settings
 from backend.services.store import store
@@ -65,6 +66,19 @@ app.include_router(personajes.router)
 app.include_router(mundo.router)
 app.include_router(web.router)
 app.include_router(pdf.router)
+
+# ── No-cache middleware para estáticos (evita que el navegador cachee JS/CSS) ──
+class NoCacheStaticMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+        path = request.url.path
+        if path.startswith(("/js/", "/css/", "/assets/")):
+            response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+            response.headers["Pragma"]        = "no-cache"
+            response.headers["Expires"]       = "0"
+        return response
+
+app.add_middleware(NoCacheStaticMiddleware)
 
 # ── Static files ──────────────────────────────────────────────────────────────
 _FRONTEND = os.path.join(os.path.dirname(__file__), "..", "frontend")

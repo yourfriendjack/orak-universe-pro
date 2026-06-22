@@ -15,8 +15,9 @@ html.theme-dark-fantasy {
   --deep:      #060410;
   --white:     #12101e;
   --parchment: #161228;
+  background:  #0d0a1a !important;
 }
-html.theme-dark-fantasy body { background: var(--page); }
+html.theme-dark-fantasy body { background: transparent !important; }
 html.theme-dark-fantasy .topbar,
 html.theme-dark-fantasy .sidebar { border-color: rgba(180,120,255,.15); }
 html.theme-dark-fantasy .auth-card { background: #100d20; border-color: rgba(181,123,255,.2); }
@@ -77,6 +78,27 @@ html.theme-sangre {
 html.theme-sangre body { background: var(--page); }
 html.theme-sangre .auth-card { background: rgba(248,240,222,.92); border-color: rgba(80,18,28,.18); }
 html.theme-sangre .auth-glow { background: radial-gradient(ellipse at 50% 0%, rgba(120,20,38,.12) 0%, transparent 65%); }
+
+/* ── ELDERGLOOM VALLEY ────────────────────────────────────────── */
+html.theme-eldergloom {
+  --page:      #0b0e12;
+  --mist:      #11151a;
+  --fog:       #2a313b;
+  --ink:       #f5f1e8;
+  --gold:      #f4b56a;
+  --amber:     #e39a4f;
+  --amber-dim: #704020;
+  --rust:      #4e6b57;
+  --deep:      #060810;
+  --white:     #1d232b;
+  --parchment: #232a33;
+  background:  #0b0e12 !important;
+}
+html.theme-eldergloom body { background: transparent !important; }
+html.theme-eldergloom .topbar,
+html.theme-eldergloom .sidebar { border-color: rgba(194,145,90,.12); }
+html.theme-eldergloom .auth-card { background: #0d1016; border-color: rgba(194,145,90,.18); }
+html.theme-eldergloom .auth-glow { background: radial-gradient(ellipse at 50% 0%, rgba(160,100,35,.28) 0%, transparent 65%); }
 
 
 /* ═══════════════════════════════════════════════════════════════
@@ -220,39 +242,7 @@ html.theme-sangre .auth-glow { background: radial-gradient(ellipse at 50% 0%, rg
 @keyframes esm-blink      { 0%{opacity:.3} 25%{opacity:.98} 50%{opacity:.18} 75%{opacity:.88} 100%{opacity:.3} }
 @keyframes esm-blink2     { 0%{opacity:.85} 28%{opacity:.12} 55%{opacity:.95} 82%{opacity:.18} 100%{opacity:.85} }
 
-/* ── ✦ DARK FANTASY — partículas mágicas ascendentes ─────── */
-html.theme-dark-fantasy body::before {
-  content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
-  background:
-    radial-gradient(ellipse 65% 50% at 50% 100%, rgba(100,40,160,.14) 0%, transparent 70%),
-    radial-gradient(ellipse 80% 30% at 50% 0%,   rgba(80,20,140,.09)  0%, transparent 60%);
-  animation: df-glow 6s ease-in-out infinite alternate;
-}
-html.theme-dark-fantasy body::after {
-  content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
-  background-image:
-    radial-gradient(1.5px 1.5px at 70px  80px,  rgba(180,120,255,.85) 0%,transparent 100%),
-    radial-gradient(1px   1px   at 160px 200px, rgba(200,150,255,.65) 0%,transparent 100%),
-    radial-gradient(2px   2px   at 255px 50px,  rgba(220,180,255,.9)  0%,transparent 100%),
-    radial-gradient(1px   1px   at 340px 160px, rgba(160,90,255,.7)   0%,transparent 100%),
-    radial-gradient(1.5px 1.5px at 430px 280px, rgba(190,130,255,.75) 0%,transparent 100%),
-    radial-gradient(1px   1px   at 520px 80px,  rgba(210,160,255,.6)  0%,transparent 100%),
-    radial-gradient(2px   2px   at 100px 350px, rgba(230,200,255,.8)  0%,transparent 100%),
-    radial-gradient(1px   1px   at 200px 450px, rgba(170,100,255,.55) 0%,transparent 100%),
-    radial-gradient(1.5px 1.5px at 310px 370px, rgba(195,140,255,.8)  0%,transparent 100%),
-    radial-gradient(1px   1px   at 450px 480px, rgba(215,170,255,.65) 0%,transparent 100%),
-    radial-gradient(1px   1px   at 560px 350px, rgba(175,110,255,.7)  0%,transparent 100%),
-    radial-gradient(2px   2px   at 40px  530px, rgba(220,180,255,.75) 0%,transparent 100%),
-    radial-gradient(1.5px 1.5px at 280px 590px, rgba(180,120,255,.5)  0%,transparent 100%),
-    radial-gradient(1px   1px   at 490px 560px, rgba(200,150,255,.8)  0%,transparent 100%),
-    radial-gradient(1px   1px   at 370px 680px, rgba(160,90,255,.6)   0%,transparent 100%),
-    radial-gradient(1.5px 1.5px at 130px 680px, rgba(235,210,255,.7)  0%,transparent 100%),
-    radial-gradient(2px   2px   at 580px 700px, rgba(190,130,255,.85) 0%,transparent 100%),
-    radial-gradient(1px   1px   at 470px 720px, rgba(210,160,255,.55) 0%,transparent 100%);
-  background-size: 620px 800px;
-  background-repeat: repeat;
-  animation: df-ascend 38s linear infinite;
-}
+/* ── ✦ DARK FANTASY — partículas reemplazadas por Canvas (dark-fantasy.js) ── */
 
 /* ── ⟋ GLITCH — escáner CRT + distorsión de pantalla ──────────── */
 html.theme-glitch body {
@@ -1423,4 +1413,391 @@ html.theme-sangre .auth-card {
 }
 html.theme-sangre .auth-glow {
   background: radial-gradient(ellipse at 50% 0%, rgba(100,16,30,.10) 0%, transparent 65%);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   ENCHANTED CRYSTAL PANELS — ELDERGLOOM VALLEY
+   Obsidiana esmerilada con iluminación ámbar de linterna antigua.
+   Cada panel evoca un artefacto tallado por artesanos de un reino
+   perdido: bordes con calor de fuego, profundidad interior oscura.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Texto de publicaciones ──────────────────────────────────── */
+html.theme-eldergloom .post-text        { color: var(--ink); }
+html.theme-eldergloom .post-text strong { color: #fde8c0; }
+html.theme-eldergloom .post-text em     { color: var(--gold); }
+html.theme-eldergloom .post-name        { color: var(--ink); }
+html.theme-eldergloom .post-handle,
+html.theme-eldergloom .post-time        { color: rgba(194, 145, 90, 0.48); }
+
+/* ── Tarjetas post — obsidiana esmerilada ────────────────────── */
+html.theme-eldergloom .post {
+  position: relative;
+  overflow: hidden;
+  background: rgba(11, 14, 18, 0.78);
+  border-color: rgba(194, 145, 90, 0.13);
+  backdrop-filter: blur(24px) saturate(1.28) brightness(0.93);
+  -webkit-backdrop-filter: blur(24px) saturate(1.28) brightness(0.93);
+  box-shadow:
+    0 4px 32px rgba(3, 4, 7, 0.72),
+    inset 0  1px 0 rgba(244, 181, 106, 0.10),
+    inset 1px 0 0 rgba(194, 145, 90,  0.06),
+    inset 0 -1px 0 rgba(0,   0,   0,  0.52),
+    inset 0 36px 72px rgba(244, 181, 106, 0.022);
+  transition:
+    transform   .44s cubic-bezier(.22,.82,.30,1),
+    box-shadow  .44s cubic-bezier(.22,.82,.30,1),
+    border-color .44s ease,
+    background  .44s ease;
+}
+
+/* Arista ámbar — luz de linterna atrapada en el borde superior */
+html.theme-eldergloom .post::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 7%; right: 7%; height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(194, 145, 90, 0.18) 22%,
+    rgba(244, 201, 138, 0.46) 50%,
+    rgba(194, 145, 90, 0.18) 78%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Barrido de calor en hover — como la llama de una vela pasa cerca */
+html.theme-eldergloom .post::after {
+  content: '';
+  position: absolute;
+  top: -12%; left: -88%;
+  width: 62%; height: 124%;
+  background: linear-gradient(
+    114deg,
+    transparent 30%,
+    rgba(194, 145, 90, 0.050) 52%,
+    rgba(244, 201, 138, 0.018) 62%,
+    transparent 76%
+  );
+  transition: left .78s cubic-bezier(.35,.10,.18,1);
+  pointer-events: none;
+}
+
+html.theme-eldergloom .post:hover {
+  background: rgba(15, 18, 23, 0.86);
+  border-color: rgba(194, 145, 90, 0.30);
+  transform: translateY(-3px);
+  box-shadow:
+    0 12px 54px rgba(3,  4,   7, 0.74),
+    0  0   42px rgba(194, 145, 90, 0.07),
+    inset 0  1px 0 rgba(244, 201, 138, 0.24),
+    inset 1px 0 0 rgba(194, 145, 90, 0.11),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.58),
+    inset 0 48px 96px rgba(244, 181, 106, 0.040),
+    0 0 0 1px rgba(160, 115, 48, 0.09);
+}
+html.theme-eldergloom .post:hover::after { left: 108%; }
+
+/* ── Topbar — nave de la guardia de la aldea ─────────────────── */
+html.theme-eldergloom .topbar {
+  background: rgba(8, 10, 14, 0.95) !important;
+  backdrop-filter: blur(28px) saturate(1.32) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(1.32) !important;
+  border-bottom: 1px solid rgba(194, 145, 90, 0.09);
+  box-shadow:
+    0 1px 30px rgba(3, 4, 7, 0.62),
+    inset 0 -1px 0 rgba(194, 145, 90, 0.055);
+}
+
+/* ── Sidebar — sala de gremio de piedra oscura ───────────────── */
+html.theme-eldergloom .sidebar {
+  background: rgba(8, 10, 14, 0.84);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  border-color: rgba(194, 145, 90, 0.08);
+  box-shadow: inset -1px 0 0 rgba(194, 145, 90, 0.042);
+}
+
+/* ── Panel de Economía — cofre del gremio ───────────────────── */
+html.theme-eldergloom .eco-card {
+  background: rgba(11, 14, 18, 0.84) !important;
+  border-color: rgba(194, 145, 90, 0.11) !important;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow:
+    0 2px 26px rgba(3, 4, 7, 0.54),
+    inset 0  1px 0 rgba(244, 181, 106, 0.09),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.40);
+}
+
+/* ── Widgets ─────────────────────────────────────────────────── */
+html.theme-eldergloom .feed-widgets {
+  background: rgba(7, 9, 12, 0.68);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-color: rgba(194, 145, 90, 0.058);
+}
+
+/* ── Búsqueda ────────────────────────────────────────────────── */
+html.theme-eldergloom .topbar-search {
+  background: rgba(11, 14, 18, 0.80);
+  border-color: rgba(194, 145, 90, 0.16);
+  color: var(--ink);
+}
+html.theme-eldergloom .topbar-search::placeholder { color: rgba(194, 145, 90, 0.32); }
+html.theme-eldergloom .topbar-search:focus {
+  border-color: rgba(194, 145, 90, 0.40);
+  background: rgba(15, 18, 24, 0.90);
+  box-shadow:
+    0 0 0 3px rgba(160, 110, 42, 0.11),
+    inset 0 1px 0 rgba(244, 181, 106, 0.07);
+}
+
+/* ── Orun pill — moneda de oro antiguo ──────────────────────── */
+html.theme-eldergloom .orun-pill {
+  background: rgba(140, 90, 28, 0.20) !important;
+  border: 1px solid rgba(194, 145, 90, 0.26) !important;
+  color: var(--gold) !important;
+  box-shadow: inset 0 1px 0 rgba(244, 201, 138, 0.10);
+}
+
+/* ── Notificaciones ──────────────────────────────────────────── */
+html.theme-eldergloom .notif-btn {
+  background: rgba(9, 11, 15, 0.92) !important;
+  border: 1px solid rgba(194, 145, 90, 0.11);
+}
+html.theme-eldergloom .notif-btn:hover {
+  background: rgba(14, 17, 22, 0.96) !important;
+  border-color: rgba(194, 145, 90, 0.28);
+  box-shadow: 0 0 14px rgba(160, 110, 42, 0.10);
+}
+
+/* ── Botón Escribir — reliquia encantada ─────────────────────── */
+html.theme-eldergloom .write-btn {
+  background: linear-gradient(135deg, #c47828 0%, #9a5a1c 100%);
+  color: #fff8ee;
+  box-shadow:
+    0 2px 12px rgba(140, 80, 18, 0.36),
+    inset 0 1px 0 rgba(255, 225, 165, 0.22);
+  transition: all .42s cubic-bezier(.22,.78,.28,1);
+}
+html.theme-eldergloom .write-btn:hover {
+  background: linear-gradient(135deg, #d88832 0%, #aa6422 100%);
+  color: #fff8ee;
+  box-shadow:
+    0 0  24px rgba(200, 120, 32, 0.32),
+    0 4px 18px rgba(80,  45,  8, 0.28),
+    inset 0 1px 0 rgba(255, 230, 175, 0.30);
+  transform: translateY(-2px);
+}
+
+/* ── Auth card ───────────────────────────────────────────────── */
+html.theme-eldergloom .auth-card {
+  background: rgba(11, 14, 18, 0.94) !important;
+  border-color: rgba(194, 145, 90, 0.20) !important;
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  box-shadow:
+    0 8px 48px rgba(3, 4, 7, 0.70),
+    inset 0 1px 0 rgba(244, 181, 106, 0.08);
+}
+html.theme-eldergloom .auth-glow {
+  background: radial-gradient(ellipse at 50% 0%, rgba(160, 100, 32, 0.24) 0%, transparent 65%);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   ARCANE CRYSTAL PANELS — DARK FANTASY
+   Obsidiana abisal con iluminación violeta-arcana.
+   Cada panel evoca un fragmento de cristal oscuro imbuido con
+   energía mística: bordes con resplandor de luna púrpura,
+   profundidad de abismo, magia contenida parpadeando.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Texto de publicaciones ──────────────────────────────────── */
+html.theme-dark-fantasy .post-text        { color: var(--ink); }
+html.theme-dark-fantasy .post-text strong { color: #ead4ff; }
+html.theme-dark-fantasy .post-text em     { color: var(--gold); }
+html.theme-dark-fantasy .post-name        { color: var(--ink); }
+html.theme-dark-fantasy .post-handle,
+html.theme-dark-fantasy .post-time        { color: rgba(181, 123, 255, 0.48); }
+
+/* ── Tarjetas post — cristal de obsidiana arcana ─────────────── */
+html.theme-dark-fantasy .post {
+  position: relative;
+  overflow: hidden;
+  background: rgba(10, 8, 22, 0.78);
+  border-color: rgba(180, 120, 255, 0.14);
+  backdrop-filter: blur(24px) saturate(1.28) brightness(0.93);
+  -webkit-backdrop-filter: blur(24px) saturate(1.28) brightness(0.93);
+  box-shadow:
+    0 4px 32px rgba(2, 1, 8, 0.75),
+    inset 0  1px 0 rgba(210, 170, 255, 0.10),
+    inset 1px 0 0 rgba(180, 120, 255, 0.06),
+    inset 0 -1px 0 rgba(0,   0,   0,  0.55),
+    inset 0 36px 72px rgba(160, 80, 255, 0.022);
+  transition:
+    transform   .44s cubic-bezier(.22,.82,.30,1),
+    box-shadow  .44s cubic-bezier(.22,.82,.30,1),
+    border-color .44s ease,
+    background  .44s ease;
+}
+
+/* Arista violeta — luna arcana atrapada en el borde superior */
+html.theme-dark-fantasy .post::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 7%; right: 7%; height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(180, 120, 255, 0.18) 22%,
+    rgba(220, 180, 255, 0.48) 50%,
+    rgba(180, 120, 255, 0.18) 78%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Barrido arcano en hover — energía mágica que cruza el panel */
+html.theme-dark-fantasy .post::after {
+  content: '';
+  position: absolute;
+  top: -12%; left: -88%;
+  width: 62%; height: 124%;
+  background: linear-gradient(
+    114deg,
+    transparent 30%,
+    rgba(180, 120, 255, 0.048) 52%,
+    rgba(220, 180, 255, 0.018) 62%,
+    transparent 76%
+  );
+  transition: left .78s cubic-bezier(.35,.10,.18,1);
+  pointer-events: none;
+}
+
+html.theme-dark-fantasy .post:hover {
+  background: rgba(14, 10, 28, 0.86);
+  border-color: rgba(180, 120, 255, 0.32);
+  transform: translateY(-3px);
+  box-shadow:
+    0 12px 54px rgba(2,  1,   8, 0.78),
+    0  0   42px rgba(160, 80, 255, 0.08),
+    inset 0  1px 0 rgba(220, 180, 255, 0.24),
+    inset 1px 0 0 rgba(180, 120, 255, 0.11),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.60),
+    inset 0 48px 96px rgba(160, 80, 255, 0.038),
+    0 0 0 1px rgba(140, 80, 220, 0.09);
+}
+html.theme-dark-fantasy .post:hover::after { left: 108%; }
+
+/* ── Topbar — fortaleza de obsidiana ─────────────────────────── */
+html.theme-dark-fantasy .topbar {
+  background: rgba(7, 5, 18, 0.95) !important;
+  backdrop-filter: blur(28px) saturate(1.32) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(1.32) !important;
+  border-bottom: 1px solid rgba(180, 120, 255, 0.09);
+  box-shadow:
+    0 1px 30px rgba(2, 1, 8, 0.65),
+    inset 0 -1px 0 rgba(180, 120, 255, 0.055);
+}
+
+/* ── Sidebar — sala de arcanos oscura ────────────────────────── */
+html.theme-dark-fantasy .sidebar {
+  background: rgba(7, 5, 18, 0.84);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  border-color: rgba(180, 120, 255, 0.08);
+  box-shadow: inset -1px 0 0 rgba(180, 120, 255, 0.042);
+}
+
+/* ── Panel de Economía — grimorio arcano ─────────────────────── */
+html.theme-dark-fantasy .eco-card {
+  background: rgba(10, 8, 22, 0.84) !important;
+  border-color: rgba(180, 120, 255, 0.11) !important;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow:
+    0 2px 26px rgba(2, 1, 8, 0.56),
+    inset 0  1px 0 rgba(210, 170, 255, 0.09),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.42);
+}
+
+/* ── Widgets ─────────────────────────────────────────────────── */
+html.theme-dark-fantasy .feed-widgets {
+  background: rgba(6, 4, 14, 0.68);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-color: rgba(180, 120, 255, 0.058);
+}
+
+/* ── Búsqueda ────────────────────────────────────────────────── */
+html.theme-dark-fantasy .topbar-search {
+  background: rgba(10, 8, 22, 0.80);
+  border-color: rgba(180, 120, 255, 0.16);
+  color: var(--ink);
+}
+html.theme-dark-fantasy .topbar-search::placeholder { color: rgba(181, 123, 255, 0.32); }
+html.theme-dark-fantasy .topbar-search:focus {
+  border-color: rgba(180, 120, 255, 0.42);
+  background: rgba(14, 10, 28, 0.90);
+  box-shadow:
+    0 0 0 3px rgba(140, 70, 220, 0.11),
+    inset 0 1px 0 rgba(210, 170, 255, 0.07);
+}
+
+/* ── Orun pill — moneda de energía oscura ───────────────────── */
+html.theme-dark-fantasy .orun-pill {
+  background: rgba(100, 40, 180, 0.20) !important;
+  border: 1px solid rgba(180, 120, 255, 0.26) !important;
+  color: var(--gold) !important;
+  box-shadow: inset 0 1px 0 rgba(220, 180, 255, 0.10);
+}
+
+/* ── Notificaciones ──────────────────────────────────────────── */
+html.theme-dark-fantasy .notif-btn {
+  background: rgba(8, 6, 18, 0.92) !important;
+  border: 1px solid rgba(180, 120, 255, 0.11);
+}
+html.theme-dark-fantasy .notif-btn:hover {
+  background: rgba(12, 9, 24, 0.96) !important;
+  border-color: rgba(180, 120, 255, 0.28);
+  box-shadow: 0 0 14px rgba(140, 70, 220, 0.12);
+}
+
+/* ── Botón Escribir — grimorio encantado ─────────────────────── */
+html.theme-dark-fantasy .write-btn {
+  background: linear-gradient(135deg, #8a3fc8 0%, #6428a0 100%);
+  color: #f0e8ff;
+  box-shadow:
+    0 2px 12px rgba(120, 50, 200, 0.36),
+    inset 0 1px 0 rgba(220, 190, 255, 0.22);
+  transition: all .42s cubic-bezier(.22,.78,.28,1);
+}
+html.theme-dark-fantasy .write-btn:hover {
+  background: linear-gradient(135deg, #9e4edc 0%, #7438b8 100%);
+  color: #f8f0ff;
+  box-shadow:
+    0 0  24px rgba(160, 80, 255, 0.32),
+    0 4px 18px rgba(60,  20, 100, 0.28),
+    inset 0 1px 0 rgba(230, 200, 255, 0.30);
+  transform: translateY(-2px);
+}
+
+/* ── Auth card ───────────────────────────────────────────────── */
+html.theme-dark-fantasy .auth-card {
+  background: rgba(10, 8, 22, 0.94) !important;
+  border-color: rgba(180, 120, 255, 0.20) !important;
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  box-shadow:
+    0 8px 48px rgba(2, 1, 8, 0.72),
+    inset 0 1px 0 rgba(210, 170, 255, 0.08);
+}
+html.theme-dark-fantasy .auth-glow {
+  background: radial-gradient(ellipse at 50% 0%, rgba(140, 60, 220, 0.28) 0%, transparent 65%);
 }
