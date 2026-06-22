@@ -2152,7 +2152,20 @@ html.theme-weirdcore .auth-glow {
 /* ══════════════════════════════════════════════════════════════════
    VAPORWAVE — Retrowave Neon Glass
    ══════════════════════════════════════════════════════════════════ */
-html.theme-vaporwave { background: #08001a !important; }
+html.theme-vaporwave {
+  --page:      #08001a;
+  --mist:      #1a003a;   /* hover de nav items */
+  --fog:       #9040b0;   /* texto secundario: etiquetas, secciones */
+  --ink:       #ffd0ff;   /* texto principal: nav, posts */
+  --gold:      #ff80dd;   /* acento claro */
+  --amber:     #ff00cc;   /* magenta puro: item activo */
+  --amber-dim: #dd00aa;   /* magenta oscuro: texto activo */
+  --rust:      #cc0088;
+  --deep:      #040008;
+  --white:     #120026;   /* fondo de paneles oscuros */
+  --parchment: #1a0038;
+  background:  #08001a !important;
+}
 html.theme-vaporwave body { background: transparent !important; }
 
 html.theme-vaporwave .topbar,
@@ -2211,6 +2224,46 @@ html.theme-vaporwave .write-btn:hover {
   background: linear-gradient(135deg, #e01898 0%, #a000ff 100%);
   box-shadow: 0 0 28px rgba(255, 0, 200, 0.45), 0 4px 20px rgba(80,0,160,.30), inset 0 1px 0 rgba(255,220,255,.22);
   transform: translateY(-2px);
+}
+
+/* Feed widgets */
+html.theme-vaporwave .feed-widgets {
+  background: rgba(10, 0, 26, 0.82);
+  border: 1px solid rgba(255, 0, 200, 0.08);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+/* Buscador */
+html.theme-vaporwave .topbar-search {
+  background: rgba(14, 0, 32, 0.88);
+  border: 1px solid rgba(255, 0, 200, 0.16);
+  color: #ffd0ff;
+}
+html.theme-vaporwave .topbar-search::placeholder { color: rgba(255, 0, 200, 0.32); }
+html.theme-vaporwave .topbar-search:focus {
+  border-color: rgba(255, 0, 200, 0.42);
+  background: rgba(18, 0, 40, 0.92);
+  box-shadow: 0 0 0 3px rgba(200, 0, 180, 0.10), inset 0 1px 0 rgba(255, 180, 255, 0.06);
+}
+
+/* Orun pill */
+html.theme-vaporwave .orun-pill {
+  background: rgba(120, 0, 100, 0.22) !important;
+  border: 1px solid rgba(255, 0, 200, 0.24) !important;
+  color: var(--gold) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 180, 255, 0.08);
+}
+
+/* Notificaciones */
+html.theme-vaporwave .notif-btn {
+  background: rgba(10, 0, 22, 0.94) !important;
+  border: 1px solid rgba(255, 0, 200, 0.10);
+}
+html.theme-vaporwave .notif-btn:hover {
+  background: rgba(16, 0, 32, 0.98) !important;
+  border-color: rgba(255, 0, 200, 0.30);
+  box-shadow: 0 0 14px rgba(200, 0, 180, 0.12);
 }
 
 /* Auth card */
