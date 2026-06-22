@@ -958,6 +958,7 @@ const CATALOGO = [
   { id:'ui-rubi',         tipo:'tema_ui', nombre:'Rubí',              desc:'Carmesí profundo, elegancia oscura y pasión',    precio:500, req:200, clase:'theme-rubi',         preview:'linear-gradient(135deg,#0d0308 0%,#3d1022 100%)', acento:'#e87898' },
   { id:'ui-esmeralda',    tipo:'tema_ui', nombre:'Esmeralda',         desc:'Verde jade y oscuridad de bosque ancestral',     precio:600, req:300, clase:'theme-esmeralda',    preview:'linear-gradient(135deg,#030e06 0%,#123820 100%)', acento:'#35d878' },
   { id:'ui-eldergloom',  tipo:'tema_ui', nombre:'Eldergloom Valley', desc:'Valle olvidado: faroles, montañas y magia antigua', precio:800, req:500, clase:'theme-eldergloom',   preview:'linear-gradient(135deg,#0b0e12 0%,#2a313b 100%)', acento:'#f4b56a' },
+  { id:'ui-weirdcore',   tipo:'tema_ui', nombre:'Weirdcore',         desc:'Ya estuviste aquí. Lo recuerdas pero no sabes cuándo.', precio:900, req:500, clase:'theme-weirdcore',    preview:'linear-gradient(135deg,#0f0c1e 0%,#251d40 100%)', acento:'#c8b0e0' },
   // TEMAS LECTURA
   { id:'rl-libreta',   tipo:'tema_lectura', nombre:'Libreta Antigua',     desc:'Rayas de cuaderno en crema envejecida',          precio:150, req:0,   clase:'rl-libreta',   preview:'linear-gradient(135deg,#f5ead8,#ede3c8)', acento:'#8b6040', dark:false },
   { id:'rl-pergamino', tipo:'tema_lectura', nombre:'Pergamino',           desc:'Papel antiguo con tonos dorados',                precio:200, req:0,   clase:'rl-pergamino', preview:'linear-gradient(135deg,#d4b896,#b08860)', acento:'#7a5020', dark:false },
@@ -1103,7 +1104,7 @@ window.quitarEquipo = async (itemId, tipo) => {
 
 function aplicarTema(itemId, tipo) {
   if (tipo === 'tema_ui') {
-    document.documentElement.classList.remove('theme-dark-fantasy','theme-glitch','theme-lunar','theme-sangre','theme-cosmos','theme-aurora','theme-rubi','theme-esmeralda','theme-eldergloom');
+    document.documentElement.classList.remove('theme-dark-fantasy','theme-glitch','theme-lunar','theme-sangre','theme-cosmos','theme-aurora','theme-rubi','theme-esmeralda','theme-eldergloom','theme-weirdcore');
     if (itemId !== 'default') document.documentElement.classList.add(CATALOGO.find(x=>x.id===itemId)?.clase || '');
     localStorage.setItem('orak_tema_ui', itemId === 'default' ? '' : itemId);
   }
