@@ -50,14 +50,17 @@ const WeirdcoreRenderer = (() => {
   ];
 
   // ── Estado global ────────────────────────────────────────────────────────
-  let windows  = null;
-  let eyes     = null;
-  let frags    = null;   // fragmentos de texto activos
+  let windows     = null;
+  let eyes        = null;
+  let frags       = null;
+  let silhouettes = null;
+  let polaroids   = null;
 
   // ── Cursor ───────────────────────────────────────────────────────────────
   let mouseX = -999, mouseY = -999;
   let lastTrailT = 0, _onMove = null, _onClick = null;
-  const letterTrail = [];   // { x, y, ch, alpha }
+  const letterTrail   = [];
+  const cursorHistory = [];   // posiciones con delay para el reflejo
 
   // ── Blooms de clic ───────────────────────────────────────────────────────
   const blooms = [];
@@ -451,6 +454,226 @@ const WeirdcoreRenderer = (() => {
   }
 
   // ════════════════════════════════════════════════════════════════════════
+  //  BG — Siluetas humanas: aparecen inmóviles y desaparecen
+  // ════════════════════════════════════════════════════════════════════════
+  function initSilhouettes(W, H) {
+    silhouettes = Array.from({ length: 3 }, (_, i) => ({
+      x: 0, y: 0, scale: 0.06, alpha: 0,
+      phase: 'dormant',
+      timer:    120 + Math.floor(i * 220 + Math.random() * 250),
+      holdMax:  90  + Math.floor(Math.random() * 140),
+      holdCount: 0,
+    }));
+  }
+
+  function _drawSilhouette(x, bottomY, h, alpha) {
+    const headR   = h * 0.11;
+    const shdY    = bottomY - h * 0.70;  // hombros
+    const hipY    = bottomY - h * 0.40;  // cadera
+    const shdW    = h * 0.19;
+    const armL    = h * 0.26;
+
+    bgCtx.save();
+    bgCtx.fillStyle   = `rgba(8,4,18,${alpha})`;
+    bgCtx.strokeStyle = `rgba(8,4,18,${alpha})`;
+    bgCtx.lineWidth   = headR * 0.38;
+    bgCtx.lineCap     = 'round';
+
+    // Cabeza
+    bgCtx.beginPath(); bgCtx.arc(x, bottomY - h * 0.84, headR, 0, Math.PI*2); bgCtx.fill();
+    // Torso
+    bgCtx.beginPath();
+    bgCtx.moveTo(x - shdW*0.5, shdY); bgCtx.lineTo(x + shdW*0.5, shdY);
+    bgCtx.lineTo(x + shdW*0.28, hipY); bgCtx.lineTo(x - shdW*0.28, hipY);
+    bgCtx.closePath(); bgCtx.fill();
+    // Brazo izquierdo
+    bgCtx.beginPath();
+    bgCtx.moveTo(x - shdW*0.5, shdY);
+    bgCtx.lineTo(x - shdW*0.5 - armL*0.35, shdY + armL); bgCtx.stroke();
+    // Brazo derecho
+    bgCtx.beginPath();
+    bgCtx.moveTo(x + shdW*0.5, shdY);
+    bgCtx.lineTo(x + shdW*0.5 + armL*0.18, shdY + armL); bgCtx.stroke();
+    // Pierna izquierda
+    bgCtx.beginPath();
+    bgCtx.moveTo(x - shdW*0.18, hipY); bgCtx.lineTo(x - shdW*0.38, bottomY); bgCtx.stroke();
+    // Pierna derecha
+    bgCtx.beginPath();
+    bgCtx.moveTo(x + shdW*0.18, hipY); bgCtx.lineTo(x + shdW*0.38, bottomY); bgCtx.stroke();
+
+    bgCtx.restore();
+  }
+
+  function drawSilhouettes(W, H) {
+    if (!silhouettes) return;
+    silhouettes.forEach(s => {
+      s.timer--;
+      if (s.phase === 'dormant' && s.timer <= 0) {
+        s.x     = W * (0.08 + Math.random() * 0.84);
+        s.scale = 0.045 + Math.random() * 0.090;
+        const h = s.scale * H;
+        s.y     = H * (0.30 + Math.random() * 0.45);
+        s.phase = 'appearing'; s.holdCount = 0;
+        s.holdMax = 80 + Math.floor(Math.random() * 140);
+      } else if (s.phase === 'appearing') {
+        s.alpha = Math.min(0.82, s.alpha + 0.010);
+        if (s.alpha >= 0.82) s.phase = 'standing';
+      } else if (s.phase === 'standing') {
+        s.holdCount++;
+        if (s.holdCount >= s.holdMax) s.phase = 'disappearing';
+      } else if (s.phase === 'disappearing') {
+        s.alpha = Math.max(0, s.alpha - 0.007);
+        if (s.alpha <= 0) {
+          s.phase = 'dormant';
+          s.timer = 180 + Math.floor(Math.random() * 380);
+        }
+      }
+      if (s.phase !== 'dormant') {
+        _drawSilhouette(s.x, s.y, s.scale * H, s.alpha);
+      }
+    });
+  }
+
+  // ════════════════════════════════════════════════════════════════════════
+  //  BG — Fotos polaroid flotando con dibujos primitivos
+  // ════════════════════════════════════════════════════════════════════════
+  const DRAWINGS = ['house','tree','stickfigure','eye','star','flower'];
+
+  function initPolaroids(W, H) {
+    polaroids = Array.from({ length: 5 }, (_, i) => ({
+      x: W * (0.10 + Math.random() * 0.80),
+      y: H * (0.20 + Math.random() * 0.55),
+      size:   55 + Math.floor(i * 13.7 % 1.0 * 40),
+      alpha:  0,
+      rot:    (Math.random() - 0.5) * 0.30,
+      rotSpd: (Math.random() - 0.5) * 0.00030,
+      vx:     (Math.random() - 0.5) * 0.055,
+      vy:     -0.025 - Math.random() * 0.035,
+      drawing: DRAWINGS[i % DRAWINGS.length],
+      phase:  'fadein',
+      life:   Math.floor(i * 70),
+      maxLife: 260 + Math.floor(Math.random() * 220),
+    }));
+  }
+
+  function _primitiveArt(x, y, w, h, alpha, type) {
+    const cx = x + w*0.5, cy = y + h*0.5;
+    bgCtx.strokeStyle = `rgba(100,80,140,${alpha * 0.65})`;
+    bgCtx.fillStyle   = `rgba(100,80,140,${alpha * 0.40})`;
+    bgCtx.lineWidth   = 1.1;
+    bgCtx.lineCap     = 'round';
+
+    if (type === 'house') {
+      bgCtx.beginPath(); bgCtx.moveTo(cx, y+h*0.12);
+      bgCtx.lineTo(x+w*0.82, y+h*0.46); bgCtx.lineTo(x+w*0.18, y+h*0.46);
+      bgCtx.closePath(); bgCtx.stroke();
+      bgCtx.strokeRect(x+w*0.22, y+h*0.46, w*0.56, h*0.42);
+      bgCtx.strokeRect(cx-w*0.07, y+h*0.66, w*0.14, h*0.22);
+    } else if (type === 'tree') {
+      bgCtx.beginPath(); bgCtx.moveTo(cx, y+h*0.08);
+      bgCtx.lineTo(x+w*0.76, y+h*0.64); bgCtx.lineTo(x+w*0.24, y+h*0.64);
+      bgCtx.closePath(); bgCtx.stroke();
+      bgCtx.strokeRect(cx-w*0.07, y+h*0.64, w*0.14, h*0.28);
+    } else if (type === 'stickfigure') {
+      bgCtx.beginPath(); bgCtx.arc(cx, y+h*0.18, h*0.10, 0, Math.PI*2); bgCtx.stroke();
+      bgCtx.beginPath(); bgCtx.moveTo(cx, y+h*0.28); bgCtx.lineTo(cx, y+h*0.64); bgCtx.stroke();
+      bgCtx.beginPath(); bgCtx.moveTo(x+w*0.18, y+h*0.44); bgCtx.lineTo(x+w*0.82, y+h*0.44); bgCtx.stroke();
+      bgCtx.beginPath(); bgCtx.moveTo(cx, y+h*0.64); bgCtx.lineTo(x+w*0.26, y+h*0.92); bgCtx.stroke();
+      bgCtx.beginPath(); bgCtx.moveTo(cx, y+h*0.64); bgCtx.lineTo(x+w*0.74, y+h*0.92); bgCtx.stroke();
+    } else if (type === 'eye') {
+      bgCtx.beginPath();
+      bgCtx.moveTo(x+w*0.12, cy);
+      bgCtx.bezierCurveTo(x+w*0.35, y+h*0.25, x+w*0.65, y+h*0.25, x+w*0.88, cy);
+      bgCtx.bezierCurveTo(x+w*0.65, y+h*0.75, x+w*0.35, y+h*0.75, x+w*0.12, cy);
+      bgCtx.stroke();
+      bgCtx.beginPath(); bgCtx.arc(cx, cy, h*0.17, 0, Math.PI*2); bgCtx.stroke();
+      bgCtx.beginPath(); bgCtx.arc(cx, cy, h*0.08, 0, Math.PI*2); bgCtx.fill();
+    } else if (type === 'star') {
+      const R = Math.min(w,h)*0.40, r = R*0.42;
+      bgCtx.beginPath();
+      for (let i = 0; i < 5; i++) {
+        const aO = (i/5)*Math.PI*2 - Math.PI/2;
+        const aI = aO + Math.PI/5;
+        i === 0 ? bgCtx.moveTo(cx+Math.cos(aO)*R, cy+Math.sin(aO)*R)
+                : bgCtx.lineTo(cx+Math.cos(aO)*R, cy+Math.sin(aO)*R);
+        bgCtx.lineTo(cx+Math.cos(aI)*r, cy+Math.sin(aI)*r);
+      }
+      bgCtx.closePath(); bgCtx.stroke();
+    } else if (type === 'flower') {
+      for (let i = 0; i < 6; i++) {
+        const a = (i/6)*Math.PI*2;
+        bgCtx.beginPath();
+        bgCtx.arc(cx+Math.cos(a)*h*0.24, cy+Math.sin(a)*h*0.24, h*0.14, 0, Math.PI*2);
+        bgCtx.stroke();
+      }
+      bgCtx.beginPath(); bgCtx.arc(cx, cy, h*0.10, 0, Math.PI*2); bgCtx.fill();
+    }
+  }
+
+  function drawPolaroids(W, H) {
+    if (!polaroids) return;
+    polaroids.forEach((p, i) => {
+      p.life++;
+      p.x  += p.vx; p.y  += p.vy;
+      p.rot += p.rotSpd;
+
+      if (p.phase === 'fadein') {
+        p.alpha = Math.min(0.88, p.alpha + 0.006);
+        if (p.life >= 70) p.phase = 'hold';
+      } else if (p.phase === 'hold') {
+        if (p.life >= p.maxLife) p.phase = 'fadeout';
+      } else if (p.phase === 'fadeout') {
+        p.alpha = Math.max(0, p.alpha - 0.005);
+        if (p.alpha <= 0) {
+          // respawn
+          polaroids[i] = {
+            x: W * (0.10 + Math.random() * 0.80),
+            y: H * (0.55 + Math.random() * 0.30),   // nace desde abajo
+            size:   55 + Math.floor(Math.random() * 40),
+            alpha:  0, rot: (Math.random()-0.5)*0.28,
+            rotSpd: (Math.random()-0.5)*0.00028,
+            vx:     (Math.random()-0.5)*0.055,
+            vy:     -0.022 - Math.random()*0.032,
+            drawing: DRAWINGS[Math.floor(Math.random()*DRAWINGS.length)],
+            phase: 'fadein', life: 0,
+            maxLife: 260 + Math.floor(Math.random()*200),
+          };
+          return;
+        }
+      }
+
+      // Dibuja la polaroid
+      const { x, y, size, alpha, rot, drawing } = p;
+      const pw = size, ph = size * 1.26;
+      const brd = size * 0.09;
+      const iw  = pw - brd * 2;
+      const ih  = ph - brd * 2.8;
+
+      bgCtx.save();
+      bgCtx.translate(x, y); bgCtx.rotate(rot);
+
+      // Sombra
+      bgCtx.shadowColor = `rgba(20,10,40,${alpha*0.22})`; bgCtx.shadowBlur = 7;
+      // Fondo blanco de la polaroid
+      bgCtx.fillStyle = `rgba(242,238,252,${alpha*0.94})`;
+      bgCtx.fillRect(-pw/2, -ph/2, pw, ph);
+      bgCtx.shadowBlur = 0;
+
+      // Área de imagen (ligeramente más oscura)
+      bgCtx.fillStyle = `rgba(225,218,242,${alpha*0.80})`;
+      bgCtx.fillRect(-pw/2+brd, -ph/2+brd, iw, ih);
+
+      // Arte primitivo dentro
+      _primitiveArt(-pw/2+brd, -ph/2+brd, iw, ih, alpha, drawing);
+
+      bgCtx.restore();
+
+      // Rebote en bordes
+      if (p.x < -pw || p.x > W + pw || p.y < -ph * 2) p.phase = 'fadeout';
+    });
+  }
+
+  // ════════════════════════════════════════════════════════════════════════
   //  BG — Grano de película analógica
   // ════════════════════════════════════════════════════════════════════════
   function drawGrain(W, H) {
@@ -578,8 +801,37 @@ const WeirdcoreRenderer = (() => {
       overCtx.fillStyle = `rgba(195,175,230,${l.alpha})`;
       overCtx.fillText(l.ch, l.x, l.y);
       l.alpha -= 0.014;
-      l.y -= 0.15;   // los caracteres flotan ligeramente hacia arriba
+      l.y -= 0.15;
       if (l.alpha <= 0) letterTrail.splice(i, 1);
+    }
+
+    // Reflejo del cursor en el suelo — posición con delay de 22 frames
+    cursorHistory.push({ x: mouseX, y: mouseY });
+    if (cursorHistory.length > 22) cursorHistory.shift();
+    const ghost = cursorHistory.length >= 22 ? cursorHistory[0] : null;
+    if (ghost && ghost.x > 0) {
+      const vpY   = H * 0.50;                          // horizonte del suelo
+      const refY  = vpY + (vpY - ghost.y);             // posición reflejada
+      const refX  = ghost.x;
+      if (refY > vpY && refY < H * 0.96) {
+        const depth = (refY - vpY) / (H - vpY);        // 0=horizonte 1=base
+        const rA    = depth * 0.18;
+
+        // Reflejo invertido: anillo más tenue
+        overCtx.save();
+        overCtx.globalAlpha = rA;
+        overCtx.scale(1, -0.55 - depth * 0.15);        // aplana el reflejo
+
+        const ry = -refY / (0.55 + depth * 0.15);      // compensar scale
+        overCtx.beginPath();
+        overCtx.arc(refX, ry, ringR * (0.5 + depth*0.5), 0, Math.PI*2);
+        overCtx.strokeStyle = `rgba(195,175,230,1)`;
+        overCtx.lineWidth = 0.7; overCtx.stroke();
+
+        overCtx.beginPath(); overCtx.arc(refX, ry, 1.1, 0, Math.PI*2);
+        overCtx.fillStyle = 'rgba(215,200,245,1)'; overCtx.fill();
+        overCtx.restore();
+      }
     }
 
     overCtx.restore();
@@ -596,6 +848,8 @@ const WeirdcoreRenderer = (() => {
     drawBackground(W, H);
     drawFloorGrid(W, H);
     drawWindows(W, H);
+    drawSilhouettes(W, H);
+    drawPolaroids(W, H);
     drawEyes(W, H);
     drawFrags(W, H);
     drawVHS(W, H);
@@ -615,6 +869,8 @@ const WeirdcoreRenderer = (() => {
     initWindows(W, H);
     initEyes(W, H);
     initFrags(W, H);
+    initSilhouettes(W, H);
+    initPolaroids(W, H);
   }
 
   // ════════════════════════════════════════════════════════════════════════
@@ -668,8 +924,8 @@ const WeirdcoreRenderer = (() => {
       if (_onClick) { document.removeEventListener('click',     _onClick); _onClick = null; }
       bgCanvas.remove();   bgCanvas   = bgCtx   = null;
       overCanvas.remove(); overCanvas = overCtx = null;
-      windows = eyes = frags = null;
-      letterTrail.length = blooms.length = 0;
+      windows = eyes = frags = silhouettes = polaroids = null;
+      letterTrail.length = blooms.length = cursorHistory.length = 0;
       mouseX = mouseY = -999; raf = null; t = 0;
     },
   };
