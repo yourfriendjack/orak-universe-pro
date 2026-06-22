@@ -466,40 +466,147 @@ const WeirdcoreRenderer = (() => {
     }));
   }
 
-  function _drawSilhouette(x, bottomY, h, alpha) {
-    const headR   = h * 0.11;
-    const shdY    = bottomY - h * 0.70;  // hombros
-    const hipY    = bottomY - h * 0.40;  // cadera
-    const shdW    = h * 0.19;
-    const armL    = h * 0.26;
-
+  function _drawSilhouette(cx, bottomY, h, alpha) {
     bgCtx.save();
-    bgCtx.fillStyle   = `rgba(8,4,18,${alpha})`;
-    bgCtx.strokeStyle = `rgba(8,4,18,${alpha})`;
-    bgCtx.lineWidth   = headR * 0.38;
-    bgCtx.lineCap     = 'round';
+    bgCtx.fillStyle = `rgba(8,4,18,${alpha})`;
 
-    // Cabeza
-    bgCtx.beginPath(); bgCtx.arc(x, bottomY - h * 0.84, headR, 0, Math.PI*2); bgCtx.fill();
-    // Torso
+    // ── Cabeza ──────────────────────────────────────────────────────────
     bgCtx.beginPath();
-    bgCtx.moveTo(x - shdW*0.5, shdY); bgCtx.lineTo(x + shdW*0.5, shdY);
-    bgCtx.lineTo(x + shdW*0.28, hipY); bgCtx.lineTo(x - shdW*0.28, hipY);
-    bgCtx.closePath(); bgCtx.fill();
-    // Brazo izquierdo
+    bgCtx.arc(cx, bottomY - h*0.87, h*0.09, 0, Math.PI*2);
+    bgCtx.fill();
+
+    // ── Cuerpo superior: cuello + hombros + torso + brazos ──────────────
     bgCtx.beginPath();
-    bgCtx.moveTo(x - shdW*0.5, shdY);
-    bgCtx.lineTo(x - shdW*0.5 - armL*0.35, shdY + armL); bgCtx.stroke();
-    // Brazo derecho
+    bgCtx.moveTo(cx - h*0.040, bottomY - h*0.780);   // cuello izq
+
+    // Hombro izquierdo
+    bgCtx.bezierCurveTo(
+      cx - h*0.065, bottomY - h*0.774,
+      cx - h*0.182, bottomY - h*0.754,
+      cx - h*0.208, bottomY - h*0.724
+    );
+    // Brazo izquierdo exterior (cuelga ligeramente separado)
+    bgCtx.bezierCurveTo(
+      cx - h*0.238, bottomY - h*0.645,
+      cx - h*0.238, bottomY - h*0.520,
+      cx - h*0.218, bottomY - h*0.385
+    );
+    // Mano izquierda
+    bgCtx.bezierCurveTo(
+      cx - h*0.213, bottomY - h*0.330,
+      cx - h*0.178, bottomY - h*0.305,
+      cx - h*0.165, bottomY - h*0.325
+    );
+    // Brazo izquierdo interior (sube)
+    bgCtx.bezierCurveTo(
+      cx - h*0.152, bottomY - h*0.440,
+      cx - h*0.138, bottomY - h*0.535,
+      cx - h*0.122, bottomY - h*0.568
+    );
+    // Cintura izquierda → cadera
+    bgCtx.bezierCurveTo(
+      cx - h*0.098, bottomY - h*0.548,
+      cx - h*0.082, bottomY - h*0.486,
+      cx - h*0.114, bottomY - h*0.428
+    );
+    // Entrepierna izquierda
+    bgCtx.bezierCurveTo(
+      cx - h*0.132, bottomY - h*0.380,
+      cx - h*0.052, bottomY - h*0.318,
+      cx - h*0.018, bottomY - h*0.300
+    );
+    // Centro de entrepierna
+    bgCtx.lineTo(cx + h*0.018, bottomY - h*0.300);
+    // Entrepierna derecha
+    bgCtx.bezierCurveTo(
+      cx + h*0.052, bottomY - h*0.318,
+      cx + h*0.132, bottomY - h*0.380,
+      cx + h*0.114, bottomY - h*0.428
+    );
+    // Cintura derecha → cadera
+    bgCtx.bezierCurveTo(
+      cx + h*0.082, bottomY - h*0.486,
+      cx + h*0.098, bottomY - h*0.548,
+      cx + h*0.122, bottomY - h*0.568
+    );
+    // Brazo derecho interior
+    bgCtx.bezierCurveTo(
+      cx + h*0.138, bottomY - h*0.535,
+      cx + h*0.152, bottomY - h*0.440,
+      cx + h*0.165, bottomY - h*0.325
+    );
+    // Mano derecha
+    bgCtx.bezierCurveTo(
+      cx + h*0.178, bottomY - h*0.305,
+      cx + h*0.213, bottomY - h*0.330,
+      cx + h*0.218, bottomY - h*0.385
+    );
+    // Brazo derecho exterior
+    bgCtx.bezierCurveTo(
+      cx + h*0.238, bottomY - h*0.520,
+      cx + h*0.238, bottomY - h*0.645,
+      cx + h*0.208, bottomY - h*0.724
+    );
+    // Hombro derecho
+    bgCtx.bezierCurveTo(
+      cx + h*0.182, bottomY - h*0.754,
+      cx + h*0.065, bottomY - h*0.774,
+      cx + h*0.040, bottomY - h*0.780    // cuello der
+    );
+    bgCtx.closePath();
+    bgCtx.fill();
+
+    // ── Pierna izquierda ────────────────────────────────────────────────
     bgCtx.beginPath();
-    bgCtx.moveTo(x + shdW*0.5, shdY);
-    bgCtx.lineTo(x + shdW*0.5 + armL*0.18, shdY + armL); bgCtx.stroke();
-    // Pierna izquierda
+    bgCtx.moveTo(cx - h*0.100, bottomY - h*0.405);
+    bgCtx.bezierCurveTo(
+      cx - h*0.132, bottomY - h*0.295,
+      cx - h*0.130, bottomY - h*0.165,
+      cx - h*0.112, bottomY - h*0.022   // tobillo exterior
+    );
+    bgCtx.bezierCurveTo(
+      cx - h*0.112, bottomY,
+      cx - h*0.048, bottomY + h*0.005,
+      cx - h*0.025, bottomY             // punta pie izq
+    );
+    bgCtx.bezierCurveTo(
+      cx - h*0.014, bottomY - h*0.020,
+      cx - h*0.010, bottomY - h*0.165,
+      cx - h*0.012, bottomY - h*0.295
+    );
+    bgCtx.bezierCurveTo(
+      cx - h*0.012, bottomY - h*0.355,
+      cx - h*0.028, bottomY - h*0.405,
+      cx - h*0.042, bottomY - h*0.422
+    );
+    bgCtx.closePath();
+    bgCtx.fill();
+
+    // ── Pierna derecha ──────────────────────────────────────────────────
     bgCtx.beginPath();
-    bgCtx.moveTo(x - shdW*0.18, hipY); bgCtx.lineTo(x - shdW*0.38, bottomY); bgCtx.stroke();
-    // Pierna derecha
-    bgCtx.beginPath();
-    bgCtx.moveTo(x + shdW*0.18, hipY); bgCtx.lineTo(x + shdW*0.38, bottomY); bgCtx.stroke();
+    bgCtx.moveTo(cx + h*0.100, bottomY - h*0.405);
+    bgCtx.bezierCurveTo(
+      cx + h*0.132, bottomY - h*0.295,
+      cx + h*0.130, bottomY - h*0.165,
+      cx + h*0.112, bottomY - h*0.022
+    );
+    bgCtx.bezierCurveTo(
+      cx + h*0.112, bottomY,
+      cx + h*0.048, bottomY + h*0.005,
+      cx + h*0.025, bottomY
+    );
+    bgCtx.bezierCurveTo(
+      cx + h*0.014, bottomY - h*0.020,
+      cx + h*0.010, bottomY - h*0.165,
+      cx + h*0.012, bottomY - h*0.295
+    );
+    bgCtx.bezierCurveTo(
+      cx + h*0.012, bottomY - h*0.355,
+      cx + h*0.028, bottomY - h*0.405,
+      cx + h*0.042, bottomY - h*0.422
+    );
+    bgCtx.closePath();
+    bgCtx.fill();
 
     bgCtx.restore();
   }
