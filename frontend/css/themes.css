@@ -23,6 +23,27 @@ html.theme-dark-fantasy .sidebar { border-color: rgba(180,120,255,.15); }
 html.theme-dark-fantasy .auth-card { background: #100d20; border-color: rgba(181,123,255,.2); }
 html.theme-dark-fantasy .auth-glow { background: radial-gradient(ellipse at 50% 0%, rgba(140,60,220,.35) 0%, transparent 65%); }
 
+/* ── WEIRDCORE — El Lugar Que Ya Conoces ─────────────────────── */
+html.theme-weirdcore {
+  --page:      #0f0c1e;
+  --mist:      #1a1530;
+  --fog:       #352d55;
+  --ink:       #e0d5f0;
+  --gold:      #f0d0e8;
+  --amber:     #c8b0e0;
+  --amber-dim: #8a70b0;
+  --rust:      #e080b0;
+  --deep:      #080618;
+  --white:     #16121e;
+  --parchment: #1a1530;
+  background:  #0f0c1e !important;
+}
+html.theme-weirdcore body { background: transparent !important; }
+html.theme-weirdcore .topbar,
+html.theme-weirdcore .sidebar { border-color: rgba(195,175,230,.12); }
+html.theme-weirdcore .auth-card { background: #120e20; border-color: rgba(200,180,235,.18); }
+html.theme-weirdcore .auth-glow { background: radial-gradient(ellipse at 50% 0%, rgba(160,120,220,.28) 0%, transparent 65%); }
+
 /* ── GLITCH · CYBER ───────────────────────────────────────────── */
 html.theme-glitch {
   --page:      #05100a;
@@ -1963,4 +1984,166 @@ html.theme-glitch .auth-card {
 }
 html.theme-glitch .auth-glow {
   background: radial-gradient(ellipse at 50% 0%, rgba(0, 200, 100, 0.24) 0%, transparent 65%);
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   BROKEN MEMORY GLASS — WEIRDCORE
+   Cristal lavanda oscuro, bordes que no deberían existir,
+   arista superior como luz de un cuarto que no recuerdas.
+   ══════════════════════════════════════════════════════════════════ */
+
+/* ── Tipografía ──────────────────────────────────────────────────── */
+html.theme-weirdcore .post-text        { color: var(--ink); }
+html.theme-weirdcore .post-text strong { color: #f0e0ff; }
+html.theme-weirdcore .post-text em     { color: var(--gold); }
+html.theme-weirdcore .post-name        { color: var(--ink); }
+html.theme-weirdcore .post-handle,
+html.theme-weirdcore .post-time        { color: rgba(195,175,230, 0.42); }
+
+/* ── Posts — ventanas a otro lugar ──────────────────────────────── */
+html.theme-weirdcore .post {
+  background:    rgba(18, 14, 32, 0.78);
+  border:        1px solid rgba(195, 175, 230, 0.09);
+  border-radius: 10px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow:
+    0 2px 20px rgba(0, 0, 0, 0.58),
+    inset 0 1px 0 rgba(200, 180, 240, 0.06);
+  position: relative;
+  overflow: hidden;
+  transition: border-color .35s ease, box-shadow .35s ease;
+}
+
+/* Arista de luz de habitación — como luz bajo una puerta */
+html.theme-weirdcore .post::before {
+  content: '';
+  position: absolute; top: 0; left: 12%; right: 12%; height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%, rgba(215,195,245,0.40) 35%,
+    rgba(240,220,255,0.65) 50%,
+    rgba(215,195,245,0.40) 65%, transparent 100%
+  );
+  pointer-events: none;
+}
+
+/* Barrido de memoria — aparece en hover */
+html.theme-weirdcore .post::after {
+  content: '';
+  position: absolute; top: 0; bottom: 0;
+  left: -110%; width: 55%;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(195,175,230,0.03) 50%,
+    transparent 100%
+  );
+  pointer-events: none;
+  transition: left .60s cubic-bezier(.22,.78,.28,1);
+}
+html.theme-weirdcore .post:hover {
+  border-color: rgba(200, 180, 240, 0.18);
+  box-shadow:
+    0 4px 28px rgba(0, 0, 0, 0.62),
+    0 0 20px rgba(160, 120, 220, 0.05),
+    inset 0 1px 0 rgba(210, 190, 245, 0.10);
+}
+html.theme-weirdcore .post:hover::after { left: 110%; }
+
+/* ── Topbar ──────────────────────────────────────────────────────── */
+html.theme-weirdcore .topbar {
+  background: rgba(10, 7, 20, 0.96) !important;
+  border-bottom: 1px solid rgba(195, 175, 230, 0.08) !important;
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  box-shadow: 0 1px 20px rgba(0, 0, 0, 0.60);
+}
+
+/* ── Sidebar ─────────────────────────────────────────────────────── */
+html.theme-weirdcore .sidebar {
+  background: rgba(12, 9, 22, 0.86);
+  border-color: rgba(195, 175, 230, 0.07) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* ── Eco-card ────────────────────────────────────────────────────── */
+html.theme-weirdcore .eco-card {
+  background: rgba(14, 10, 24, 0.84);
+  border: 1px solid rgba(195, 175, 230, 0.08);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.48);
+}
+
+/* ── Feed widgets ────────────────────────────────────────────────── */
+html.theme-weirdcore .feed-widgets {
+  background: rgba(14, 10, 24, 0.80);
+  border: 1px solid rgba(195, 175, 230, 0.07);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+/* ── Buscador ────────────────────────────────────────────────────── */
+html.theme-weirdcore .topbar-search {
+  background: rgba(16, 12, 28, 0.88);
+  border: 1px solid rgba(195, 175, 230, 0.13);
+  color: var(--ink);
+}
+html.theme-weirdcore .topbar-search::placeholder { color: rgba(195, 175, 230, 0.28); }
+html.theme-weirdcore .topbar-search:focus {
+  border-color: rgba(195, 175, 230, 0.36);
+  background: rgba(18, 14, 30, 0.92);
+  box-shadow:
+    0 0 0 3px rgba(160, 120, 220, 0.08),
+    inset 0 1px 0 rgba(210, 190, 245, 0.06);
+}
+
+/* ── Orun pill ───────────────────────────────────────────────────── */
+html.theme-weirdcore .orun-pill {
+  background: rgba(80, 50, 140, 0.20) !important;
+  border: 1px solid rgba(195, 175, 230, 0.22) !important;
+  color: var(--gold) !important;
+  box-shadow: inset 0 1px 0 rgba(220, 200, 250, 0.08);
+}
+
+/* ── Notificaciones ──────────────────────────────────────────────── */
+html.theme-weirdcore .notif-btn {
+  background: rgba(12, 9, 22, 0.94) !important;
+  border: 1px solid rgba(195, 175, 230, 0.09);
+}
+html.theme-weirdcore .notif-btn:hover {
+  background: rgba(16, 12, 26, 0.98) !important;
+  border-color: rgba(195, 175, 230, 0.26);
+  box-shadow: 0 0 14px rgba(160, 120, 220, 0.09);
+}
+
+/* ── Botón Escribir — abrir una puerta ───────────────────────────── */
+html.theme-weirdcore .write-btn {
+  background: linear-gradient(135deg, #9060c8 0%, #6840a0 100%);
+  color: #f0e8ff;
+  box-shadow:
+    0 2px 12px rgba(120, 70, 200, 0.30),
+    inset 0 1px 0 rgba(220, 200, 255, 0.18);
+  transition: all .40s cubic-bezier(.22,.78,.28,1);
+}
+html.theme-weirdcore .write-btn:hover {
+  background: linear-gradient(135deg, #a870d8 0%, #7850b8 100%);
+  color: #faf4ff;
+  box-shadow:
+    0 0 24px rgba(160, 100, 255, 0.26),
+    0 4px 18px rgba(40, 20, 80, 0.30),
+    inset 0 1px 0 rgba(230, 210, 255, 0.28);
+  transform: translateY(-2px);
+}
+
+/* ── Auth card ───────────────────────────────────────────────────── */
+html.theme-weirdcore .auth-card {
+  background: rgba(14, 10, 26, 0.95) !important;
+  border-color: rgba(195, 175, 230, 0.16) !important;
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  box-shadow:
+    0 8px 48px rgba(0, 0, 0, 0.72),
+    inset 0 1px 0 rgba(210, 190, 245, 0.07);
+}
+html.theme-weirdcore .auth-glow {
+  background: radial-gradient(ellipse at 50% 0%, rgba(140, 90, 210, 0.24) 0%, transparent 65%);
 }

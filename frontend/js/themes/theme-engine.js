@@ -31,6 +31,7 @@ import { EsmeraldaRenderer }   from './esmeralda.js';
 import { EldergloomRenderer }  from './eldergloom.js';
 import { DarkFantasyRenderer } from './dark-fantasy.js';
 import { GlitchRenderer }      from './glitch.js';
+import { WeirdcoreRenderer }   from './weirdcore.js';
 
 const RENDERERS = {
   'theme-aurora':       AuroraRenderer,
@@ -42,6 +43,7 @@ const RENDERERS = {
   'theme-eldergloom':   EldergloomRenderer,
   'theme-dark-fantasy': DarkFantasyRenderer,
   'theme-glitch':       GlitchRenderer,
+  'theme-weirdcore':    WeirdcoreRenderer,
 };
 
 let activeRenderer = null;
