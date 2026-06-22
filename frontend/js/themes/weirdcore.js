@@ -73,13 +73,18 @@ const WeirdcoreRenderer = (() => {
   function initWindows(W, H) {
     // Colores de luz exterior por ventana (pasteles)
     const GLOW_COLS = ['255,240,200', '255,200,225', '190,240,210', '210,200,255', '255,230,170'];
+    // Posiciones dispersas por toda la pantalla (no en fila)
+    const POS = [
+      [0.13, 0.10], [0.78, 0.07], [0.40, 0.36],
+      [0.88, 0.48], [0.20, 0.58], [0.62, 0.20],
+    ];
     windows = Array.from({ length: 6 }, (_, i) => {
       const scale = 0.07 + (i * 0.053 % 1.0) * 0.10;
       const winH  = scale * H;
       const winW  = winH * 1.65;   // ventana más ancha que alta
       return {
-        x:        (i * 0.18 + 0.06) * W,
-        y:        (0.08 + (i * 0.13 % 1.0) * 0.40) * H,
+        x:        POS[i][0] * W,
+        y:        POS[i][1] * H,
         winW, winH,
         vx:       Math.sin(i * 1.73) * 0.016,
         vy:       Math.cos(i * 2.51) * 0.010,
