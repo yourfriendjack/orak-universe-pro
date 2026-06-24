@@ -426,71 +426,75 @@ const CloudcoreRenderer = (() => {
     bgCtx.moveTo(...pts[6]); bgCtx.lineTo(x, y + h * 0.18); bgCtx.lineTo(...pts[5]);
     bgCtx.stroke();
 
-    // ── Espiras de cristal ──
-    const spires = [
-      { ox:  0,       oh: -1.9, hw: 0.17 },  // central (más alta)
-      { ox: -w*0.18,  oh: -1.4, hw: 0.12 },
-      { ox:  w*0.20,  oh: -1.2, hw: 0.11 },
-      { ox: -w*0.32,  oh: -0.9, hw: 0.08 },
-      { ox:  w*0.30,  oh: -0.8, hw: 0.07 },
+    // ── Cristales inclinados (geodo, no montañas) ──
+    // Cada cristal se dibuja con rotate para inclinar en distintas direcciones
+    const crystals = [
+      { ox: -w*0.08, len: h*1.10, hw: w*0.095, angle: -0.38 },  // inclinado izquierda
+      { ox:  w*0.12, len: h*0.90, hw: w*0.080, angle:  0.28 },  // inclinado derecha
+      { ox: -w*0.26, len: h*0.75, hw: w*0.065, angle: -0.62 },  // muy inclinado izq
+      { ox:  w*0.28, len: h*0.70, hw: w*0.060, angle:  0.55 },  // muy inclinado der
+      { ox:  0,      len: h*0.82, hw: w*0.055, angle:  0.08 },  // casi vertical, leve sesgo
     ];
 
-    for (const s of spires) {
-      const sx  = x + s.ox;
-      const base = y - h * 0.04;
-      const tip  = base + s.oh * h;
-      const hw   = w * s.hw;
+    const base = y - h * 0.04;
 
-      // Relleno translúcido espira
+    for (const c of crystals) {
+      const sx = x + c.ox;
+
+      bgCtx.save();
+      bgCtx.translate(sx, base);
+      bgCtx.rotate(c.angle);
+
+      // Relleno translúcido
       bgCtx.beginPath();
-      bgCtx.moveTo(sx - hw, base);
-      bgCtx.lineTo(sx, tip);
-      bgCtx.lineTo(sx + hw, base);
+      bgCtx.moveTo(-c.hw, 0);
+      bgCtx.lineTo(0, -c.len);
+      bgCtx.lineTo(c.hw, 0);
       bgCtx.closePath();
-      bgCtx.fillStyle = `rgba(${cR - 10},${cG + 10},${cB},0.26)`;
+      bgCtx.fillStyle = `rgba(${cR - 10},${cG + 10},${cB},0.24)`;
       bgCtx.fill();
 
-      // Faceta izquierda (más brillante)
+      // Faceta brillante (mitad izquierda)
       bgCtx.beginPath();
-      bgCtx.moveTo(sx - hw, base);
-      bgCtx.lineTo(sx, tip);
-      bgCtx.lineTo(sx, base);
+      bgCtx.moveTo(-c.hw, 0);
+      bgCtx.lineTo(0, -c.len);
+      bgCtx.lineTo(0, 0);
       bgCtx.closePath();
       bgCtx.fillStyle = 'rgba(255,255,255,0.20)';
       bgCtx.fill();
 
       // Borde nítido
-      bgCtx.strokeStyle = `rgba(${cR + 50},${cG + 30},255,0.62)`;
+      bgCtx.strokeStyle = `rgba(${cR + 50},${cG + 30},255,0.58)`;
       bgCtx.lineWidth = 1.0;
       bgCtx.beginPath();
-      bgCtx.moveTo(sx - hw, base);
-      bgCtx.lineTo(sx, tip);
-      bgCtx.lineTo(sx + hw, base);
+      bgCtx.moveTo(-c.hw, 0);
+      bgCtx.lineTo(0, -c.len);
+      bgCtx.lineTo(c.hw, 0);
       bgCtx.closePath();
       bgCtx.stroke();
+
+      bgCtx.restore();
     }
 
     // ── Glow interior pulsante ──
     const pulse = 0.5 + 0.5 * Math.sin(t * 0.025 + x * 0.008);
-    const glow  = bgCtx.createRadialGradient(x, y - h * 0.4, 0, x, y - h * 0.4, w * 0.42);
+    const glow  = bgCtx.createRadialGradient(x, y - h * 0.35, 0, x, y - h * 0.35, w * 0.38);
     glow.addColorStop(0, `rgba(${cR},${cG},255,${0.14 * pulse})`);
     glow.addColorStop(1, `rgba(${cR},${cG},255,0)`);
     bgCtx.fillStyle = glow;
     bgCtx.beginPath();
-    bgCtx.ellipse(x, y - h * 0.4, w * 0.42, h * 0.90, 0, 0, Math.PI * 2);
+    bgCtx.ellipse(x, y - h * 0.35, w * 0.38, h * 0.80, 0, 0, Math.PI * 2);
     bgCtx.fill();
 
-    // ── Destellos en las puntas ──
+    // ── Destellos en las puntas (posición real rotada) ──
     const sPulse = 0.5 + 0.5 * Math.abs(Math.sin(t * 0.03 + x * 0.005));
-    const tips = [
-      { ox: 0,       oy: -h * 1.95, r: 2.8 },
-      { ox: -w*0.18, oy: -h * 1.44, r: 1.8 },
-      { ox:  w*0.20, oy: -h * 1.24, r: 1.6 },
-    ];
-    bgCtx.fillStyle = `rgba(255,255,255,${sPulse * 0.85})`;
-    for (const sp of tips) {
+    bgCtx.fillStyle = `rgba(255,255,255,${sPulse * 0.88})`;
+    for (const c of crystals) {
+      // Punta real = base + vector rotado de longitud c.len
+      const tx = (x + c.ox) - Math.sin(c.angle) * c.len;
+      const ty = base        - Math.cos(c.angle) * c.len;
       bgCtx.beginPath();
-      bgCtx.arc(x + sp.ox, y + sp.oy, sp.r * sPulse, 0, Math.PI * 2);
+      bgCtx.arc(tx, ty, 1.8 * sPulse, 0, Math.PI * 2);
       bgCtx.fill();
     }
   }
