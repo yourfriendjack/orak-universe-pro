@@ -369,52 +369,130 @@ const CloudcoreRenderer = (() => {
   }
 
   function drawIsland(x, y, w, h, tint) {
-    // Suelo: elipse con fondo de tierra
-    const r = Math.min(255, 90  + Math.round(Math.max(0, tint) * 40));
-    const g = Math.min(255, 120 + Math.round(Math.max(0, tint) * 20));
-    const b = Math.min(255, 60  - Math.round(Math.max(0, tint) * 20));
+    // Paleta cristal: azul-cian en mediodía, dorado-cian en atardecer
+    const cR = Math.round(100 + Math.max(0, tint) * 80);
+    const cG = Math.round(200 + Math.max(0, tint) * 30);
+    const cB = 255;
 
-    // Sombra difusa debajo
-    const shadowG = bgCtx.createRadialGradient(x, y + h * 0.6, 0, x, y + h * 0.6, w * 0.7);
-    shadowG.addColorStop(0, 'rgba(30,50,100,0.18)');
-    shadowG.addColorStop(1, 'rgba(30,50,100,0)');
-    bgCtx.fillStyle = shadowG;
+    // ── Sombra difusa bajo la isla ──
+    const shad = bgCtx.createRadialGradient(x, y + h * 0.75, 0, x, y + h * 0.75, w * 0.62);
+    shad.addColorStop(0, 'rgba(30,70,160,0.20)');
+    shad.addColorStop(1, 'rgba(30,70,160,0)');
+    bgCtx.fillStyle = shad;
     bgCtx.beginPath();
-    bgCtx.ellipse(x, y + h * 0.9, w * 0.65, h * 0.35, 0, 0, Math.PI * 2);
+    bgCtx.ellipse(x, y + h * 0.82, w * 0.56, h * 0.18, 0, 0, Math.PI * 2);
     bgCtx.fill();
 
-    // Cuerpo de tierra (base rocosa)
-    bgCtx.fillStyle = `rgb(${r - 25},${g - 35},${b - 10})`;
+    // ── Base cristalina (polígono angular) ──
+    const pts = [
+      [x - w*0.50, y + h*0.08],
+      [x - w*0.38, y + h*0.42],
+      [x,          y + h*0.52],
+      [x + w*0.38, y + h*0.42],
+      [x + w*0.50, y + h*0.08],
+      [x + w*0.24, y - h*0.06],
+      [x - w*0.24, y - h*0.06],
+    ];
+
+    // Relleno translúcido
     bgCtx.beginPath();
-    bgCtx.ellipse(x, y + h * 0.35, w * 0.50, h * 0.65, 0, 0, Math.PI * 2);
+    bgCtx.moveTo(...pts[0]);
+    for (let i = 1; i < pts.length; i++) bgCtx.lineTo(...pts[i]);
+    bgCtx.closePath();
+    bgCtx.fillStyle = `rgba(${cR},${cG},${cB},0.18)`;
     bgCtx.fill();
 
-    // Hierba verde encima
-    const grassR = Math.min(255, 55  + Math.round(Math.max(0, tint) * 30));
-    const grassG = Math.min(255, 130 + Math.round(Math.max(0, tint) * 15));
-    const grassB = 45;
-    bgCtx.fillStyle = `rgb(${grassR},${grassG},${grassB})`;
+    // Faceta superior más luminosa
     bgCtx.beginPath();
-    bgCtx.ellipse(x, y, w * 0.52, h * 0.30, 0, 0, Math.PI * 2);
+    bgCtx.moveTo(...pts[6]); bgCtx.lineTo(...pts[5]);
+    bgCtx.lineTo(...pts[4]); bgCtx.lineTo(...pts[0]);
+    bgCtx.closePath();
+    bgCtx.fillStyle = 'rgba(255,255,255,0.16)';
     bgCtx.fill();
 
-    // Brillo en el borde superior de la hierba
-    bgCtx.fillStyle = `rgba(160,220,100,0.35)`;
+    // Borde nítido cristalino
+    bgCtx.strokeStyle = `rgba(${cR + 40},${cG + 20},255,0.55)`;
+    bgCtx.lineWidth = 1.2;
     bgCtx.beginPath();
-    bgCtx.ellipse(x - w * 0.06, y - h * 0.06, w * 0.28, h * 0.12, 0, 0, Math.PI * 2);
-    bgCtx.fill();
-
-    // Arbolito simple (2-3 círculos verdes + tronco)
-    const tx = x + w * 0.12, ty = y - h * 0.25;
-    bgCtx.fillStyle = `rgb(${grassR - 10},${grassG - 20},${grassB})`;
-    bgCtx.beginPath(); bgCtx.arc(tx, ty,       h * 0.22, 0, Math.PI * 2); bgCtx.fill();
-    bgCtx.beginPath(); bgCtx.arc(tx - h*0.12, ty + h*0.10, h * 0.16, 0, Math.PI * 2); bgCtx.fill();
-    bgCtx.beginPath(); bgCtx.arc(tx + h*0.10, ty + h*0.12, h * 0.14, 0, Math.PI * 2); bgCtx.fill();
-    bgCtx.strokeStyle = `rgb(${r - 20},${g - 50},${b - 20})`;
-    bgCtx.lineWidth = h * 0.06;
-    bgCtx.beginPath();
-    bgCtx.moveTo(tx, ty + h * 0.18); bgCtx.lineTo(tx, y - h * 0.02);
+    bgCtx.moveTo(...pts[0]);
+    for (let i = 1; i < pts.length; i++) bgCtx.lineTo(...pts[i]);
+    bgCtx.closePath();
     bgCtx.stroke();
+
+    // Línea de faceta interna
+    bgCtx.strokeStyle = 'rgba(255,255,255,0.22)';
+    bgCtx.lineWidth = 0.8;
+    bgCtx.beginPath();
+    bgCtx.moveTo(...pts[6]); bgCtx.lineTo(x, y + h * 0.18); bgCtx.lineTo(...pts[5]);
+    bgCtx.stroke();
+
+    // ── Espiras de cristal ──
+    const spires = [
+      { ox:  0,       oh: -1.9, hw: 0.17 },  // central (más alta)
+      { ox: -w*0.18,  oh: -1.4, hw: 0.12 },
+      { ox:  w*0.20,  oh: -1.2, hw: 0.11 },
+      { ox: -w*0.32,  oh: -0.9, hw: 0.08 },
+      { ox:  w*0.30,  oh: -0.8, hw: 0.07 },
+    ];
+
+    for (const s of spires) {
+      const sx  = x + s.ox;
+      const base = y - h * 0.04;
+      const tip  = base + s.oh * h;
+      const hw   = w * s.hw;
+
+      // Relleno translúcido espira
+      bgCtx.beginPath();
+      bgCtx.moveTo(sx - hw, base);
+      bgCtx.lineTo(sx, tip);
+      bgCtx.lineTo(sx + hw, base);
+      bgCtx.closePath();
+      bgCtx.fillStyle = `rgba(${cR - 10},${cG + 10},${cB},0.26)`;
+      bgCtx.fill();
+
+      // Faceta izquierda (más brillante)
+      bgCtx.beginPath();
+      bgCtx.moveTo(sx - hw, base);
+      bgCtx.lineTo(sx, tip);
+      bgCtx.lineTo(sx, base);
+      bgCtx.closePath();
+      bgCtx.fillStyle = 'rgba(255,255,255,0.20)';
+      bgCtx.fill();
+
+      // Borde nítido
+      bgCtx.strokeStyle = `rgba(${cR + 50},${cG + 30},255,0.62)`;
+      bgCtx.lineWidth = 1.0;
+      bgCtx.beginPath();
+      bgCtx.moveTo(sx - hw, base);
+      bgCtx.lineTo(sx, tip);
+      bgCtx.lineTo(sx + hw, base);
+      bgCtx.closePath();
+      bgCtx.stroke();
+    }
+
+    // ── Glow interior pulsante ──
+    const pulse = 0.5 + 0.5 * Math.sin(t * 0.025 + x * 0.008);
+    const glow  = bgCtx.createRadialGradient(x, y - h * 0.4, 0, x, y - h * 0.4, w * 0.42);
+    glow.addColorStop(0, `rgba(${cR},${cG},255,${0.14 * pulse})`);
+    glow.addColorStop(1, `rgba(${cR},${cG},255,0)`);
+    bgCtx.fillStyle = glow;
+    bgCtx.beginPath();
+    bgCtx.ellipse(x, y - h * 0.4, w * 0.42, h * 0.90, 0, 0, Math.PI * 2);
+    bgCtx.fill();
+
+    // ── Destellos en las puntas ──
+    const sPulse = 0.5 + 0.5 * Math.abs(Math.sin(t * 0.03 + x * 0.005));
+    const tips = [
+      { ox: 0,       oy: -h * 1.95, r: 2.8 },
+      { ox: -w*0.18, oy: -h * 1.44, r: 1.8 },
+      { ox:  w*0.20, oy: -h * 1.24, r: 1.6 },
+    ];
+    bgCtx.fillStyle = `rgba(255,255,255,${sPulse * 0.85})`;
+    for (const sp of tips) {
+      bgCtx.beginPath();
+      bgCtx.arc(x + sp.ox, y + sp.oy, sp.r * sPulse, 0, Math.PI * 2);
+      bgCtx.fill();
+    }
   }
 
   function drawIslands(W, H, tint) {
@@ -504,8 +582,8 @@ const CloudcoreRenderer = (() => {
     for (const band of bands) {
       bgCtx.beginPath();
       bgCtx.arc(cx, cy, band.r, Math.PI, Math.PI * 2);
-      bgCtx.strokeStyle = `rgba(${band.color},${alpha * 0.28})`;
-      bgCtx.lineWidth   = W * 0.038;
+      bgCtx.strokeStyle = `rgba(${band.color},${alpha * 0.14})`;
+      bgCtx.lineWidth   = W * 0.022;
       bgCtx.stroke();
     }
 
