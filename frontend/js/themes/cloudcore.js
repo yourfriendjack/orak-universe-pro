@@ -6,6 +6,8 @@ const CloudcoreRenderer = (() => {
   let bgCanvas, bgCtx, overCanvas, overCtx;
   let raf, t = 0;
   let clouds = [], dustMotes = [], spawnPuffs = [], stars = [], birdGroups = [];
+  let rainDrops = [], islands = [];
+  let rainPhase = 0, rainAlpha = 0;  // lluvia aparece en transición noche→amanecer
   let mouseX = -999, mouseY = -999, trail = [];
   let _onMove = null, _onClick = null;
 
@@ -351,6 +353,165 @@ const CloudcoreRenderer = (() => {
     bgCtx.restore();
   }
 
+  // ── Islas flotantes ───────────────────────────────────────────
+  const ISLAND_DEFS = [
+    { fx: 0.18, fy: 0.62, w: 110, h: 38, spd: 1.4e-4, bobPhase: 0.0 },
+    { fx: 0.55, fy: 0.70, w: 160, h: 50, spd: 1.0e-4, bobPhase: 1.8 },
+    { fx: 0.80, fy: 0.58, w:  85, h: 28, spd: 1.8e-4, bobPhase: 3.4 },
+  ];
+
+  function initIslands(W, H) {
+    islands = ISLAND_DEFS.map(d => ({
+      ...d,
+      x: d.fx * W,
+      y: d.fy * H,
+    }));
+  }
+
+  function drawIsland(x, y, w, h, tint) {
+    // Suelo: elipse con fondo de tierra
+    const r = Math.min(255, 90  + Math.round(Math.max(0, tint) * 40));
+    const g = Math.min(255, 120 + Math.round(Math.max(0, tint) * 20));
+    const b = Math.min(255, 60  - Math.round(Math.max(0, tint) * 20));
+
+    // Sombra difusa debajo
+    const shadowG = bgCtx.createRadialGradient(x, y + h * 0.6, 0, x, y + h * 0.6, w * 0.7);
+    shadowG.addColorStop(0, 'rgba(30,50,100,0.18)');
+    shadowG.addColorStop(1, 'rgba(30,50,100,0)');
+    bgCtx.fillStyle = shadowG;
+    bgCtx.beginPath();
+    bgCtx.ellipse(x, y + h * 0.9, w * 0.65, h * 0.35, 0, 0, Math.PI * 2);
+    bgCtx.fill();
+
+    // Cuerpo de tierra (base rocosa)
+    bgCtx.fillStyle = `rgb(${r - 25},${g - 35},${b - 10})`;
+    bgCtx.beginPath();
+    bgCtx.ellipse(x, y + h * 0.35, w * 0.50, h * 0.65, 0, 0, Math.PI * 2);
+    bgCtx.fill();
+
+    // Hierba verde encima
+    const grassR = Math.min(255, 55  + Math.round(Math.max(0, tint) * 30));
+    const grassG = Math.min(255, 130 + Math.round(Math.max(0, tint) * 15));
+    const grassB = 45;
+    bgCtx.fillStyle = `rgb(${grassR},${grassG},${grassB})`;
+    bgCtx.beginPath();
+    bgCtx.ellipse(x, y, w * 0.52, h * 0.30, 0, 0, Math.PI * 2);
+    bgCtx.fill();
+
+    // Brillo en el borde superior de la hierba
+    bgCtx.fillStyle = `rgba(160,220,100,0.35)`;
+    bgCtx.beginPath();
+    bgCtx.ellipse(x - w * 0.06, y - h * 0.06, w * 0.28, h * 0.12, 0, 0, Math.PI * 2);
+    bgCtx.fill();
+
+    // Arbolito simple (2-3 círculos verdes + tronco)
+    const tx = x + w * 0.12, ty = y - h * 0.25;
+    bgCtx.fillStyle = `rgb(${grassR - 10},${grassG - 20},${grassB})`;
+    bgCtx.beginPath(); bgCtx.arc(tx, ty,       h * 0.22, 0, Math.PI * 2); bgCtx.fill();
+    bgCtx.beginPath(); bgCtx.arc(tx - h*0.12, ty + h*0.10, h * 0.16, 0, Math.PI * 2); bgCtx.fill();
+    bgCtx.beginPath(); bgCtx.arc(tx + h*0.10, ty + h*0.12, h * 0.14, 0, Math.PI * 2); bgCtx.fill();
+    bgCtx.strokeStyle = `rgb(${r - 20},${g - 50},${b - 20})`;
+    bgCtx.lineWidth = h * 0.06;
+    bgCtx.beginPath();
+    bgCtx.moveTo(tx, ty + h * 0.18); bgCtx.lineTo(tx, y - h * 0.02);
+    bgCtx.stroke();
+  }
+
+  function drawIslands(W, H, tint) {
+    for (const isl of islands) {
+      // Bob suave vertical
+      const bob = Math.sin(t * 0.006 + isl.bobPhase) * 5;
+      // Drift horizontal lento
+      isl.x += isl.spd * W;
+      if (isl.x > W + isl.w + 50) isl.x = -isl.w - 50;
+
+      bgCtx.save();
+      bgCtx.globalAlpha = 0.88;
+      drawIsland(isl.x, isl.y + bob, isl.w, isl.h, tint);
+      bgCtx.restore();
+    }
+  }
+
+  // ── Lluvia ────────────────────────────────────────────────────
+  // Aparece solo en la transición noche→amanecer (phase 0.88–0.05)
+  function initRain(W, H) {
+    rainDrops = Array.from({ length: 200 }, () => ({
+      x:   Math.random() * W,
+      y:   Math.random() * H,
+      len: 8  + Math.random() * 14,
+      spd: 6  + Math.random() * 8,
+      alpha: 0.25 + Math.random() * 0.35,
+    }));
+  }
+
+  function drawRain(W, H, phase) {
+    const p = phase % 1;
+    // Lluvia visible solo en 0.86–0.99 y 0.0–0.06
+    let target = 0;
+    if (p >= 0.86 && p < 0.93)      target = (p - 0.86) / 0.07;
+    else if (p >= 0.93 && p < 0.99) target = 1;
+    else if (p < 0.06)              target = Math.max(0, 1 - p / 0.06);
+
+    rainAlpha += (target - rainAlpha) * 0.04;
+    if (rainAlpha < 0.01) return;
+
+    bgCtx.save();
+    bgCtx.strokeStyle = `rgba(180,210,255,1)`;
+    bgCtx.lineCap = 'round';
+
+    for (const d of rainDrops) {
+      d.y += d.spd;
+      d.x -= d.spd * 0.15;  // leve ángulo con el viento
+      if (d.y > H + 20) { d.y = -20; d.x = Math.random() * W; }
+      if (d.x < -5)     d.x = W + 5;
+
+      bgCtx.globalAlpha = rainAlpha * d.alpha;
+      bgCtx.lineWidth   = 0.8;
+      bgCtx.beginPath();
+      bgCtx.moveTo(d.x, d.y);
+      bgCtx.lineTo(d.x - d.len * 0.15, d.y + d.len);
+      bgCtx.stroke();
+    }
+
+    bgCtx.restore();
+  }
+
+  // ── Arcoíris ─────────────────────────────────────────────────
+  // Aparece justo después de la lluvia, en amanecer (phase 0.02–0.18)
+  function drawRainbow(W, H, phase) {
+    const p = phase % 1;
+    let alpha = 0;
+    if (p >= 0.01 && p < 0.06)       alpha = (p - 0.01) / 0.05;
+    else if (p >= 0.06 && p < 0.14)  alpha = 1;
+    else if (p >= 0.14 && p < 0.22)  alpha = 1 - (p - 0.14) / 0.08;
+    if (alpha <= 0.01) return;
+
+    const cx = W * 0.5;
+    const cy = H * 0.92;  // centro del arco debajo de la pantalla
+    const bands = [
+      { r: W * 0.72, color: '255,60,60'   },  // rojo
+      { r: W * 0.66, color: '255,140,0'   },  // naranja
+      { r: W * 0.60, color: '255,230,0'   },  // amarillo
+      { r: W * 0.54, color: '60,200,60'   },  // verde
+      { r: W * 0.48, color: '40,140,255'  },  // azul
+      { r: W * 0.42, color: '120,60,220'  },  // índigo
+      { r: W * 0.36, color: '200,60,220'  },  // violeta
+    ];
+
+    bgCtx.save();
+    bgCtx.globalCompositeOperation = 'screen';
+
+    for (const band of bands) {
+      bgCtx.beginPath();
+      bgCtx.arc(cx, cy, band.r, Math.PI, Math.PI * 2);
+      bgCtx.strokeStyle = `rgba(${band.color},${alpha * 0.28})`;
+      bgCtx.lineWidth   = W * 0.038;
+      bgCtx.stroke();
+    }
+
+    bgCtx.restore();
+  }
+
   // ── Polvo de luz ──────────────────────────────────────────────
   function initDust(W, H) {
     dustMotes = Array.from({ length: 55 }, () => ({
@@ -461,7 +622,10 @@ const CloudcoreRenderer = (() => {
     drawGodRays(W, H, phase);
     drawCelestialBody(W, H, phase);
     drawClouds(W, H, tint);
+    drawIslands(W, H, tint);
     drawBirds(W, H, phase);
+    drawRain(W, H, phase);
+    drawRainbow(W, H, phase);
     drawSpawnPuffs(tint);
     drawDust(W, H);
     drawCursor(W, H);
@@ -476,6 +640,8 @@ const CloudcoreRenderer = (() => {
     overCanvas.width = W; overCanvas.height = H;
     initClouds(W, H);
     initBirds(W, H);
+    initIslands(W, H);
+    initRain(W, H);
     initDust(W, H);
     initStars(W, H);
   }
@@ -523,6 +689,7 @@ const CloudcoreRenderer = (() => {
       bgCanvas.remove();   bgCanvas   = bgCtx   = null;
       overCanvas.remove(); overCanvas = overCtx = null;
       clouds = []; dustMotes = []; spawnPuffs = []; stars = []; birdGroups = [];
+      rainDrops = []; islands = []; rainAlpha = 0;
       trail  = [];
       mouseX = mouseY = -999; raf = null; t = 0;
     },
