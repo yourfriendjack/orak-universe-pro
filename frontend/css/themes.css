@@ -2277,3 +2277,117 @@ html.theme-vaporwave .auth-card {
 html.theme-vaporwave .auth-glow {
   background: radial-gradient(ellipse at 50% 0%, rgba(200, 0, 160, 0.28) 0%, transparent 65%);
 }
+
+/* ── CLOUDCORE — El Cielo Vive ───────────────────────────────── */
+html.theme-cloudcore {
+  --page:      #87ceeb;
+  --mist:      #ddeeff;
+  --fog:       #3a6090;
+  --ink:       #1a2a40;
+  --gold:      #e8a020;
+  --amber:     #3a80c0;
+  --amber-dim: #2a60a0;
+  --rust:      #c04040;
+  --deep:      #0a1828;
+  --white:     #f0f8ff;
+  --parchment: #e0f0ff;
+  background:  #87ceeb !important;
+}
+html.theme-cloudcore body { background: transparent !important; }
+
+/* Paneles — cristal blanco */
+html.theme-cloudcore .post-card,
+html.theme-cloudcore .profile-card,
+html.theme-cloudcore .feed-center,
+html.theme-cloudcore .left-sidebar,
+html.theme-cloudcore .right-sidebar {
+  background: rgba(255,255,255,0.78) !important;
+  border-color: rgba(180,220,255,0.55) !important;
+  backdrop-filter: blur(14px) saturate(1.4);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  box-shadow:
+    0 2px 18px rgba(60,120,200,0.10),
+    inset 0 1px 0 rgba(255,255,255,0.80);
+}
+html.theme-cloudcore .post-card:hover {
+  border-color: rgba(80,160,240,0.50) !important;
+  box-shadow:
+    0 4px 28px rgba(60,140,220,0.18),
+    inset 0 1px 0 rgba(255,255,255,0.90);
+}
+
+/* Topbar */
+html.theme-cloudcore .topbar {
+  background: rgba(255,255,255,0.72) !important;
+  backdrop-filter: blur(18px) saturate(1.5);
+  -webkit-backdrop-filter: blur(18px) saturate(1.5);
+  border-bottom: 1px solid rgba(160,210,255,0.45) !important;
+}
+html.theme-cloudcore .sidebar { border-right: 1px solid rgba(160,210,255,0.30) !important; }
+
+/* Feed widgets */
+html.theme-cloudcore .feed-widgets {
+  background: rgba(255,255,255,0.75);
+  border: 1px solid rgba(160,210,255,0.35);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* Buscador */
+html.theme-cloudcore .topbar-search,
+html.theme-cloudcore .topbar-search input {
+  background: rgba(220,240,255,0.88) !important;
+  color: #1a2a40 !important;
+  border-color: rgba(100,170,230,0.35) !important;
+}
+
+/* Orun pill */
+html.theme-cloudcore .orun-pill {
+  background: rgba(220,240,255,0.90) !important;
+  color: #1a2a40 !important;
+  border: 1px solid rgba(100,160,220,0.30) !important;
+}
+
+/* Notificaciones */
+html.theme-cloudcore .notif-btn { color: var(--fog) !important; }
+html.theme-cloudcore .notif-btn:hover { background: rgba(100,160,220,0.18) !important; }
+
+/* Botones de acción */
+html.theme-cloudcore .btn-action,
+html.theme-cloudcore .action-btn {
+  color: rgba(40,100,180,0.70);
+  border-color: rgba(80,150,220,0.20);
+}
+html.theme-cloudcore .btn-action:hover { color: #3a80c0; border-color: rgba(58,128,192,0.45); }
+
+/* Botón escribir */
+html.theme-cloudcore .write-btn {
+  background: linear-gradient(135deg, #3a80c0 0%, #1a50a0 100%);
+  color: #ffffff;
+  box-shadow: 0 2px 16px rgba(40,100,200,0.30), inset 0 1px 0 rgba(255,255,255,0.25);
+  transition: all .38s cubic-bezier(.22,.78,.28,1);
+}
+html.theme-cloudcore .write-btn:hover {
+  background: linear-gradient(135deg, #5a9ad8 0%, #2a60c0 100%);
+  box-shadow: 0 0 28px rgba(60,140,240,0.40), 0 4px 20px rgba(20,60,160,.25);
+  transform: translateY(-2px);
+}
+
+/* Texto */
+html.theme-cloudcore .post-content,
+html.theme-cloudcore .post-author,
+html.theme-cloudcore .eco-label { color: rgba(20,40,70,0.90); }
+html.theme-cloudcore .post-meta,
+html.theme-cloudcore .widget-label { color: rgba(60,100,150,0.60); }
+
+/* Auth */
+html.theme-cloudcore .auth-card {
+  background: rgba(240,250,255,0.95) !important;
+  border-color: rgba(100,180,255,0.30) !important;
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  box-shadow: 0 8px 48px rgba(60,100,200,.18), inset 0 1px 0 rgba(255,255,255,.90);
+}
+html.theme-cloudcore .auth-glow {
+  background: radial-gradient(ellipse at 50% 0%, rgba(100,180,255,0.22) 0%, transparent 65%);
+}
