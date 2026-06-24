@@ -5,7 +5,7 @@ const CloudcoreRenderer = (() => {
   // ── State ─────────────────────────────────────────────────────
   let bgCanvas, bgCtx, overCanvas, overCtx;
   let raf, t = 0;
-  let clouds = [], dustMotes = [], spawnPuffs = [], stars = [];
+  let clouds = [], dustMotes = [], spawnPuffs = [], stars = [], birdGroups = [];
   let mouseX = -999, mouseY = -999, trail = [];
   let _onMove = null, _onClick = null;
 
@@ -271,6 +271,86 @@ const CloudcoreRenderer = (() => {
     bgCtx.restore();
   }
 
+  // ── Pájaros ───────────────────────────────────────────────────
+  // 4 bandadas: 2 hacia la derecha, 2 hacia la izquierda, en distintas alturas
+  const FLOCK_DEFS = [
+    { count: 6, yFrac: 0.11, spd: 3.8e-4, size: 5.0, dir:  1, flapHz: 0.09 },
+    { count: 9, yFrac: 0.19, spd: 2.8e-4, size: 3.5, dir: -1, flapHz: 0.07 },
+    { count: 5, yFrac: 0.07, spd: 2.2e-4, size: 3.0, dir:  1, flapHz: 0.08 },
+    { count: 7, yFrac: 0.15, spd: 3.2e-4, size: 4.5, dir: -1, flapHz: 0.10 },
+  ];
+
+  function makeBird(i, size) {
+    // Formación en V: líder al frente, pares atrás en diagonal
+    if (i === 0) return { dx: 0,  dy: 0,  fo: 0 };
+    const row  = Math.ceil(i / 2);
+    const side = i % 2 === 1 ? -1 : 1;
+    return {
+      dx: side * row * size * 4.2,
+      dy: row  * size * 2.4,
+      fo: row  * 0.18 + Math.random() * 0.12,  // leve desfase de aleteo por fila
+    };
+  }
+
+  function initBirds(W, H) {
+    birdGroups = FLOCK_DEFS.map(d => ({
+      ...d,
+      // Stagger: cada bandada empieza en distinto punto del recorrido
+      x:         d.dir > 0 ? Math.random() * W * 1.5 - W * 0.2
+                            : W * 0.2 + Math.random() * W * 1.5,
+      y:         d.yFrac * H,
+      flapPhase: Math.random() * Math.PI * 2,
+      birds:     Array.from({ length: d.count }, (_, i) => makeBird(i, d.size)),
+    }));
+  }
+
+  function drawBirdWing(ctx, x, y, size, flap) {
+    // Dos curvitas de bezier formando la W clásica del pájaro en vuelo
+    const wh = flap * size * 0.42;
+    ctx.beginPath();
+    ctx.moveTo(x - size, y + size * 0.12);
+    ctx.quadraticCurveTo(x - size * 0.45, y - wh, x, y);
+    ctx.quadraticCurveTo(x + size * 0.45, y - wh, x + size, y + size * 0.12);
+    ctx.stroke();
+  }
+
+  function drawBirds(W, H, phase) {
+    // Desvanecer durante noche
+    const p = phase % 1;
+    let alpha = 1;
+    if (p >= 0.76 && p < 0.86) alpha = 1 - (p - 0.76) / 0.10;
+    else if (p >= 0.86 && p < 0.99) alpha = 0;
+    else if (p < 0.04) alpha = p / 0.04;
+    if (alpha <= 0) return;
+
+    bgCtx.save();
+    bgCtx.lineCap = 'round';
+
+    for (const g of birdGroups) {
+      // Avanzar bandada
+      g.x += g.dir * g.spd * W;
+      if (g.dir >  0 && g.x >  W + 300) g.x = -300;
+      if (g.dir < -0 && g.x < -300)     g.x =  W + 300;
+
+      // Color de silueta cambia con el ciclo: azul-oscuro de día, naranja en atardecer
+      const tint    = getTint(phase);
+      const r       = Math.round(25  + Math.max(0, tint) * 80);
+      const gC      = Math.round(40  + Math.max(0, tint) * 40);
+      const b       = Math.round(65  - Math.max(0, tint) * 40);
+      bgCtx.strokeStyle = `rgba(${r},${gC},${b},${alpha * 0.80})`;
+
+      for (const bird of g.birds) {
+        const bx   = g.x + bird.dx;
+        const by   = g.y + bird.dy;
+        const flap = Math.sin(t * g.flapHz + g.flapPhase + bird.fo);
+        bgCtx.lineWidth = g.size * 0.30;
+        drawBirdWing(bgCtx, bx, by, g.size, flap);
+      }
+    }
+
+    bgCtx.restore();
+  }
+
   // ── Polvo de luz ──────────────────────────────────────────────
   function initDust(W, H) {
     dustMotes = Array.from({ length: 55 }, () => ({
@@ -381,6 +461,7 @@ const CloudcoreRenderer = (() => {
     drawGodRays(W, H, phase);
     drawCelestialBody(W, H, phase);
     drawClouds(W, H, tint);
+    drawBirds(W, H, phase);
     drawSpawnPuffs(tint);
     drawDust(W, H);
     drawCursor(W, H);
@@ -394,6 +475,7 @@ const CloudcoreRenderer = (() => {
     bgCanvas.width  = W; bgCanvas.height  = H;
     overCanvas.width = W; overCanvas.height = H;
     initClouds(W, H);
+    initBirds(W, H);
     initDust(W, H);
     initStars(W, H);
   }
@@ -440,7 +522,7 @@ const CloudcoreRenderer = (() => {
       if (_onClick) { document.removeEventListener('click',     _onClick); _onClick = null; }
       bgCanvas.remove();   bgCanvas   = bgCtx   = null;
       overCanvas.remove(); overCanvas = overCtx = null;
-      clouds = []; dustMotes = []; spawnPuffs = []; stars = [];
+      clouds = []; dustMotes = []; spawnPuffs = []; stars = []; birdGroups = [];
       trail  = [];
       mouseX = mouseY = -999; raf = null; t = 0;
     },
