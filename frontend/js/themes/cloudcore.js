@@ -6,7 +6,7 @@ const CloudcoreRenderer = (() => {
   let bgCanvas, bgCtx, overCanvas, overCtx;
   let raf, t = 0;
   let clouds = [], dustMotes = [], spawnPuffs = [], stars = [], birdGroups = [];
-  let rainDrops = [], islands = [];
+  let rainDrops = [];
   let rainPhase = 0, rainAlpha = 0;  // lluvia aparece en transición noche→amanecer
   let mouseX = -999, mouseY = -999, trail = [];
   let _onMove = null, _onClick = null;
@@ -353,167 +353,6 @@ const CloudcoreRenderer = (() => {
     bgCtx.restore();
   }
 
-  // ── Islas flotantes ───────────────────────────────────────────
-  const ISLAND_DEFS = [
-    { fx: 0.18, fy: 0.62, w: 110, h: 38, spd: 1.4e-4, bobPhase: 0.0 },
-    { fx: 0.55, fy: 0.70, w: 160, h: 50, spd: 1.0e-4, bobPhase: 1.8 },
-    { fx: 0.80, fy: 0.58, w:  85, h: 28, spd: 1.8e-4, bobPhase: 3.4 },
-  ];
-
-  function initIslands(W, H) {
-    islands = ISLAND_DEFS.map(d => ({
-      ...d,
-      x: d.fx * W,
-      y: d.fy * H,
-    }));
-  }
-
-  function drawIsland(x, y, w, h, tint) {
-    // Paleta cristal: azul-cian en mediodía, dorado-cian en atardecer
-    const cR = Math.round(100 + Math.max(0, tint) * 80);
-    const cG = Math.round(200 + Math.max(0, tint) * 30);
-    const cB = 255;
-
-    // ── Sombra difusa bajo la isla ──
-    const shad = bgCtx.createRadialGradient(x, y + h * 0.75, 0, x, y + h * 0.75, w * 0.62);
-    shad.addColorStop(0, 'rgba(30,70,160,0.20)');
-    shad.addColorStop(1, 'rgba(30,70,160,0)');
-    bgCtx.fillStyle = shad;
-    bgCtx.beginPath();
-    bgCtx.ellipse(x, y + h * 0.82, w * 0.56, h * 0.18, 0, 0, Math.PI * 2);
-    bgCtx.fill();
-
-    // ── Base cristalina (polígono angular) ──
-    const pts = [
-      [x - w*0.50, y + h*0.08],
-      [x - w*0.38, y + h*0.42],
-      [x,          y + h*0.52],
-      [x + w*0.38, y + h*0.42],
-      [x + w*0.50, y + h*0.08],
-      [x + w*0.24, y - h*0.06],
-      [x - w*0.24, y - h*0.06],
-    ];
-
-    // Relleno translúcido
-    bgCtx.beginPath();
-    bgCtx.moveTo(...pts[0]);
-    for (let i = 1; i < pts.length; i++) bgCtx.lineTo(...pts[i]);
-    bgCtx.closePath();
-    bgCtx.fillStyle = `rgba(${cR},${cG},${cB},0.18)`;
-    bgCtx.fill();
-
-    // Faceta superior más luminosa
-    bgCtx.beginPath();
-    bgCtx.moveTo(...pts[6]); bgCtx.lineTo(...pts[5]);
-    bgCtx.lineTo(...pts[4]); bgCtx.lineTo(...pts[0]);
-    bgCtx.closePath();
-    bgCtx.fillStyle = 'rgba(255,255,255,0.16)';
-    bgCtx.fill();
-
-    // Borde nítido cristalino
-    bgCtx.strokeStyle = `rgba(${cR + 40},${cG + 20},255,0.55)`;
-    bgCtx.lineWidth = 1.2;
-    bgCtx.beginPath();
-    bgCtx.moveTo(...pts[0]);
-    for (let i = 1; i < pts.length; i++) bgCtx.lineTo(...pts[i]);
-    bgCtx.closePath();
-    bgCtx.stroke();
-
-    // Línea de faceta interna
-    bgCtx.strokeStyle = 'rgba(255,255,255,0.22)';
-    bgCtx.lineWidth = 0.8;
-    bgCtx.beginPath();
-    bgCtx.moveTo(...pts[6]); bgCtx.lineTo(x, y + h * 0.18); bgCtx.lineTo(...pts[5]);
-    bgCtx.stroke();
-
-    // ── Cristales inclinados (geodo, no montañas) ──
-    // Cada cristal se dibuja con rotate para inclinar en distintas direcciones
-    const crystals = [
-      { ox: -w*0.08, len: h*1.10, hw: w*0.095, angle: -0.38 },  // inclinado izquierda
-      { ox:  w*0.12, len: h*0.90, hw: w*0.080, angle:  0.28 },  // inclinado derecha
-      { ox: -w*0.26, len: h*0.75, hw: w*0.065, angle: -0.62 },  // muy inclinado izq
-      { ox:  w*0.28, len: h*0.70, hw: w*0.060, angle:  0.55 },  // muy inclinado der
-      { ox:  0,      len: h*0.82, hw: w*0.055, angle:  0.08 },  // casi vertical, leve sesgo
-    ];
-
-    const base = y - h * 0.04;
-
-    for (const c of crystals) {
-      const sx = x + c.ox;
-
-      bgCtx.save();
-      bgCtx.translate(sx, base);
-      bgCtx.rotate(c.angle);
-
-      // Relleno translúcido
-      bgCtx.beginPath();
-      bgCtx.moveTo(-c.hw, 0);
-      bgCtx.lineTo(0, -c.len);
-      bgCtx.lineTo(c.hw, 0);
-      bgCtx.closePath();
-      bgCtx.fillStyle = `rgba(${cR - 10},${cG + 10},${cB},0.24)`;
-      bgCtx.fill();
-
-      // Faceta brillante (mitad izquierda)
-      bgCtx.beginPath();
-      bgCtx.moveTo(-c.hw, 0);
-      bgCtx.lineTo(0, -c.len);
-      bgCtx.lineTo(0, 0);
-      bgCtx.closePath();
-      bgCtx.fillStyle = 'rgba(255,255,255,0.20)';
-      bgCtx.fill();
-
-      // Borde nítido
-      bgCtx.strokeStyle = `rgba(${cR + 50},${cG + 30},255,0.58)`;
-      bgCtx.lineWidth = 1.0;
-      bgCtx.beginPath();
-      bgCtx.moveTo(-c.hw, 0);
-      bgCtx.lineTo(0, -c.len);
-      bgCtx.lineTo(c.hw, 0);
-      bgCtx.closePath();
-      bgCtx.stroke();
-
-      bgCtx.restore();
-    }
-
-    // ── Glow interior pulsante ──
-    const pulse = 0.5 + 0.5 * Math.sin(t * 0.025 + x * 0.008);
-    const glow  = bgCtx.createRadialGradient(x, y - h * 0.35, 0, x, y - h * 0.35, w * 0.38);
-    glow.addColorStop(0, `rgba(${cR},${cG},255,${0.14 * pulse})`);
-    glow.addColorStop(1, `rgba(${cR},${cG},255,0)`);
-    bgCtx.fillStyle = glow;
-    bgCtx.beginPath();
-    bgCtx.ellipse(x, y - h * 0.35, w * 0.38, h * 0.80, 0, 0, Math.PI * 2);
-    bgCtx.fill();
-
-    // ── Destellos en las puntas (posición real rotada) ──
-    const sPulse = 0.5 + 0.5 * Math.abs(Math.sin(t * 0.03 + x * 0.005));
-    bgCtx.fillStyle = `rgba(255,255,255,${sPulse * 0.88})`;
-    for (const c of crystals) {
-      // Punta real = base + vector rotado de longitud c.len
-      const tx = (x + c.ox) - Math.sin(c.angle) * c.len;
-      const ty = base        - Math.cos(c.angle) * c.len;
-      bgCtx.beginPath();
-      bgCtx.arc(tx, ty, 1.8 * sPulse, 0, Math.PI * 2);
-      bgCtx.fill();
-    }
-  }
-
-  function drawIslands(W, H, tint) {
-    for (const isl of islands) {
-      // Bob suave vertical
-      const bob = Math.sin(t * 0.006 + isl.bobPhase) * 5;
-      // Drift horizontal lento
-      isl.x += isl.spd * W;
-      if (isl.x > W + isl.w + 50) isl.x = -isl.w - 50;
-
-      bgCtx.save();
-      bgCtx.globalAlpha = 0.88;
-      drawIsland(isl.x, isl.y + bob, isl.w, isl.h, tint);
-      bgCtx.restore();
-    }
-  }
-
   // ── Lluvia ────────────────────────────────────────────────────
   // Aparece solo en la transición noche→amanecer (phase 0.88–0.05)
   function initRain(W, H) {
@@ -704,7 +543,6 @@ const CloudcoreRenderer = (() => {
     drawGodRays(W, H, phase);
     drawCelestialBody(W, H, phase);
     drawClouds(W, H, tint);
-    drawIslands(W, H, tint);
     drawBirds(W, H, phase);
     drawRain(W, H, phase);
     drawRainbow(W, H, phase);
@@ -722,7 +560,6 @@ const CloudcoreRenderer = (() => {
     overCanvas.width = W; overCanvas.height = H;
     initClouds(W, H);
     initBirds(W, H);
-    initIslands(W, H);
     initRain(W, H);
     initDust(W, H);
     initStars(W, H);
@@ -771,7 +608,7 @@ const CloudcoreRenderer = (() => {
       bgCanvas.remove();   bgCanvas   = bgCtx   = null;
       overCanvas.remove(); overCanvas = overCtx = null;
       clouds = []; dustMotes = []; spawnPuffs = []; stars = []; birdGroups = [];
-      rainDrops = []; islands = []; rainAlpha = 0;
+      rainDrops = []; rainAlpha = 0;
       trail  = [];
       mouseX = mouseY = -999; raf = null; t = 0;
     },
