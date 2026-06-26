@@ -327,6 +327,34 @@ a{text-decoration:none;color:inherit;}
 .prof-stat-num.blue{color:var(--glimmer);}
 .prof-stat:hover .prof-stat-num{color:var(--amber-dim);}
 .prof-stat-lbl{font-family:'JetBrains Mono',monospace;font-size:.55rem;letter-spacing:.1em;text-transform:uppercase;color:var(--fog);margin-top:1px;}
+
+/* ── Dropdown seguidores / siguiendo ───────────────────────── */
+.prof-stat.has-dropdown{position:relative;}
+.prof-stat.has-dropdown .prof-stat-lbl::after{content:' ›';opacity:.45;font-style:normal;}
+.follows-dropdown{
+  position:absolute;top:calc(100% + 10px);left:50%;transform:translateX(-50%);
+  width:230px;background:var(--page);border:1px solid var(--fog);
+  border-radius:12px;box-shadow:0 10px 28px rgba(0,0,0,.18);
+  z-index:300;display:none;overflow:hidden;
+}
+.follows-dropdown.open{display:block;animation:fd-in .14s ease;}
+@keyframes fd-in{from{opacity:0;transform:translateX(-50%) translateY(-6px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}
+.follows-dropdown-title{
+  font-family:'JetBrains Mono',monospace;font-size:.54rem;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--fog);
+  padding:10px 14px 8px;border-bottom:1px solid var(--fog);
+}
+.follows-list{max-height:260px;overflow-y:auto;}
+.follows-list::-webkit-scrollbar{width:3px;}
+.follows-list::-webkit-scrollbar-thumb{background:var(--fog);border-radius:2px;}
+.follow-row{display:flex;align-items:center;gap:10px;padding:9px 14px;cursor:pointer;transition:background .13s;}
+.follow-row:hover{background:var(--mist);}
+.follow-row-av{width:30px;height:30px;border-radius:50%;background:var(--fog) center/cover no-repeat;flex-shrink:0;}
+.follow-row-info{min-width:0;}
+.follow-row-name{font-size:.78rem;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.follow-row-handle{font-size:.62rem;color:var(--fog);}
+.follows-empty,.follows-loading{padding:16px;font-style:italic;color:var(--fog);font-size:.72rem;text-align:center;}
+
 .prof-tabs-row{display:flex;border-bottom:1px solid var(--fog);padding:0 26px;}
 .ptab{font-family:'JetBrains Mono',monospace;font-size:.62rem;letter-spacing:.06em;text-transform:uppercase;padding:11px 14px 9px;cursor:pointer;color:var(--fog);border-bottom:2px solid transparent;transition:all var(--transition);}
 .ptab:hover{color:var(--ink);}

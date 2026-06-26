@@ -274,8 +274,22 @@
       </div>
       <div class="prof-stats">
         <div class="prof-stat"><div class="prof-stat-num" id="ps-libros">—</div><div class="prof-stat-lbl">Libros</div></div>
-        <div class="prof-stat"><div class="prof-stat-num" id="ps-seg">—</div><div class="prof-stat-lbl">Seguidores</div></div>
-        <div class="prof-stat"><div class="prof-stat-num" id="ps-sig">—</div><div class="prof-stat-lbl">Siguiendo</div></div>
+        <div class="prof-stat has-dropdown" id="stat-seg" onclick="toggleFollowsPanel('seg',event)">
+          <div class="prof-stat-num" id="ps-seg">—</div>
+          <div class="prof-stat-lbl">Seguidores</div>
+          <div class="follows-dropdown" id="fd-seg" onclick="event.stopPropagation()">
+            <div class="follows-dropdown-title">Seguidores</div>
+            <div class="follows-list" id="fl-seg"></div>
+          </div>
+        </div>
+        <div class="prof-stat has-dropdown" id="stat-sig" onclick="toggleFollowsPanel('sig',event)">
+          <div class="prof-stat-num" id="ps-sig">—</div>
+          <div class="prof-stat-lbl">Siguiendo</div>
+          <div class="follows-dropdown" id="fd-sig" onclick="event.stopPropagation()">
+            <div class="follows-dropdown-title">Siguiendo</div>
+            <div class="follows-list" id="fl-sig"></div>
+          </div>
+        </div>
         <div class="prof-stat"><div class="prof-stat-num gold" id="ps-oruns">—</div><div class="prof-stat-lbl">Oruns</div></div>
         <div class="prof-stat"><div class="prof-stat-num blue" id="ps-glimmers">—</div><div class="prof-stat-lbl">Glimmers</div></div>
       </div>
@@ -1355,6 +1369,58 @@ document.addEventListener('click', e => {
     closeNotifPanel();
 });
 document.getElementById('glimmer-modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal('glimmer-modal'); });
+
+// ── PANEL SEGUIDORES / SIGUIENDO ────────────────────────────────
+window.toggleFollowsPanel = async (which, e) => {
+  e.stopPropagation();
+  const panel = document.getElementById(`fd-${which}`);
+  const other = document.getElementById(`fd-${which === 'seg' ? 'sig' : 'seg'}`);
+  if (!panel) return;
+  other?.classList.remove('open');
+
+  const wasOpen = panel.classList.contains('open');
+  panel.classList.toggle('open');
+  if (wasOpen) return;
+
+  // carga fresca cada vez que se abre
+  const meId = getPerfil()?.id;
+  if (!meId) return;
+  const list = document.getElementById(`fl-${which}`);
+  list.innerHTML = '<div class="follows-loading">Cargando…</div>';
+
+  const endpoint = which === 'seg'
+    ? `/api/social/follows/seguidores/${meId}`
+    : `/api/social/follows/siguiendo/${meId}`;
+
+  try {
+    const data = await apiGet(endpoint, getToken());
+    if (!data?.length) {
+      list.innerHTML = '<div class="follows-empty">Ninguno todavía</div>';
+      return;
+    }
+    list.innerHTML = data.map(row => {
+      const p      = row.perfiles || {};
+      const name   = p.display_name || p.username || '—';
+      const handle = p.username || '';
+      const av     = p.avatar_url  || '';
+      return `<div class="follow-row">
+        <div class="follow-row-av" style="${av ? `background-image:url(${av})` : ''}"></div>
+        <div class="follow-row-info">
+          <div class="follow-row-name">${name}</div>
+          <div class="follow-row-handle">@${handle}</div>
+        </div>
+      </div>`;
+    }).join('');
+  } catch {
+    list.innerHTML = '<div class="follows-empty">Error al cargar</div>';
+  }
+};
+
+// cierre al hacer clic fuera de ambos paneles
+document.addEventListener('click', () => {
+  document.getElementById('fd-seg')?.classList.remove('open');
+  document.getElementById('fd-sig')?.classList.remove('open');
+});
 </script>
 
 <!-- ══════════════════════════════════════════════════════════
