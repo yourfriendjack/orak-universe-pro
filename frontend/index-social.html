@@ -120,19 +120,11 @@
         </g>
       </svg>ORAK
     </div>
-    <input class="topbar-search" type="text" placeholder="Buscar libros, escritores…">
-    <nav class="topbar-nav">
-      <button class="tnav active" id="tnav-feed"    onclick="goView('feed')"><svg class="orak-icon icon-feed" viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="10" cy="10" r="7.5"/><circle class="icon-orbit" cx="10" cy="10" r="4.5" stroke-opacity=".45"/><circle class="icon-pupil" cx="10" cy="10" r="1.8" fill="currentColor" stroke="none"/></svg> Feed</button>
-      <button class="tnav"        id="tnav-explore" onclick="goView('explore')"><svg class="orak-icon icon-explore" viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="10" cy="10" r="8"/><line x1="10" y1="2.5" x2="10" y2="4.5"/><line x1="10" y1="15.5" x2="10" y2="17.5"/><line x1="2.5" y1="10" x2="4.5" y2="10"/><line x1="15.5" y1="10" x2="17.5" y2="10"/><polygon points="10,6.5 12,13.5 10,11.5 8,13.5" fill="currentColor" stroke="none"/></svg> Explorar</button>
-      <button class="tnav"        id="tnav-people"  onclick="goView('people')"><svg class="orak-icon icon-people" viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.3"><polygon points="10,3 17,15 3,15"/><circle cx="10" cy="9" r="1.2" fill="currentColor" stroke="none"/><line x1="7" y1="12" x2="10" y2="9"/><line x1="13" y1="12" x2="10" y2="9"/></svg> Escritores</button>
-      <button class="tnav"        id="tnav-profile" onclick="goView('profile')"><svg class="orak-icon icon-profile" viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M10 2 a8 8 0 0 1 0 16 A8 8 0 0 1 10 2z"/><path d="M10 2 a8 8 0 0 0 0 16" fill="currentColor" fill-opacity=".18" stroke="none"/><circle cx="10" cy="10" r="2.5" stroke-opacity=".5"/></svg> Mi Perfil</button>
-    </nav>
     <div class="topbar-right">
       <button class="notif-btn" id="notif-btn" onclick="toggleNotif()">
-        <span class="notif-sigil"></span>
+        <svg class="orak-icon icon-notif" viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.3"><polygon points="10,2 12.2,7.8 18.5,8.1 13.8,12.2 15.5,18.3 10,15 4.5,18.3 6.2,12.2 1.5,8.1 7.8,7.8"/></svg>
         <div class="notif-dot" id="notif-dot"></div>
       </button>
-      <div class="orun-pill">⬡ <span id="orun-display">—</span> Oruns</div>
       <div class="user-av" id="topbar-av" onclick="goView('profile')">…</div>
     </div>
   </header>
@@ -1968,8 +1960,6 @@ const _origLoadPeople = window.loadPeople;
 
 @media (max-width: 900px) {
   .hamburger-btn{display:flex;}
-  .topbar-nav{display:none;}
-  .topbar-search{max-width:none;flex:1;}
   .app-body{grid-template-columns:1fr;}
   .sidebar{
     position:fixed;top:0;left:0;height:100vh;width:240px;z-index:200;
@@ -1993,7 +1983,6 @@ const _origLoadPeople = window.loadPeople;
   .prof-stats{padding:0 14px 14px;gap:14px;flex-wrap:wrap;}
   .prof-tabs-row{padding:0 14px;}
   .ptab-pane{padding:14px;}
-  .orun-pill{font-size:.6rem;padding:4px 8px;}
   .notif-panel{width:calc(100vw - 24px);right:12px;}
 }
 
@@ -2001,7 +1990,6 @@ const _origLoadPeople = window.loadPeople;
   .topbar{padding:0 12px;gap:8px;}
   .logo{font-size:.85rem;}
   .logo svg{width:24px;height:24px;}
-  .topbar-search{display:none;}
   .composer-input{font-size:.95rem;}
   .post-text{font-size:.92rem;}
   .books-grid{grid-template-columns:repeat(2,1fr);}

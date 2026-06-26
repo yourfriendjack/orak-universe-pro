@@ -96,22 +96,14 @@ a{text-decoration:none;color:inherit;}
   display:flex;align-items:center;gap:12px;padding:0 20px;
 }
 .logo{display:flex;align-items:center;gap:8px;font-family:'Cinzel',serif;font-weight:900;font-size:1rem;letter-spacing:.12em;flex-shrink:0;cursor:pointer;}
-.topbar-search{flex:1;max-width:260px;background:var(--mist);border:1px solid var(--fog);border-radius:var(--radius-sm);padding:7px 14px;font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--ink);outline:none;transition:all var(--transition);}
-.topbar-search:focus{border-color:var(--amber);background:var(--white);}
-.topbar-search::placeholder{color:var(--fog);}
-.topbar-nav{display:flex;gap:2px;margin-left:4px;}
-.tnav{display:flex;align-items:center;gap:5px;padding:7px 12px;border-radius:var(--radius-sm);font-family:'JetBrains Mono',monospace;font-size:.64rem;letter-spacing:.05em;text-transform:uppercase;color:var(--fog);cursor:pointer;transition:all var(--transition);border:none;background:none;}
-.tnav:hover{background:var(--mist);color:var(--ink);}
-.tnav.active{background:var(--ink);color:var(--gold);}
 .topbar-right{margin-left:auto;display:flex;align-items:center;gap:10px;}
-.notif-btn{width:34px;height:34px;border-radius:50%;background:var(--mist);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;position:relative;transition:background var(--transition);}
-.notif-btn:hover{background:var(--fog);}
-.notif-sigil{display:block;width:16px;height:16px;clip-path:polygon(50% 0%,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);background:var(--fog);transition:background var(--transition),filter var(--transition);}
-.notif-btn:hover .notif-sigil{background:var(--ink);}
-.notif-btn:has(.notif-dot.show) .notif-sigil{background:var(--amber);filter:drop-shadow(0 0 5px rgba(212,168,67,.55));}
+.notif-btn{width:34px;height:34px;border-radius:50%;background:var(--mist);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;position:relative;color:var(--fog);transition:background var(--transition),color var(--transition);}
+.notif-btn:hover,.notif-btn:active{background:var(--fog);color:var(--ink);}
+.notif-btn:hover .icon-notif,.notif-btn:active .icon-notif{transform:rotate(30deg) scale(1.1);}
+.notif-btn:has(.notif-dot.show){color:var(--amber);}
+.notif-btn:has(.notif-dot.show) .icon-notif{filter:drop-shadow(0 0 4px rgba(212,168,67,.6));}
 .notif-dot{position:absolute;top:5px;right:5px;width:7px;height:7px;background:var(--amber);border-radius:50%;border:2px solid var(--page);display:none;}
 .notif-dot.show{display:block;}
-.orun-pill{display:flex;align-items:center;gap:5px;background:var(--ink);color:var(--gold);padding:5px 10px;border-radius:20px;font-family:'JetBrains Mono',monospace;font-size:.65rem;cursor:default;}
 .user-av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--amber),var(--rust));display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-size:.72rem;font-weight:700;color:#fff;cursor:pointer;border:2px solid var(--fog);transition:border-color var(--transition);flex-shrink:0;}
 .user-av:hover{border-color:var(--amber);}
 
@@ -133,25 +125,20 @@ a{text-decoration:none;color:inherit;}
 .orak-icon *{transition:transform .28s cubic-bezier(.34,1.56,.64,1),opacity .25s ease;transform-box:fill-box;transform-origin:center;}
 
 /* Feed — pupila se dilata */
-.snav-item:hover .icon-feed .icon-pupil,.snav-item:active .icon-feed .icon-pupil,
-.tnav:hover .icon-feed .icon-pupil,.tnav:active .icon-feed .icon-pupil{transform:scale(1.9);}
+.snav-item:hover .icon-feed .icon-pupil,.snav-item:active .icon-feed .icon-pupil{transform:scale(1.9);}
 .snav-item:hover .icon-feed .icon-orbit,.snav-item:active .icon-feed .icon-orbit{opacity:.7;}
 
 /* Explorar — brújula gira */
-.snav-item:hover .icon-explore,.snav-item:active .icon-explore,
-.tnav:hover .icon-explore,.tnav:active .icon-explore{transform:rotate(45deg);}
+.snav-item:hover .icon-explore,.snav-item:active .icon-explore{transform:rotate(45deg);}
 
 /* Escritores — constelación flota */
-.snav-item:hover .icon-people,.snav-item:active .icon-people,
-.tnav:hover .icon-people,.tnav:active .icon-people{transform:translateY(-2px) scale(1.08);}
+.snav-item:hover .icon-people,.snav-item:active .icon-people{transform:translateY(-2px) scale(1.08);}
 
 /* Perfil — luna rota */
-.snav-item:hover .icon-profile,.snav-item:active .icon-profile,
-.tnav:hover .icon-profile,.tnav:active .icon-profile{transform:rotate(-22deg);}
+.snav-item:hover .icon-profile,.snav-item:active .icon-profile{transform:rotate(-22deg);}
 
 /* Libros — grimorio levita */
-.snav-item:hover .icon-libros,.snav-item:active .icon-libros,
-.tnav:hover .icon-libros,.tnav:active .icon-libros{transform:translateY(-2px);}
+.snav-item:hover .icon-libros,.snav-item:active .icon-libros{transform:translateY(-2px);}
 
 /* Colaboraciones — anillos se separan */
 .snav-item:hover .icon-collab .collab-l,.snav-item:active .icon-collab .collab-l{transform:translateX(-1.8px);}
