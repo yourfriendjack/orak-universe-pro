@@ -2041,16 +2041,16 @@ window.enviarChatMsg = async () => {
   input.value = '';
   const meId = getPerfil()?.id;
   const c = document.getElementById('chat-msgs');
+  // Mostrar el mensaje en pantalla inmediatamente (optimista)
+  const tmpDiv = _msgDiv({ id: 'tmp_' + Date.now(), emisor_id: meId, texto }, meId);
+  tmpDiv.style.opacity = '0.6';
+  c.appendChild(tmpDiv);
+  c.scrollTop = c.scrollHeight;
+  playSound('send');
   try {
     await apiPost('/api/social/mensajes', { receptor_id: CHAT_USER_ID, texto }, getToken());
-    playSound('send');
-    // re-fetch para obtener el id real del mensaje recién enviado
-    const msgs = await apiGet(`/api/social/mensajes/${CHAT_USER_ID}`, getToken());
-    const existing = new Set([...c.querySelectorAll('[data-mid]')].map(el => el.dataset.mid));
-    msgs.filter(m => !existing.has(String(m.id))).forEach(m => c.appendChild(_msgDiv(m, meId)));
-    c.scrollTop = c.scrollHeight;
-    if (msgs.length) _chatLastMsgId = msgs[msgs.length - 1].id;
-  } catch {}
+    tmpDiv.style.opacity = '';
+  } catch { tmpDiv.remove(); }
 };
 
 // ── Tabs del chat ────────────────────────────────────────

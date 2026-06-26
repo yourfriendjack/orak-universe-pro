@@ -25,9 +25,15 @@ let _ctx = null;
 let _muted = localStorage.getItem('orak_muted') === '1';
 let _gestured = false;
 
-// Chrome bloquea AudioContext hasta el primer gesto del usuario
+// Chrome bloquea AudioContext hasta el primer gesto del usuario.
+// Pre-calentamos el contexto en el primer gesto para que resume() ya esté listo.
+function _warmUp() {
+  _gestured = true;
+  if (!_ctx) _ctx = new (window.AudioContext || window.webkitAudioContext)();
+  if (_ctx.state === 'suspended') _ctx.resume();
+}
 ['click', 'keydown', 'touchstart'].forEach(evt =>
-  document.addEventListener(evt, () => { _gestured = true; }, { once: false, passive: true })
+  document.addEventListener(evt, _warmUp, { once: true, passive: true })
 );
 
 function _getCtx() {
