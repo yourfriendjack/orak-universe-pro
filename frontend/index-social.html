@@ -837,7 +837,6 @@ function renderPeople(list, filter='') {
       <div class="person-btns">
         ${(()=>{const f=S.myFollows.has(p.id);return `<button class="follow-btn${f?' on':''}" id="fw-${p.id}" onclick="toggleFollow('${p.id}',this)">${f?'✓ Siguiendo':'+ Seguir'}</button>`;})()}
         <button class="reader-btn" id="rd-${p.id}" onclick="toggleReader('${p.id}',this)">❧ Lector fiel</button>
-        <button class="reader-btn" onclick="iniciarConvDesdeEscritor('${p.id}','${escapeHtml(p.username||'')}','${escapeHtml(p.display_name||p.username||'')}')">◎ Mensaje</button>
       </div>
     </div>`;
   }).join('') || '<div class="loading">No se encontraron escritores</div>';
@@ -1987,6 +1986,9 @@ const _origLoadPeople = window.loadPeople;
   .books-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));padding:12px;gap:10px;}
   .explore-head{padding:16px 12px 0;}
   .people-wrap{padding:14px 12px;}
+  .person-card{flex-wrap:wrap;align-items:flex-start;}
+  .person-btns{width:100%;padding-left:58px;margin-top:6px;}
+  .follow-btn,.reader-btn{flex:1;text-align:center;padding:5px 8px;font-size:.58rem;}
   .prof-infobar{padding:0 14px 16px;flex-wrap:wrap;}
   .prof-stats{padding:0 14px 14px;gap:14px;flex-wrap:wrap;}
   .prof-tabs-row{padding:0 14px;}
