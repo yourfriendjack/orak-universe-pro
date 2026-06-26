@@ -1763,11 +1763,12 @@ async function loadChatSiguiendo() {
     }
     c.innerHTML = data.map(row => {
       const p   = row.perfiles || {};
+      const uid = row.seguido_id;              // id real — perfiles no lo incluye
       const ini = (p.display_name || p.username || '?')[0].toUpperCase();
       const avEl = p.avatar_url
         ? `<div style="width:28px;height:28px;border-radius:50%;background:url(${escapeStr(p.avatar_url)}) center/cover no-repeat;flex-shrink:0"></div>`
         : `<div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#c8a860,#8b5a2b);display:flex;align-items:center;justify-content:center;font-size:.62rem;font-weight:700;color:#f5ead8;flex-shrink:0">${escapeStr(ini)}</div>`;
-      return `<div class="chat-conv-item" onclick="seleccionarChatUser('${p.id}','${escapeStr(p.username||'')}','${escapeStr(p.display_name||p.username||'')}')">
+      return `<div class="chat-conv-item" onclick="seleccionarChatUser('${uid}','${escapeStr(p.username||'')}','${escapeStr(p.display_name||p.username||'')}')">
         ${avEl}
         <div style="flex:1;min-width:0">
           <div style="font-size:.78rem;font-weight:600;color:#3d2008">${escapeStr(p.display_name||p.username||'—')}</div>
