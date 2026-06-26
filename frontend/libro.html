@@ -35,7 +35,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;bac
 .tbtn-fork:hover{background:rgba(139,58,31,.35);}
 
 /* ── HERO ── */
-.hero{position:relative;min-height:300px;display:flex;align-items:flex-end;overflow:hidden;}
+.hero{position:relative;min-height:360px;display:flex;align-items:flex-end;overflow:hidden;}
 .hero-bg{position:absolute;inset:0;}
 .hero-bg::after{content:'';position:absolute;bottom:0;left:0;right:0;height:160px;background:linear-gradient(to top,var(--deep),transparent);}
 .hero-stars{position:absolute;inset:0;background-image:radial-gradient(1.5px 1.5px at 8% 15%,rgba(232,197,90,.9) 0%,transparent 100%),radial-gradient(1px 1px at 22% 35%,rgba(232,197,90,.5) 0%,transparent 100%),radial-gradient(2px 2px at 38% 8%,rgba(168,212,232,.8) 0%,transparent 100%),radial-gradient(1px 1px at 55% 45%,rgba(232,197,90,.4) 0%,transparent 100%),radial-gradient(1.5px 1.5px at 68% 20%,rgba(168,212,232,.6) 0%,transparent 100%),radial-gradient(1px 1px at 78% 55%,rgba(232,197,90,.7) 0%,transparent 100%),radial-gradient(1px 1px at 90% 12%,rgba(232,197,90,.5) 0%,transparent 100%),radial-gradient(1px 1px at 15% 70%,rgba(168,212,232,.4) 0%,transparent 100%);}
@@ -580,18 +580,28 @@ async function cargarLibro() {
 function renderHero() {
   const d   = LIBRO.datos || {};
   const idx = LIBRO_ID % 5;
-  document.getElementById('hero-bg').style.background   = BG_COLORS[idx];
+  const heroBg = document.getElementById('hero-bg');
+  if (LIBRO.portada_url) {
+    heroBg.style.backgroundImage    = `url('${LIBRO.portada_url}')`;
+    heroBg.style.backgroundSize     = 'cover';
+    heroBg.style.backgroundPosition = 'center';
+  } else {
+    heroBg.style.background = BG_COLORS[idx];
+  }
   document.getElementById('breadcrumb').innerHTML        = `<strong>${escapeHtml(LIBRO.titulo)}</strong>`;
   document.getElementById('hero-genre').textContent      = `◆ ${LIBRO.genero || 'Sin género'}`;
   document.getElementById('hero-title').textContent      = LIBRO.titulo;
   document.getElementById('hero-desc').textContent       = d.descripcion || 'Sin sinopsis todavía.';
   document.title = `${LIBRO.titulo} — ORAK Universe`;
 
-  const per = LIBRO.perfiles || {};
+  const per = LIBRO.autor || {};
   const ini = initials(per.display_name || per.username || '?');
+  const avHtml = per.avatar_url
+    ? `<img src="${escapeHtml(per.avatar_url)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" loading="lazy">`
+    : escapeHtml(ini);
   document.getElementById('hero-meta').innerHTML = `
-    <div class="author-chip">
-      <div class="author-av">${escapeHtml(ini)}</div>
+    <div class="author-chip" onclick="window.location.href='/perfil?u=${encodeURIComponent(per.username||'')}'">
+      <div class="author-av">${avHtml}</div>
       <div>
         <div class="author-name">${escapeHtml(per.display_name || per.username || '—')}</div>
         <div class="author-handle">@${escapeHtml(per.username || '—')}</div>
