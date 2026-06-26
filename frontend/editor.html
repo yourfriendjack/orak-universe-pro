@@ -383,7 +383,7 @@ body{background:var(--page);display:block;}
       <input class="chapter-title-input" type="text" id="cap-titulo"
         placeholder="Título del capítulo…" oninput="onCapChange()">
       <textarea class="chapter-body" id="cap-body"
-        placeholder="Escribe tu historia aquí…&#10;&#10;Cada palabra construye un universo."
+        placeholder="Las palabras llegan cuando el silencio las llama…&#10;&#10;Empieza aquí. El universo te escucha."
         oninput="onCapChange()"></textarea>
     </div>
     <div class="word-count" id="word-count">0 palabras</div>
@@ -639,7 +639,7 @@ window.onCapChange = () => {
   updateWordCount();
   updateStats();
   renderSideList();
-  setStatus('saving');
+  _scheduleAutoSave();
 };
 
 // ── Visibilidad ───────────────────────────────────────────────────
@@ -650,95 +650,138 @@ window.toggleVis = () => {
 };
 
 // ── Status ────────────────────────────────────────────────────────
+let _lastSavedAt  = null;
+let _agoTimer     = null;
+
 function setStatus(st) {
   const dot  = document.getElementById('status-dot');
   const text = document.getElementById('status-text');
-  dot.className  = 'dot ' + st;
-  text.textContent = st === 'saved' ? 'Guardado' : st === 'saving' ? 'Sin guardar…' : 'Sin guardar';
+  if (st === 'saved') {
+    _lastSavedAt = Date.now();
+    dot.className = 'dot saved';
+    _updateAgo();
+    clearInterval(_agoTimer);
+    _agoTimer = setInterval(_updateAgo, 30000);
+  } else if (st === 'saving') {
+    clearInterval(_agoTimer);
+    dot.className = 'dot saving';
+    text.textContent = 'Guardando…';
+  } else {
+    clearInterval(_agoTimer);
+    dot.className = 'dot';
+    text.textContent = 'Sin guardar';
+  }
 }
 
-// ── Guardar todo ──────────────────────────────────────────────────
+function _updateAgo() {
+  if (!_lastSavedAt) return;
+  const sec = Math.floor((Date.now() - _lastSavedAt) / 1000);
+  const text = document.getElementById('status-text');
+  if (sec < 60)       text.textContent = 'Guardado';
+  else if (sec < 3600) text.textContent = `Guardado hace ${Math.floor(sec/60)} min`;
+  else                 text.textContent = `Guardado hace ${Math.floor(sec/3600)} h`;
+}
+
+// ── Auto-guardado (debounce 3 s) ──────────────────────────────────
+let _autoSaveTimer = null;
+
+function _scheduleAutoSave() {
+  const dot  = document.getElementById('status-dot');
+  const text = document.getElementById('status-text');
+  dot.className = 'dot saving';
+  text.textContent = 'Sin guardar…';
+  clearTimeout(_autoSaveTimer);
+  _autoSaveTimer = setTimeout(_autoSave, 3000);
+}
+
+async function _autoSave() {
+  const titulo = document.getElementById('libro-titulo').value.trim();
+  if (!titulo) return; // sin título no guardamos
+  const btn = document.getElementById('save-btn');
+  btn.disabled = true;
+  setStatus('saving');
+  try {
+    await guardarTodo_silencioso();
+    setStatus('saved');
+  } catch {
+    setStatus('unsaved');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// Versión de guardarTodo sin toast de éxito (para auto-save)
+async function guardarTodo_silencioso() {
+  const titulo = document.getElementById('libro-titulo').value.trim();
+  if (!titulo) return;
+  S.capitulos[S.capActual].titulo    = document.getElementById('cap-titulo').value;
+  S.capitulos[S.capActual].contenido = document.getElementById('cap-body').value;
+  S.capitulos[S.capActual].palabras  = contarPalabras(S.capitulos[S.capActual].contenido);
+  if (!S.libroId) {
+    const r = await fetch('/v2/libros', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},
+      body: JSON.stringify({
+        titulo, descripcion: document.getElementById('libro-desc').value,
+        genero: document.getElementById('libro-genero').value,
+        es_publico: S.esPublico, worldbuilding: window._wb_data || null,
+      })
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.detail?.mensaje || d.detail || 'Error');
+    S.libroId = d.datos?.libro?.id;
+    document.getElementById('editor-title').textContent = titulo;
+  } else {
+    await fetch(`/v2/libros/${S.libroId}`, {
+      method:'PATCH',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},
+      body: JSON.stringify({
+        titulo, descripcion: document.getElementById('libro-desc').value,
+        genero: document.getElementById('libro-genero').value,
+        es_publico: S.esPublico, worldbuilding: window._wb_data || null,
+      })
+    });
+  }
+  if (S.libroId) {
+    for (const cap of S.capitulos) {
+      if (!cap.titulo && !cap.contenido) continue;
+      if (cap.id) {
+        await fetch(`/api/libros/${S.libroId}/capitulos/${cap.numero}`, {
+          method:'PATCH',
+          headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},
+          body: JSON.stringify({ titulo: cap.titulo||`Capítulo ${cap.numero}`, contenido: cap.contenido, estado: cap.estado||'borrador' })
+        });
+      } else {
+        const rc = await fetch(`/api/libros/${S.libroId}/capitulos`, {
+          method:'POST',
+          headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},
+          body: JSON.stringify({ titulo: cap.titulo||`Capítulo ${cap.numero}`, contenido: cap.contenido, estado: cap.estado||'borrador', es_publico: S.esPublico })
+        });
+        const dc = await rc.json();
+        if (dc.datos?.capitulo?.id) cap.id = dc.datos.capitulo.id;
+      }
+    }
+  }
+}
+
+// ── Guardar todo (manual — con toast) ────────────────────────────
 window.guardarTodo = async () => {
   const titulo = document.getElementById('libro-titulo').value.trim();
   if (!titulo) { toast('Pon un título al libro primero', 'err'); document.getElementById('libro-titulo').focus(); return; }
 
-  // Guardar cap actual
-  S.capitulos[S.capActual].titulo    = document.getElementById('cap-titulo').value;
-  S.capitulos[S.capActual].contenido = document.getElementById('cap-body').value;
-  S.capitulos[S.capActual].palabras  = contarPalabras(S.capitulos[S.capActual].contenido);
-
+  clearTimeout(_autoSaveTimer);
   const btn = document.getElementById('save-btn');
   btn.disabled = true; btn.textContent = 'Guardando…';
+  setStatus('saving');
 
   try {
-    // 1. Crear o actualizar el libro
-    if (!S.libroId) {
-      const r = await fetch('/v2/libros', {
-        method: 'POST',
-        headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+TOKEN },
-        body: JSON.stringify({
-          titulo:      titulo,
-          descripcion: document.getElementById('libro-desc').value,
-          genero:      document.getElementById('libro-genero').value,
-          es_publico:  S.esPublico,
-          worldbuilding: window._wb_data || null,
-        })
-      });
-      const d = await r.json();
-      if (!r.ok) throw new Error(d.detail?.mensaje || d.detail || 'Error al crear libro');
-      S.libroId = d.datos?.libro?.id;
-      toast('✦ Libro creado · +100 Oruns');
-    } else {
-      await fetch(`/v2/libros/${S.libroId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+TOKEN },
-        body: JSON.stringify({
-          titulo:      titulo,
-          descripcion: document.getElementById('libro-desc').value,
-          genero:      document.getElementById('libro-genero').value,
-          es_publico:  S.esPublico,
-          worldbuilding: window._wb_data || null,
-        })
-      });
-    }
-
-    // 2. Guardar capítulos — solo los nuevos (sin id)
-    if (S.libroId) {
-      for (const cap of S.capitulos) {
-        if (!cap.titulo && !cap.contenido) continue;
-        if (cap.id) {
-          // Capítulo existente — actualizar
-          await fetch(`/api/libros/${S.libroId}/capitulos/${cap.numero}`, {
-            method: 'PATCH',
-            headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+TOKEN },
-            body: JSON.stringify({
-              titulo:    cap.titulo || `Capítulo ${cap.numero}`,
-              contenido: cap.contenido,
-              estado:    cap.estado || 'borrador',
-            })
-          });
-        } else {
-          // Capítulo nuevo — crear
-          const rc = await fetch(`/api/libros/${S.libroId}/capitulos`, {
-            method: 'POST',
-            headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+TOKEN },
-            body: JSON.stringify({
-              titulo:    cap.titulo || `Capítulo ${cap.numero}`,
-              contenido: cap.contenido,
-              estado:    cap.estado || 'borrador',
-              es_publico: S.esPublico,
-            })
-          });
-          const dc = await rc.json();
-          if (dc.datos?.capitulo?.id) cap.id = dc.datos.capitulo.id;
-        }
-      }
-    }
-
+    const esNuevo = !S.libroId;
+    await guardarTodo_silencioso();
     setStatus('saved');
-    toast('✦ Todo guardado correctamente');
+    toast(esNuevo ? '✦ Libro creado · +100 Oruns' : '✦ Guardado');
   } catch(e) {
     toast(e.message, 'err');
+    setStatus('unsaved');
   } finally {
     btn.disabled = false; btn.textContent = '✦ Guardar';
   }
@@ -1024,7 +1067,8 @@ function closeDrawers() {
   /* Topbar compacto */
   .editor-top{padding:0 14px;gap:8px;}
   .editor-title{font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px;}
-  .status-dot span,.status-dot .dot{display:none;}
+  .status-dot span{display:none;}
+  .status-dot .dot{display:block;}
   .back-link span{display:none;}
   .save-btn{font-size:.6rem;padding:6px 14px;}
 
