@@ -525,6 +525,7 @@ window.doRegister = async () => {
 };
 
 window.doLogout = async () => {
+  stopRealtime();
   await logout();
 };
 
@@ -541,7 +542,7 @@ function launchApp() {
   updateUserUI();
   loadFeed();
   loadRanking();
-  loadNotifs();
+  startRealtime();
   toast('✦ Bienvenido a ORAK Universe');
 }
 
@@ -1421,6 +1422,62 @@ document.addEventListener('click', () => {
   document.getElementById('fd-seg')?.classList.remove('open');
   document.getElementById('fd-sig')?.classList.remove('open');
 });
+
+// ── TIEMPO REAL (polling cada 25 s) ─────────────────────────────
+let _rtInterval   = null;
+let _rtPrevNotif  = -1;   // -1 = primera carga, no mostrar toast
+let _rtPrevMsg    = -1;
+
+async function rtPollNotifs() {
+  if (!getToken()) return;
+  await loadNotifs();
+  const unread = (S.notifs || []).filter(n => !n.leida).length;
+  if (_rtPrevNotif >= 0 && unread > _rtPrevNotif) {
+    const d = unread - _rtPrevNotif;
+    toast(`✵ ${d} notificación${d > 1 ? 'es' : ''} nueva${d > 1 ? 's' : ''}`);
+  }
+  _rtPrevNotif = unread;
+}
+
+async function rtPollMsgs() {
+  if (!getToken()) return;
+  try {
+    const convs = await apiGet('/api/social/mensajes', getToken());
+    const total = (convs || []).reduce((s, c) => s + (c.no_leidos || 0), 0);
+    const badge = document.getElementById('chat-float-badge');
+    if (badge) {
+      if (total > 0) { badge.textContent = total; badge.style.display = 'block'; }
+      else           { badge.style.display = 'none'; }
+    }
+    if (_rtPrevMsg >= 0 && total > _rtPrevMsg) {
+      const d = total - _rtPrevMsg;
+      toast(`✉ ${d} mensaje${d > 1 ? 's' : ''} nuevo${d > 1 ? 's' : ''}`);
+    }
+    _rtPrevMsg = total;
+  } catch {}
+}
+
+function startRealtime() {
+  _rtPrevNotif = -1;
+  _rtPrevMsg   = -1;
+  rtPollNotifs();
+  rtPollMsgs();
+  _rtInterval = setInterval(() => { rtPollNotifs(); rtPollMsgs(); }, 25000);
+
+  // poll inmediato al volver al tab
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && getToken()) {
+      rtPollNotifs();
+      rtPollMsgs();
+    }
+  });
+}
+
+function stopRealtime() {
+  if (_rtInterval) { clearInterval(_rtInterval); _rtInterval = null; }
+  _rtPrevNotif = -1;
+  _rtPrevMsg   = -1;
+}
 </script>
 
 <!-- ══════════════════════════════════════════════════════════
