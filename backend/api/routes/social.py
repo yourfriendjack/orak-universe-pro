@@ -59,6 +59,24 @@ async def get_feed(
     return res.data or []
 
 
+@router.get("/oraculo")
+async def oraculo_search(q: str = Query("", min_length=1)):
+    """Búsqueda pública de escritores y libros. Sin login requerido."""
+    term = q.strip()
+    if len(term) < 2:
+        return {"escritores": [], "libros": []}
+    sb = get_supabase()
+    esc = sb.table("perfiles")\
+        .select("id,username,display_name,avatar_url")\
+        .or_(f"username.ilike.%{term}%,display_name.ilike.%{term}%")\
+        .limit(6).execute()
+    lib = sb.table("libros")\
+        .select("id,titulo,portada_url,genero,autor:perfiles!libros_autor_id_fkey(username,display_name)")\
+        .ilike("titulo", f"%{term}%")\
+        .limit(6).execute()
+    return {"escritores": esc.data or [], "libros": lib.data or []}
+
+
 @router.get("/feed/explorar")
 async def get_explorar(
     genero: str = Query(None),

@@ -139,6 +139,33 @@
       <div class="snav-item"        id="snav-explore" onclick="goView('explore')"><span class="snav-icon"><svg class="orak-icon icon-explore" viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="10" cy="10" r="8"/><line x1="10" y1="2.5" x2="10" y2="4.5"/><line x1="10" y1="15.5" x2="10" y2="17.5"/><line x1="2.5" y1="10" x2="4.5" y2="10"/><line x1="15.5" y1="10" x2="17.5" y2="10"/><polygon points="10,6.5 12,13.5 10,11.5 8,13.5" fill="currentColor" stroke="none"/></svg></span>Explorar</div>
       <div class="snav-item"        id="snav-people"  onclick="goView('people')"><span class="snav-icon"><svg class="orak-icon icon-people" viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.3"><polygon points="10,3 17,15 3,15"/><circle cx="10" cy="9" r="1.2" fill="currentColor" stroke="none"/><line x1="7" y1="12" x2="10" y2="9"/><line x1="13" y1="12" x2="10" y2="9"/></svg></span>Escritores</div>
       <div class="snav-item"        id="snav-profile" onclick="goView('profile')"><span class="snav-icon"><svg class="orak-icon icon-profile" viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M10 2 a8 8 0 0 1 0 16 A8 8 0 0 1 10 2z"/><path d="M10 2 a8 8 0 0 0 0 16" fill="currentColor" fill-opacity=".18" stroke="none"/><circle cx="10" cy="10" r="2.5" stroke-opacity=".5"/></svg></span>Mi Perfil</div>
+
+      <!-- ── Oráculo de búsqueda ── -->
+      <div class="oraculo-toggle snav-item" id="oraculo-toggle" onclick="toggleOraculo()">
+        <span class="snav-icon">
+          <svg class="orak-icon icon-oraculo" viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.2">
+            <circle class="oraculo-ring-outer" cx="10" cy="10" r="8.5"/>
+            <circle cx="10" cy="10" r="5.8" stroke-opacity=".35"/>
+            <path d="M3.5 10 Q10 4 16.5 10 Q10 16 3.5 10z" stroke-linejoin="round"/>
+            <ellipse class="oraculo-pupil" cx="10" cy="10" rx="1.6" ry="2.4" fill="currentColor" stroke="none"/>
+            <circle cx="10" cy="1.5" r=".55" fill="currentColor" stroke="none"/>
+            <circle cx="10" cy="18.5" r=".55" fill="currentColor" stroke="none"/>
+            <circle cx="1.5" cy="10" r=".55" fill="currentColor" stroke="none"/>
+            <circle cx="18.5" cy="10" r=".55" fill="currentColor" stroke="none"/>
+          </svg>
+        </span>
+        Oráculo
+        <span class="oraculo-caret" id="oraculo-caret">›</span>
+      </div>
+      <div class="oraculo-wrap" id="oraculo-wrap">
+        <div class="oraculo-input-row">
+          <input class="oraculo-input" id="oraculo-inp" type="text" autocomplete="off" spellcheck="false"
+            placeholder="Pronuncia un nombre…" oninput="onOraculoInput()" onkeydown="if(event.key==='Escape')toggleOraculo()">
+        </div>
+        <div class="oraculo-estado" id="oraculo-estado"></div>
+        <div class="oraculo-results" id="oraculo-results"></div>
+      </div>
+
       <div class="snav-label">Biblioteca</div>
       <div class="snav-item" id="snav-misLibros" onclick="goView('misLibros')"><span class="snav-icon"><svg class="orak-icon icon-libros" viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="4" y="3" width="12" height="14" rx="1.5"/><line x1="4" y1="7" x2="16" y2="7"/><line x1="7" y1="3" x2="7" y2="7"/><line x1="7.5" y1="11" x2="13.5" y2="11"/><line x1="7.5" y1="14" x2="11.5" y2="14"/><circle cx="7" cy="5" r=".7" fill="currentColor" stroke="none"/></svg></span>Mis Libros</div>
       <div class="snav-item" id="snav-collab"   onclick="goView('collab')"><span class="snav-icon"><svg class="orak-icon icon-collab" viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.3"><circle class="collab-l" cx="8" cy="10" r="4.5"/><circle class="collab-r" cx="12" cy="10" r="4.5"/></svg></span>Colaboraciones</div>
@@ -1245,6 +1272,95 @@ async function loadNotifs() {
     }).join('') || '<div style="padding:16px;font-style:italic;color:var(--fog);font-size:.85rem;text-align:center">Sin notificaciones</div>';
   } catch { /* silencioso */ }
 }
+
+// ── ORÁCULO DE BÚSQUEDA ──────────────────────────────────────────
+(function() {
+  let _timer = null, _pTimer = null, _pIdx = 0;
+  const _phrases = [
+    'Pronuncia un nombre…',
+    '¿A qué escritor buscas?',
+    'Nómbralo y aparecerá…',
+    'El Oráculo escucha…',
+    'Un título, un alma…',
+  ];
+
+  window.toggleOraculo = () => {
+    const wrap   = document.getElementById('oraculo-wrap');
+    const toggle = document.getElementById('oraculo-toggle');
+    const inp    = document.getElementById('oraculo-inp');
+    const open   = wrap.classList.toggle('open');
+    toggle.classList.toggle('active', open);
+    if (open) {
+      inp.focus();
+      _pIdx = 0; inp.placeholder = _phrases[0];
+      _pTimer = setInterval(() => { _pIdx = (_pIdx + 1) % _phrases.length; inp.placeholder = _phrases[_pIdx]; }, 2800);
+    } else {
+      clearInterval(_pTimer);
+      clearTimeout(_timer);
+      inp.value = '';
+      document.getElementById('oraculo-estado').textContent = '';
+      document.getElementById('oraculo-results').innerHTML = '';
+    }
+  };
+
+  window.onOraculoInput = () => {
+    clearTimeout(_timer);
+    const q = document.getElementById('oraculo-inp').value.trim();
+    if (q.length < 2) {
+      document.getElementById('oraculo-estado').textContent = '';
+      document.getElementById('oraculo-results').innerHTML = '';
+      return;
+    }
+    document.getElementById('oraculo-estado').textContent = 'El Oráculo consulta los astros…';
+    _timer = setTimeout(() => _doSearch(q), 420);
+  };
+
+  async function _doSearch(q) {
+    const data = await apiGet(`/api/social/oraculo?q=${encodeURIComponent(q)}`);
+    const estado = document.getElementById('oraculo-estado');
+    const res    = document.getElementById('oraculo-results');
+    if (!data || (!data.escritores?.length && !data.libros?.length)) {
+      estado.textContent = 'El Oráculo guarda silencio…';
+      res.innerHTML = '';
+      return;
+    }
+    estado.textContent = '';
+    let html = '';
+    if (data.escritores?.length) {
+      html += `<div class="oraculo-section-lbl">Escritores</div>`;
+      data.escritores.forEach(e => {
+        const ini = (e.display_name || e.username || '?')[0].toUpperCase();
+        const av  = e.avatar_url
+          ? `style="background-image:url('${e.avatar_url}');background-size:cover;background-position:center;"`
+          : '';
+        html += `<div class="oraculo-row" onclick="window.location.href='/perfil?u=${encodeURIComponent(e.username)}'">
+          <div class="oraculo-av" ${av}>${av ? '' : ini}</div>
+          <div><div class="oraculo-row-name">${e.display_name || e.username}</div><div class="oraculo-row-sub">@${e.username}</div></div>
+        </div>`;
+      });
+    }
+    if (data.libros?.length) {
+      html += `<div class="oraculo-section-lbl">Libros</div>`;
+      data.libros.forEach(l => {
+        const img = l.portada_url ? `<img src="${l.portada_url}" alt="">` : '📖';
+        const autor = l.autor?.display_name || l.autor?.username || '';
+        html += `<div class="oraculo-row" onclick="window.location.href='/libro?t=${encodeURIComponent(l.titulo)}'">
+          <div class="oraculo-book-thumb">${img}</div>
+          <div><div class="oraculo-row-name">${l.titulo}</div><div class="oraculo-row-sub">${autor}</div></div>
+        </div>`;
+      });
+    }
+    res.innerHTML = html;
+  }
+
+  document.addEventListener('click', e => {
+    const wrap = document.getElementById('oraculo-wrap');
+    if (!wrap?.classList.contains('open')) return;
+    if (!e.target.closest('#oraculo-wrap') && !e.target.closest('#oraculo-toggle')) {
+      window.toggleOraculo();
+    }
+  });
+})();
 
 window.toggleNotif = () => {
   S.notifOpen = !S.notifOpen;
