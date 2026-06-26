@@ -142,12 +142,15 @@ body{background:var(--page);display:block;}
 .chapter-tabs::-webkit-scrollbar{display:none;}
 .ctab{
   font-family:'JetBrains Mono',monospace;font-size:.62rem;letter-spacing:.05em;
-  text-transform:uppercase;padding:12px 16px 10px;
+  text-transform:uppercase;padding:10px 16px 8px;
   cursor:pointer;color:var(--fog);border-bottom:2px solid transparent;
   transition:all .15s;white-space:nowrap;flex-shrink:0;
+  display:flex;flex-direction:column;align-items:center;gap:2px;
 }
 .ctab:hover{color:var(--ink);}
 .ctab.active{color:var(--amber-dim);border-bottom-color:var(--amber);}
+.ctab-words{font-size:.5rem;letter-spacing:.04em;color:var(--fog);opacity:.7;font-style:normal;}
+.ctab.active .ctab-words{color:var(--amber-dim);opacity:.6;}
 .ctab-add{
   font-family:'JetBrains Mono',monospace;font-size:.7rem;
   color:var(--fog);cursor:pointer;padding:12px 14px 10px;
@@ -289,6 +292,56 @@ body{background:var(--page);display:block;}
 .danger-btn{width:100%;padding:9px;background:rgba(139,58,31,.08);border:1px solid rgba(139,58,31,.2);border-radius:5px;font-family:'JetBrains Mono',monospace;font-size:.62rem;letter-spacing:.06em;text-transform:uppercase;color:#c06040;cursor:pointer;transition:all .15s;}
 .danger-btn:hover{background:rgba(139,58,31,.18);border-color:var(--rust);}
 
+/* ── MODO FOCO ── */
+.foco-btn{
+  font-family:'JetBrains Mono',monospace;font-size:.6rem;letter-spacing:.06em;
+  text-transform:uppercase;padding:5px 12px;background:none;
+  border:1px solid var(--fog);border-radius:4px;color:var(--fog);
+  cursor:pointer;transition:all .15s;
+}
+.foco-btn:hover{border-color:var(--amber);color:var(--amber-dim);}
+.foco-btn.activo{background:var(--amber);border-color:var(--amber);color:#fff;}
+
+body.modo-foco .editor-left,
+body.modo-foco .editor-right,
+body.modo-foco .main-tabs,
+body.modo-foco .chapter-tabs,
+body.modo-foco .word-count,
+body.modo-foco .back-link,
+body.modo-foco .editor-title,
+body.modo-foco .status-dot,
+body.modo-foco .save-btn,
+body.modo-foco .mob-fab-wrap { display:none !important; }
+
+body.modo-foco .editor-top {
+  justify-content:flex-end;
+  background:rgba(250,247,242,.6);
+  border-bottom-color:transparent;
+}
+body.modo-foco .editor-shell {
+  grid-template-columns:1fr;
+}
+body.modo-foco .editor-main {
+  max-width:740px;margin:0 auto;width:100%;
+}
+body.modo-foco .writing-area {
+  padding:52px 40px;
+}
+body.modo-foco .chapter-body {
+  min-height:calc(100vh - 120px);
+}
+body.modo-foco .chapter-title-input {
+  font-size:1.9rem;
+}
+
+.foco-hint {
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+  font-family:'JetBrains Mono',monospace;font-size:.55rem;letter-spacing:.1em;
+  text-transform:uppercase;color:rgba(139,110,60,.35);
+  pointer-events:none;opacity:0;transition:opacity .5s;
+}
+body.modo-foco .foco-hint { opacity:1; }
+
 </style>
 </head>
 <body>
@@ -309,8 +362,10 @@ body{background:var(--page);display:block;}
   </a>
   <div class="editor-title" id="editor-title">Nuevo Libro</div>
   <div class="status-dot"><div class="dot" id="status-dot"></div><span id="status-text">Sin guardar</span></div>
+  <button class="foco-btn" id="foco-btn" onclick="toggleFoco()" title="Modo Foco (ESC para salir)">◎ Foco</button>
   <button class="save-btn" id="save-btn" onclick="guardarTodo()">✦ Guardar</button>
 </header>
+<div class="foco-hint">ESC para salir del modo foco</div>
 
 
 <!-- TABS PRINCIPALES -->
@@ -629,11 +684,25 @@ function renderTabs() {
   S.capitulos.forEach((c, i) => {
     const tab = document.createElement('div');
     tab.className = 'ctab' + (i === S.capActual ? ' active' : '');
-    tab.textContent = c.titulo || `Capítulo ${c.numero}`;
+    const palabras = c.palabras || 0;
+    const label = palabras > 0 ? `${palabras.toLocaleString()} pal.` : '—';
+    tab.innerHTML = `<span>${c.titulo || `Cap. ${c.numero}`}</span><span class="ctab-words">${label}</span>`;
     tab.onclick = () => switchCap(i);
     container.insertBefore(tab, addBtn);
   });
 }
+
+window.toggleFoco = () => {
+  const activo = document.body.classList.toggle('modo-foco');
+  document.getElementById('foco-btn').classList.toggle('activo', activo);
+  if (activo) document.getElementById('cap-body').focus();
+};
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && document.body.classList.contains('modo-foco')) {
+    window.toggleFoco();
+  }
+});
 
 function switchCap(idx) {
   // Guardar contenido actual antes de cambiar
