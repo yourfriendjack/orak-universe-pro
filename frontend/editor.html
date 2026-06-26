@@ -283,7 +283,18 @@ body{background:var(--page);display:block;}
 
 <!-- TOPBAR -->
 <header class="editor-top">
-  <a class="back-link" href="/index-social.html">← Feed</a>
+  <a class="back-link" onclick="history.length>1?history.back():location.href='/index-social.html'" style="cursor:pointer">← Volver</a>
+  <a href="/index-social.html" class="back-link" style="display:flex;align-items:center;gap:5px;text-decoration:none;opacity:.65">
+    <svg viewBox="0 0 32 32" width="18" height="18" style="overflow:visible;flex-shrink:0">
+      <g transform="translate(16,16)">
+        <ellipse rx="13" ry="5" fill="none" stroke="rgba(212,168,67,0.92)" stroke-width="1.5">
+          <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="3s" repeatCount="indefinite"/>
+        </ellipse>
+        <circle r="3.8" fill="#c8860a"><animate attributeName="r" values="3.3;4.2;3.3" dur="2.5s" repeatCount="indefinite"/></circle>
+        <circle r="1.4" fill="#fff9e0"/>
+      </g>
+    </svg>ORAK
+  </a>
   <div class="editor-title" id="editor-title">Nuevo Libro</div>
   <div class="status-dot"><div class="dot" id="status-dot"></div><span id="status-text">Sin guardar</span></div>
   <button class="save-btn" id="save-btn" onclick="guardarTodo()">✦ Guardar</button>
