@@ -547,7 +547,10 @@ a{text-decoration:none;color:inherit;}
 /* ══════════════════════════════════════════════════════════════
    LOADING
 ══════════════════════════════════════════════════════════════ */
-.loading{display:flex;align-items:center;justify-content:center;padding:40px;font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--fog);}
+.loading{display:flex;align-items:center;justify-content:center;padding:40px;font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--fog);font-style:italic;letter-spacing:.04em;}
+.orak-empty{padding:44px 24px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--fog);letter-spacing:.04em;line-height:2;font-style:italic;}
+.orak-empty small{display:block;font-size:.65rem;opacity:.7;margin-top:2px;line-height:1.5;}
+.orak-err{color:#c06040 !important;font-style:italic;}
 .loading::after{content:'';width:14px;height:14px;border:2px solid var(--fog);border-top-color:var(--amber);border-radius:50%;margin-left:8px;animation:spin .7s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
 

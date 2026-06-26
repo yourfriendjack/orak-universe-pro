@@ -201,7 +201,7 @@
             </div>
           </div>
           <div class="feed-posts" id="feed-posts">
-            <div class="loading">Cargando feed</div>
+            <div class="loading">El universo está despertando…</div>
           </div>
         </div>
         <div class="feed-widgets">
@@ -261,7 +261,7 @@
           <div class="gpill" onclick="filterGenre(this,'mitología')">Mitología</div>
         </div>
       </div>
-      <div class="books-grid" id="books-grid"><div class="loading">Cargando libros</div></div>
+      <div class="books-grid" id="books-grid"><div class="loading">Abriendo la biblioteca…</div></div>
     </div>
 
     <!-- ── ESCRITORES ── -->
@@ -270,7 +270,7 @@
         <div class="people-title">Escritores y Lectores</div>
         <div class="people-sub">Sigue a quienes inspiran tu escritura</div>
         <input class="people-search" type="text" placeholder="Buscar por nombre o @handle…" oninput="filterPeople(this.value)">
-        <div class="people-list" id="people-list"><div class="loading">Cargando escritores</div></div>
+        <div class="people-list" id="people-list"><div class="loading">Convocando escritores…</div></div>
       </div>
     </div>
 
@@ -338,7 +338,7 @@
         <div class="explore-title">Colaboraciones</div>
         <div class="explore-sub">Libros en los que colaboras como co-escritor</div>
       </div>
-      <div id="collab-container"><div class="loading">Cargando…</div></div>
+      <div id="collab-container"><div class="loading">Buscando mentes afines…</div></div>
     </div>
 
     <!-- ── TIENDA ORUNS ── -->
@@ -371,7 +371,7 @@
         <div class="explore-sub">Todos tus mundos en un solo lugar</div>
         <button class="pbtn pbtn-ink" style="margin-top:10px" onclick="window.location.href='/libro?nuevo=1'">＋ Nuevo libro</button>
       </div>
-      <div class="books-grid" id="mis-libros-grid"><div class="loading">Cargando…</div></div>
+      <div class="books-grid" id="mis-libros-grid"><div class="loading">Invocando tus mundos…</div></div>
     </div>
 
   </div><!-- app-body -->
@@ -619,7 +619,7 @@ function updateUserUI() {
   document.getElementById('eco-fill').style.width = pct + '%';
   _set('prof-name',    display_name || username);
   _set('prof-handle',  `@${username}`);
-  _set('prof-bio',     p.bio || 'Sin bio todavía');
+  _set('prof-bio',     p.bio || 'Este escritor aún guarda su historia en silencio.');
   _set('ps-oruns',     (oruns||0).toLocaleString());
   _set('ps-glimmers',  glimmers_week || 0);
 }
@@ -651,13 +651,13 @@ async function loadFeed() {
     S.posts = data;
     renderFeed(data);
   } catch(e) {
-    document.getElementById('feed-posts').innerHTML = `<div class="loading" style="color:#e08080">Error al cargar el feed — ${e.message}</div>`;
+    document.getElementById('feed-posts').innerHTML = `<div class="loading orak-err">El Oráculo encontró una sombra — ${e.message}</div>`;
   }
 }
 
 function renderFeed(posts) {
   const c = document.getElementById('feed-posts');
-  if (!posts.length) { c.innerHTML = '<div class="loading">Sin publicaciones aún — sé el primero</div>'; return; }
+  if (!posts.length) { c.innerHTML = '<div class="orak-empty">✦<br>El silencio también es un comienzo.<br><small>Sé el primero en invocar algo.</small></div>'; return; }
   c.innerHTML = posts.map((p, i) => postHTML(p, i)).join('');
 }
 
@@ -820,17 +820,17 @@ window.sharePost = async (id) => {
 async function loadMisLibros() {
   if (!getToken()) { goView('feed'); toast('Inicia sesión para ver tus libros', 'err'); return; }
   const c = document.getElementById('mis-libros-grid');
-  c.innerHTML = '<div class="loading">Cargando tus libros…</div>';
+  c.innerHTML = '<div class="loading">Invocando tus mundos…</div>';
   try {
     const data = await apiGet('/v2/libros/mis-libros', getToken());
-    if (!data.length) { c.innerHTML = '<div class="loading">Aún no tienes libros. ¡Crea el primero!</div>'; return; }
+    if (!data.length) { c.innerHTML = '<div class="orak-empty">◎<br>Aún no has invocado ningún mundo.<br><small>Tu primer libro está esperando ser escrito.</small></div>'; return; }
     renderBooks('mis-libros-grid', data);
   } catch(e) { c.innerHTML = `<div class="loading" style="color:#e08080">${e.message}</div>`; }
 }
 
 async function loadExplore(genero) {
   const c = document.getElementById('books-grid');
-  c.innerHTML = '<div class="loading">Cargando libros</div>';
+  c.innerHTML = '<div class="loading">Abriendo la biblioteca…</div>';
   try {
     const url = `/v2/libros?limite=20${genero ? `&genero=${encodeURIComponent(genero)}` : ''}`;
     const data = await apiGet(url);
@@ -842,7 +842,7 @@ function renderBooks(containerId, books) {
   const c = document.getElementById(containerId);
   if (!c) return;
   const spines = ['bs1','bs2','bs3','bs4','bs5'];
-  if (!books.length) { c.innerHTML = '<div class="loading">Sin libros en esta categoría</div>'; return; }
+  if (!books.length) { c.innerHTML = '<div class="orak-empty">☽<br>Este género guarda silencio por ahora.</div>'; return; }
   c.innerHTML = books.map((b, i) => `
     <div class="bcard" style="animation-delay:${i*.05}s;cursor:pointer" data-libro-id="${b.id}">
       <div class="bcard-spine ${spines[i%5]}">
@@ -908,7 +908,7 @@ function renderPeople(list, filter='') {
         <button class="reader-btn" id="rd-${p.id}" onclick="toggleReader('${p.id}',this)">❧ Lector fiel</button>
       </div>
     </div>`;
-  }).join('') || '<div class="loading">No se encontraron escritores</div>';
+  }).join('') || '<div class="orak-empty">⊛<br>Ningún escritor encontrado.<br><small>Prueba con otro nombre.</small></div>';
 }
 
 window.filterPeople = (v) => renderPeople(S.people, v);
@@ -978,11 +978,11 @@ window.toggleNotas = async (id) => {
 async function cargarNotasPost(id) {
   const c = document.getElementById('notas-list-' + id);
   if (!c) return;
-  c.innerHTML = '<div style="font-size:.72rem;color:var(--fog);padding:4px 0">Cargando…</div>';
+  c.innerHTML = '<div class="loading" style="font-size:.7rem;padding:6px 0">Invocando notas…</div>';
   try {
     const notas = await apiGet('/api/social/notas/post/' + id);
     if (!notas.length) {
-      c.innerHTML = '<div style="font-size:.78rem;color:rgba(205,199,184,.65);padding:4px 0 8px">Sin notas todavía. ¡Sé el primero!</div>';
+      c.innerHTML = '<div style="font-size:.7rem;color:var(--fog);padding:4px 0 8px;font-style:italic">✐ Sé el primero en dejar una nota…</div>';
       return;
     }
     c.innerHTML = notas.map(n => {
@@ -1025,11 +1025,11 @@ window.enviarNotaPost = async (id) => {
 async function loadCollab() {
   if (!getToken()) { goView('feed'); toast('Inicia sesión', 'err'); return; }
   const c = document.getElementById('collab-container');
-  c.innerHTML = '<div class="loading">Cargando colaboraciones…</div>';
+  c.innerHTML = '<div class="loading">Buscando mentes afines…</div>';
   try {
     const data = await apiGet('/api/social/coescritores/mis-colaboraciones', getToken());
     if (!data.length) {
-      c.innerHTML = '<div class="wb-empty" style="padding:40px 0"><div class="wb-empty-icon">◆</div>Sin colaboraciones todavía<br><small style="color:var(--fog)">Cuando alguien te invite a co-escribir aparecerá aquí</small></div>';
+      c.innerHTML = '<div class="orak-empty">⊕<br>Aún no hay conjuros activos.<br><small>Cuando alguien te invite a co-escribir, aparecerá aquí.</small></div>';
       return;
     }
     const estadoColor = { pendiente:'#d4a843', activo:'#6aaa88', rechazado:'#c06040' };
@@ -1254,8 +1254,8 @@ async function loadProfile() {
   try {
     const posts = await fetch('/api/social/feed/usuario/' + p.username).then(r=>r.json());
     const c = document.getElementById('profile-posts');
-    c.innerHTML = posts.length ? posts.map((post,i) => postHTML(post,i)).join('') : '<div class="loading">Sin publicaciones todavía</div>';
-  } catch { document.getElementById('profile-posts').innerHTML = '<div class="loading">Error al cargar</div>'; }
+    c.innerHTML = posts.length ? posts.map((post,i) => postHTML(post,i)).join('') : '<div class="orak-empty">✦<br>Este escritor aún no ha invocado nada.</div>';
+  } catch { document.getElementById('profile-posts').innerHTML = '<div class="loading orak-err">El Oráculo encontró una sombra al cargar.</div>'; }
 }
 
 window.profTab = (el, tab) => {
@@ -1319,7 +1319,7 @@ async function loadNotifs() {
         <div class="notif-ico ${cls}">${ico}</div>
         <div><div class="notif-text">${escapeHtml(n.cuerpo||n.titulo)}</div><div class="notif-time">${timeAgo(n.creado_en)}</div></div>
       </div>`;
-    }).join('') || '<div style="padding:16px;font-style:italic;color:var(--fog);font-size:.85rem;text-align:center">Sin notificaciones</div>';
+    }).join('') || '<div class="orak-empty" style="padding:20px 16px">◎<br>El universo está en calma.<br><small>Nada nuevo por ahora.</small></div>';
   } catch { /* silencioso */ }
 }
 
@@ -1584,7 +1584,7 @@ window.toggleFollowsPanel = async (which, e) => {
   const meId = getPerfil()?.id;
   if (!meId) return;
   const list = document.getElementById(`fl-${which}`);
-  list.innerHTML = '<div class="follows-loading">Cargando…</div>';
+  list.innerHTML = '<div class="follows-loading">Convocando almas…</div>';
 
   const endpoint = which === 'seg'
     ? `/api/social/follows/seguidores/${meId}`
@@ -1593,7 +1593,7 @@ window.toggleFollowsPanel = async (which, e) => {
   try {
     const data = await apiGet(endpoint, getToken());
     if (!data?.length) {
-      list.innerHTML = '<div class="follows-empty">Ninguno todavía</div>';
+      list.innerHTML = '<div class="follows-empty">☽ El silencio aún reina aquí.</div>';
       return;
     }
     list.innerHTML = data.map(row => {
@@ -1847,11 +1847,11 @@ window.cerrarChatFloat = () => {
 async function loadChatConvs() {
   if (!getToken()) return;
   const c = document.getElementById('chat-conv-list');
-  c.innerHTML = '<div style="font-size:.72rem;color:#a07850;padding:14px">Cargando…</div>';
+  c.innerHTML = '<div style="font-size:.7rem;color:#a07850;padding:14px;font-style:italic">Abriendo los portales…</div>';
   try {
     const data = await apiGet('/api/social/mensajes', getToken());
     if (!data.length) {
-      c.innerHTML = '<div style="font-size:.75rem;color:#a07850;padding:14px">Sin conversaciones.<br>Usa ＋ para iniciar una.</div>';
+      c.innerHTML = '<div style="font-size:.75rem;color:#a07850;padding:14px;font-style:italic">☽ Ningún mensaje aún.<br>Conjura una conversación.</div>';
       return;
     }
     c.innerHTML = data.map(conv => {
@@ -1911,10 +1911,10 @@ window.cerrarChatThread = () => {
 async function renderChatMsgs(userId) {
   const meId = getPerfil()?.id;
   const c = document.getElementById('chat-msgs');
-  c.innerHTML = '<div style="font-size:.7rem;color:#a07850;padding:6px">Cargando…</div>';
+  c.innerHTML = '<div style="font-size:.7rem;color:#a07850;padding:6px;font-style:italic">Invocando mensajes…</div>';
   try {
     const msgs = await apiGet(`/api/social/mensajes/${userId}`, getToken());
-    if (!msgs.length) { c.innerHTML = '<div style="font-size:.75rem;color:#a07850;padding:6px">¡Di hola!</div>'; return; }
+    if (!msgs.length) { c.innerHTML = '<div style="font-size:.75rem;color:#a07850;padding:14px;text-align:center;font-style:italic">✦ El portal está abierto.<br>Di la primera palabra.</div>'; return; }
     c.innerHTML = msgs.map(m =>
       `<div class="${m.emisor_id === meId ? 'chat-msg-mio' : 'chat-msg-suyo'}">${escapeStr(m.texto)}</div>`
     ).join('');
@@ -1953,7 +1953,7 @@ async function loadChatSiguiendo() {
   try {
     const data = await apiGet(`/api/social/follows/siguiendo/${meId}`, getToken());
     if (!data?.length) {
-      c.innerHTML = '<div style="font-size:.75rem;color:#a07850;padding:16px;font-style:italic">No sigues a nadie todavía.</div>';
+      c.innerHTML = '<div style="font-size:.75rem;color:#a07850;padding:16px;font-style:italic">☽ Aún no sigues a nadie.<br>Explora escritores en el Oráculo.</div>';
       return;
     }
     c.innerHTML = data.map(row => {
@@ -1992,7 +1992,7 @@ window.buscarFloatMsg = (q) => {
     ((p.username||'').toLowerCase().includes(q.toLowerCase()) ||
      (p.display_name||'').toLowerCase().includes(q.toLowerCase()))
   ).slice(0,5);
-  if (!res.length) { c.innerHTML = '<div style="font-size:.7rem;color:#a07850">Sin resultados</div>'; return; }
+  if (!res.length) { c.innerHTML = '<div style="font-size:.7rem;color:#a07850;font-style:italic;padding:6px">El Oráculo guarda silencio…</div>'; return; }
   c.innerHTML = res.map(p => `
     <div class="chat-conv-item" style="border-radius:6px" onclick="seleccionarChatUser('${p.id}','${escapeStr(p.username||'')}','${escapeStr(p.display_name||p.username||'')}')">
       <div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#c8a860,#8b5a2b);display:flex;align-items:center;justify-content:center;font-size:.58rem;font-weight:700;color:#f5ead8">${escapeStr((p.display_name||p.username||'?')[0].toUpperCase())}</div>
