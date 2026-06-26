@@ -1836,9 +1836,10 @@ window.toggleChatFloat = () => {
   const win = document.getElementById('chat-win');
   const open = win.style.display !== 'none';
   win.style.display = open ? 'none' : 'flex';
-  if (!open) { switchChatTab('msgs'); loadChatConvs(); }
+  if (open) { _stopChatPoll(); } else { switchChatTab('msgs'); loadChatConvs(); }
 };
 window.cerrarChatFloat = () => {
+  _stopChatPoll();
   document.getElementById('chat-win').style.display = 'none';
   cerrarChatThread();
 };
@@ -1874,31 +1875,71 @@ async function loadChatConvs() {
 }
 
 // ── Abrir hilo — efecto gota ─────────────────────────────
+let _chatPollInterval = null;
+let _chatLastMsgId    = null;
+
+function _msgDiv(m, meId) {
+  const d = document.createElement('div');
+  d.className = m.emisor_id === meId ? 'chat-msg-mio' : 'chat-msg-suyo';
+  d.dataset.mid = m.id;
+  d.textContent = m.texto;
+  return d;
+}
+
+function _startChatPoll(userId) {
+  _stopChatPoll();
+  _chatPollInterval = setInterval(() => _pollChatThread(userId), 4000);
+}
+
+function _stopChatPoll() {
+  if (_chatPollInterval) { clearInterval(_chatPollInterval); _chatPollInterval = null; }
+  _chatLastMsgId = null;
+}
+
+async function _pollChatThread(userId) {
+  if (!userId || !getToken()) return;
+  const meId = getPerfil()?.id;
+  try {
+    const msgs = await apiGet(`/api/social/mensajes/${userId}`, getToken());
+    if (!msgs.length) return;
+    const lastId = msgs[msgs.length - 1].id;
+    if (lastId === _chatLastMsgId) return;
+    const c = document.getElementById('chat-msgs');
+    if (!c) return;
+    const existing = new Set([...c.querySelectorAll('[data-mid]')].map(el => el.dataset.mid));
+    const nuevos = msgs.filter(m => !existing.has(String(m.id)));
+    if (!nuevos.length) { _chatLastMsgId = lastId; return; }
+    const atBottom = c.scrollHeight - c.scrollTop - c.clientHeight < 80;
+    nuevos.forEach(m => c.appendChild(_msgDiv(m, meId)));
+    if (atBottom) c.scrollTop = c.scrollHeight;
+    _chatLastMsgId = lastId;
+  } catch {}
+}
+
 window.abrirChatThread = async (userId, username, nombre) => {
   CHAT_USER_ID = userId;
   const tw = document.getElementById('chat-thread-win');
   const cw = document.getElementById('chat-win');
 
-  // Titulo
   document.getElementById('chat-thread-title').textContent = nombre || ('@' + username);
 
-  // Squeeze en la ventana origen
   cw.classList.remove('spawning');
-  void cw.offsetWidth; // reflow
+  void cw.offsetWidth;
   cw.classList.add('spawning');
 
-  // Mostrar hilo con animación gota
   tw.style.display = 'flex';
   tw.classList.remove('drop-in','drop-out');
   void tw.offsetWidth;
   tw.classList.add('drop-in');
 
   await renderChatMsgs(userId);
+  _startChatPoll(userId);
 };
 
 window.cerrarChatThread = () => {
   const tw = document.getElementById('chat-thread-win');
   if (tw.style.display === 'none') return;
+  _stopChatPoll();
   tw.classList.remove('drop-in');
   tw.classList.add('drop-out');
   tw.addEventListener('animationend', () => {
@@ -1914,11 +1955,15 @@ async function renderChatMsgs(userId) {
   c.innerHTML = '<div style="font-size:.7rem;color:#a07850;padding:6px;font-style:italic">Invocando mensajes…</div>';
   try {
     const msgs = await apiGet(`/api/social/mensajes/${userId}`, getToken());
-    if (!msgs.length) { c.innerHTML = '<div style="font-size:.75rem;color:#a07850;padding:14px;text-align:center;font-style:italic">✦ El portal está abierto.<br>Di la primera palabra.</div>'; return; }
-    c.innerHTML = msgs.map(m =>
-      `<div class="${m.emisor_id === meId ? 'chat-msg-mio' : 'chat-msg-suyo'}">${escapeStr(m.texto)}</div>`
-    ).join('');
+    if (!msgs.length) {
+      c.innerHTML = '<div style="font-size:.75rem;color:#a07850;padding:14px;text-align:center;font-style:italic">✦ El portal está abierto.<br>Di la primera palabra.</div>';
+      _chatLastMsgId = null;
+      return;
+    }
+    c.innerHTML = '';
+    msgs.forEach(m => c.appendChild(_msgDiv(m, meId)));
     c.scrollTop = c.scrollHeight;
+    _chatLastMsgId = msgs[msgs.length - 1].id;
   } catch(e) { c.innerHTML = `<div style="color:#c06040;font-size:.7rem">${e.message}</div>`; }
 }
 
@@ -1927,11 +1972,18 @@ window.enviarChatMsg = async () => {
   const input = document.getElementById('chat-input');
   const texto = input?.value.trim();
   if (!texto) return;
+  input.value = '';
+  const meId = getPerfil()?.id;
+  const c = document.getElementById('chat-msgs');
   try {
     await apiPost('/api/social/mensajes', { receptor_id: CHAT_USER_ID, texto }, getToken());
-    input.value = '';
-    await renderChatMsgs(CHAT_USER_ID);
-  } catch(e) {}
+    // re-fetch para obtener el id real del mensaje recién enviado
+    const msgs = await apiGet(`/api/social/mensajes/${CHAT_USER_ID}`, getToken());
+    const existing = new Set([...c.querySelectorAll('[data-mid]')].map(el => el.dataset.mid));
+    msgs.filter(m => !existing.has(String(m.id))).forEach(m => c.appendChild(_msgDiv(m, meId)));
+    c.scrollTop = c.scrollHeight;
+    if (msgs.length) _chatLastMsgId = msgs[msgs.length - 1].id;
+  } catch {}
 };
 
 // ── Tabs del chat ────────────────────────────────────────
