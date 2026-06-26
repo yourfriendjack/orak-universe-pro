@@ -486,15 +486,69 @@ const CloudcoreRenderer = (() => {
   // ═══════════════════════════════════════════════════════════════
   //  NUBES
   // ═══════════════════════════════════════════════════════════════
-  const PUFFS = [
-    { dx:  0.00, dy:  0.00, rx: 1.00, ry: 0.74 },
-    { dx: -0.80, dy:  0.22, rx: 0.75, ry: 0.58 },
-    { dx:  0.80, dy:  0.22, rx: 0.75, ry: 0.58 },
-    { dx: -0.42, dy: -0.38, rx: 0.65, ry: 0.50 },
-    { dx:  0.42, dy: -0.38, rx: 0.65, ry: 0.50 },
-    { dx: -1.30, dy:  0.38, rx: 0.50, ry: 0.40 },
-    { dx:  1.30, dy:  0.38, rx: 0.50, ry: 0.40 },
-    { dx:  0.00, dy: -0.60, rx: 0.44, ry: 0.36 },
+  // 6 morfologías de nube — cada instancia recibe una al azar
+  const CLOUD_SHAPES = [
+    // 0 — Cúmulo clásico
+    [
+      { dx:  0.00, dy:  0.00, rx: 1.00, ry: 0.74 },
+      { dx: -0.80, dy:  0.22, rx: 0.75, ry: 0.58 },
+      { dx:  0.80, dy:  0.22, rx: 0.75, ry: 0.58 },
+      { dx: -0.42, dy: -0.38, rx: 0.65, ry: 0.50 },
+      { dx:  0.42, dy: -0.38, rx: 0.65, ry: 0.50 },
+      { dx: -1.30, dy:  0.38, rx: 0.50, ry: 0.40 },
+      { dx:  1.30, dy:  0.38, rx: 0.50, ry: 0.40 },
+      { dx:  0.00, dy: -0.60, rx: 0.44, ry: 0.36 },
+    ],
+    // 1 — Estrato: ancho, bajo y plano
+    [
+      { dx:  0.00, dy:  0.00, rx: 1.35, ry: 0.40 },
+      { dx: -1.08, dy:  0.10, rx: 0.82, ry: 0.34 },
+      { dx:  1.08, dy:  0.10, rx: 0.82, ry: 0.34 },
+      { dx: -0.52, dy: -0.10, rx: 0.66, ry: 0.29 },
+      { dx:  0.52, dy: -0.10, rx: 0.66, ry: 0.29 },
+      { dx: -1.78, dy:  0.15, rx: 0.50, ry: 0.26 },
+      { dx:  1.78, dy:  0.15, rx: 0.50, ry: 0.26 },
+    ],
+    // 2 — Cúmulo alto y dramático
+    [
+      { dx:  0.00, dy:  0.00, rx: 0.76, ry: 0.92 },
+      { dx: -0.56, dy:  0.36, rx: 0.60, ry: 0.70 },
+      { dx:  0.56, dy:  0.36, rx: 0.60, ry: 0.70 },
+      { dx:  0.00, dy: -0.54, rx: 0.54, ry: 0.62 },
+      { dx: -0.28, dy: -0.28, rx: 0.46, ry: 0.52 },
+      { dx:  0.28, dy: -0.28, rx: 0.46, ry: 0.52 },
+      { dx:  0.00, dy: -0.92, rx: 0.35, ry: 0.40 },
+    ],
+    // 3 — Pequeño y redondeado
+    [
+      { dx:  0.00, dy:  0.00, rx: 0.88, ry: 0.80 },
+      { dx: -0.56, dy:  0.18, rx: 0.62, ry: 0.56 },
+      { dx:  0.56, dy:  0.18, rx: 0.62, ry: 0.56 },
+      { dx:  0.00, dy: -0.32, rx: 0.52, ry: 0.46 },
+      { dx: -0.26, dy:  0.42, rx: 0.40, ry: 0.34 },
+      { dx:  0.26, dy:  0.42, rx: 0.40, ry: 0.34 },
+    ],
+    // 4 — Alargado y estirado
+    [
+      { dx:  0.00, dy:  0.00, rx: 1.48, ry: 0.44 },
+      { dx: -1.18, dy:  0.14, rx: 0.74, ry: 0.38 },
+      { dx:  1.18, dy:  0.14, rx: 0.74, ry: 0.38 },
+      { dx: -0.55, dy: -0.08, rx: 0.60, ry: 0.34 },
+      { dx:  0.55, dy: -0.08, rx: 0.60, ry: 0.34 },
+      { dx: -1.82, dy:  0.20, rx: 0.46, ry: 0.30 },
+      { dx:  1.82, dy:  0.20, rx: 0.46, ry: 0.30 },
+      { dx:  0.00, dy:  0.22, rx: 0.88, ry: 0.28 },
+    ],
+    // 5 — Cirrus: vaporoso, fino y etéreo
+    [
+      { dx:  0.00, dy:  0.00, rx: 1.18, ry: 0.30 },
+      { dx: -0.92, dy:  0.06, rx: 0.76, ry: 0.24 },
+      { dx:  0.92, dy:  0.06, rx: 0.76, ry: 0.24 },
+      { dx: -1.62, dy:  0.10, rx: 0.48, ry: 0.18 },
+      { dx:  1.62, dy:  0.10, rx: 0.48, ry: 0.18 },
+      { dx:  0.22, dy: -0.10, rx: 0.56, ry: 0.20 },
+      { dx: -0.42, dy: -0.08, rx: 0.40, ry: 0.18 },
+    ],
   ];
 
   const CLOUD_DEFS = [
@@ -518,10 +572,12 @@ const CloudcoreRenderer = (() => {
     clouds = CLOUD_DEFS.map(d => ({
       ...d, px: d.fx * W, py: d.fy * H,
       breathPhase: Math.random() * Math.PI * 2,
+      shapeIdx: Math.floor(Math.random() * CLOUD_SHAPES.length),
     }));
   }
 
-  function drawCloudShape(ctx, cx, cy, R, tint, baseAlpha) {
+  function drawCloudShape(ctx, cx, cy, R, tint, baseAlpha, puffs) {
+    const pts = puffs || CLOUD_SHAPES[0];
     const wr = Math.min(255, 252 + Math.round(tint * 3));
     const wg = Math.min(255, 248 - Math.round(Math.max(0, tint) * 28));
     const wb = Math.min(255, 245 - Math.round(Math.max(0, tint) * 58));
@@ -531,19 +587,19 @@ const CloudcoreRenderer = (() => {
 
     ctx.fillStyle = `rgba(80,110,168,0.17)`;
     ctx.beginPath();
-    for (const p of PUFFS)
+    for (const p of pts)
       ctx.ellipse(cx + p.dx*R, cy + p.dy*R + R*0.18, p.rx*R*1.06, p.ry*R*0.55, 0, 0, Math.PI*2);
     ctx.fill();
 
     ctx.fillStyle = `rgb(${wr},${wg},${wb})`;
     ctx.beginPath();
-    for (const p of PUFFS)
+    for (const p of pts)
       ctx.ellipse(cx + p.dx*R, cy + p.dy*R, p.rx*R, p.ry*R, 0, 0, Math.PI*2);
     ctx.fill();
 
     ctx.fillStyle = `rgba(255,255,255,0.66)`;
     ctx.beginPath();
-    for (const p of PUFFS) {
+    for (const p of pts) {
       if (p.dy <= 0)
         ctx.ellipse(cx + p.dx*R, cy + p.dy*R - R*0.09, p.rx*R*0.60, p.ry*R*0.42, 0, 0, Math.PI*2);
     }
@@ -559,7 +615,7 @@ const CloudcoreRenderer = (() => {
       c.px += c.spd * W;
       if (c.px > W + 220 * c.sc) c.px = -220 * c.sc;
       const breath = 1 + 0.018 * Math.sin(t * 0.005 + c.breathPhase);
-      drawCloudShape(bgCtx, c.px, c.py, 58 * c.sc * breath, tint, ALPHAS[c.layer] * densityMod);
+      drawCloudShape(bgCtx, c.px, c.py, 58 * c.sc * breath, tint, ALPHAS[c.layer] * densityMod, CLOUD_SHAPES[c.shapeIdx]);
     }
   }
 
@@ -810,7 +866,7 @@ const CloudcoreRenderer = (() => {
   //  SPAWN PUFFS (nube que nace en el clic)
   // ═══════════════════════════════════════════════════════════════
   function spawnPuff(x, y) {
-    spawnPuffs.push({ x, y, life:0, maxLife:100 });
+    spawnPuffs.push({ x, y, life:0, maxLife:100, shapeIdx: Math.floor(Math.random() * CLOUD_SHAPES.length) });
   }
 
   function drawSpawnPuffs(tint) {
@@ -822,7 +878,7 @@ const CloudcoreRenderer = (() => {
       if (sp.life >= sp.maxLife) { spawnPuffs.splice(i,1); continue; }
       bgCtx.save();
       bgCtx.globalAlpha = alpha * 0.85;
-      drawCloudShape(bgCtx, sp.x, sp.y, 58*prog*1.15, tint);
+      drawCloudShape(bgCtx, sp.x, sp.y, 58*prog*1.15, tint, undefined, CLOUD_SHAPES[sp.shapeIdx]);
       bgCtx.restore();
     }
   }
