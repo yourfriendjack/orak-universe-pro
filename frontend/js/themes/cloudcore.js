@@ -10,8 +10,17 @@ const CloudcoreRenderer = (() => {
 
   // ── Elementos del mundo ───────────────────────────────────────
   let clouds = [], dustMotes = [], stars = [], birdGroups = [];
-  let rainDrops = [], spawnPuffs = [];
+  let rainDrops = [], flashes = [];
   let rainAlpha = 0;
+
+  // ── Secreto (5 clics rápidos) ─────────────────────────────────
+  let clickTimes = [], secretMsg = null, secretIdx = 0;
+  const SECRET_LINES = [
+    'el cielo recuerda tu nombre',
+    'escribir es hacer que el tiempo dure',
+    'todo comenzó con una sola idea',
+    'estás en el origen de algo',
+  ];
 
   // ── Sistema de energía (0–100) ────────────────────────────────
   // Sube con interacción, baja con inactividad.
@@ -863,24 +872,75 @@ const CloudcoreRenderer = (() => {
   }
 
   // ═══════════════════════════════════════════════════════════════
-  //  SPAWN PUFFS (nube que nace en el clic)
+  //  DESTELLO DE LUZ (clic)
   // ═══════════════════════════════════════════════════════════════
-  function spawnPuff(x, y) {
-    spawnPuffs.push({ x, y, life:0, maxLife:100, shapeIdx: Math.floor(Math.random() * CLOUD_SHAPES.length) });
+  function addFlash(x, y) {
+    flashes.push({ x, y, life: 0, maxLife: 42, angle: Math.random() * Math.PI * 2 });
   }
 
-  function drawSpawnPuffs(tint) {
-    for (let i = spawnPuffs.length-1; i >= 0; i--) {
-      const sp = spawnPuffs[i];
-      sp.life++;
-      const prog  = sp.life / sp.maxLife;
-      const alpha = prog < 0.3 ? prog/0.3 : 1-(prog-0.3)/0.7;
-      if (sp.life >= sp.maxLife) { spawnPuffs.splice(i,1); continue; }
-      bgCtx.save();
-      bgCtx.globalAlpha = alpha * 0.85;
-      drawCloudShape(bgCtx, sp.x, sp.y, 58*prog*1.15, tint, undefined, CLOUD_SHAPES[sp.shapeIdx]);
-      bgCtx.restore();
+  function drawFlashes() {
+    for (let i = flashes.length - 1; i >= 0; i--) {
+      const f = flashes[i];
+      f.life++;
+      if (f.life >= f.maxLife) { flashes.splice(i, 1); continue; }
+      const prog  = f.life / f.maxLife;
+      const alpha = prog < 0.18 ? prog / 0.18 : 1 - (prog - 0.18) / 0.82;
+      const r     = prog * 48;
+
+      overCtx.save();
+
+      // halo central
+      const g = overCtx.createRadialGradient(f.x, f.y, 0, f.x, f.y, r);
+      g.addColorStop(0,   `rgba(255,255,255,${alpha * 0.28})`);
+      g.addColorStop(0.35,`rgba(210,235,255,${alpha * 0.14})`);
+      g.addColorStop(1,   'rgba(180,220,255,0)');
+      overCtx.fillStyle = g;
+      overCtx.beginPath(); overCtx.arc(f.x, f.y, r, 0, Math.PI * 2); overCtx.fill();
+
+      // 6 rayos finos
+      overCtx.strokeStyle = `rgba(255,255,255,${alpha * 0.18})`;
+      overCtx.lineWidth = 0.7;
+      for (let n = 0; n < 6; n++) {
+        const a = f.angle + (n / 6) * Math.PI * 2;
+        overCtx.beginPath();
+        overCtx.moveTo(f.x + Math.cos(a) * r * 0.22, f.y + Math.sin(a) * r * 0.22);
+        overCtx.lineTo(f.x + Math.cos(a) * r * 0.88, f.y + Math.sin(a) * r * 0.88);
+        overCtx.stroke();
+      }
+
+      overCtx.restore();
     }
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  //  SECRETO (5 clics rápidos → frase etérea)
+  // ═══════════════════════════════════════════════════════════════
+  function checkSecret(x, y) {
+    clickTimes.push(t);
+    clickTimes = clickTimes.filter(ct => t - ct < 90);
+    if (clickTimes.length >= 5 && !secretMsg) {
+      secretMsg  = { text: SECRET_LINES[secretIdx % SECRET_LINES.length], x, y: y - 20, life: 0, maxLife: 310 };
+      secretIdx++;
+      clickTimes = [];
+    }
+  }
+
+  function drawSecret() {
+    if (!secretMsg) return;
+    secretMsg.life++;
+    secretMsg.y -= 0.15;
+    if (secretMsg.life >= secretMsg.maxLife) { secretMsg = null; return; }
+    const prog  = secretMsg.life / secretMsg.maxLife;
+    const alpha = prog < 0.12 ? prog / 0.12 : prog > 0.72 ? (1 - prog) / 0.28 : 1;
+    overCtx.save();
+    overCtx.globalAlpha  = alpha * 0.52;
+    overCtx.font         = 'italic 13px Georgia, serif';
+    overCtx.textAlign    = 'center';
+    overCtx.shadowColor  = 'rgba(200,230,255,0.9)';
+    overCtx.shadowBlur   = 14;
+    overCtx.fillStyle    = 'rgba(255,255,255,0.95)';
+    overCtx.fillText(`✦  ${secretMsg.text}  ✦`, secretMsg.x, secretMsg.y);
+    overCtx.restore();
   }
 
   // ═══════════════════════════════════════════════════════════════
@@ -951,7 +1011,8 @@ const CloudcoreRenderer = (() => {
     drawBirds(W, H, phase);
     drawRain(W, H, phase);
     drawRainbow(W, H, phase);
-    drawSpawnPuffs(tint);
+    drawFlashes();
+    drawSecret();
     drawDust(W, H);
     drawRareEvent(W, H);
 
@@ -1016,7 +1077,8 @@ const CloudcoreRenderer = (() => {
         energy = Math.min(100, energy + 0.07);
       };
       _onClick = e => {
-        spawnPuff(e.clientX, e.clientY);
+        addFlash(e.clientX, e.clientY);
+        checkSecret(e.clientX, e.clientY);
         addMemory(e.clientX, e.clientY);
         energy    = Math.min(100, energy + 8);
         mouseIdle = 0;
@@ -1035,8 +1097,9 @@ const CloudcoreRenderer = (() => {
       if (_onClick) { document.removeEventListener('click',     _onClick); _onClick = null; }
       bgCanvas.remove();   bgCanvas   = bgCtx   = null;
       overCanvas.remove(); overCanvas = overCtx = null;
-      clouds = []; dustMotes = []; spawnPuffs = []; stars = []; birdGroups = [];
+      clouds = []; dustMotes = []; flashes = []; stars = []; birdGroups = [];
       rainDrops = []; rainAlpha = 0; memoryOrbs = []; trail = [];
+      clickTimes = []; secretMsg = null;
       energy = 50; mouseIdle = 0; silence = 0;
       dailyEvent = null; dailyEventDone = false;
       rareEvent = null; rareCooldown = 900;
