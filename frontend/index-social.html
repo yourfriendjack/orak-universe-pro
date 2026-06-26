@@ -184,16 +184,20 @@
           <div class="composer">
             <div class="composer-top">
               <div class="composer-av" id="comp-av">…</div>
-              <textarea class="composer-input" id="comp-text" placeholder="¿Qué estás escribiendo hoy?"></textarea>
+              <textarea class="composer-input" id="comp-text" placeholder="¿Qué invocas hoy?"></textarea>
+            </div>
+            <div class="composer-estados">
+              <button class="comp-estado active" data-tipo="invocando" data-ph="¿En qué escena, capítulo o personaje estás ahora?" onclick="setEstado(this)"><span class="comp-estado-sig">✦</span>Invocando</button>
+              <button class="comp-estado" data-tipo="revelacion" data-ph="Comparte ese destello antes de que desaparezca…" onclick="setEstado(this)"><span class="comp-estado-sig">◎</span>Revelación</button>
+              <button class="comp-estado" data-tipo="umbral" data-ph="¿Qué mundo estás a punto de crear?" onclick="setEstado(this)"><span class="comp-estado-sig">⊛</span>El Umbral</button>
+              <button class="comp-estado" data-tipo="eco" data-ph="¿Qué libro o frase te transformó hoy?" onclick="setEstado(this)"><span class="comp-estado-sig">◑</span>Eco</button>
+              <button class="comp-estado" data-tipo="conjuro" data-ph="¿Qué tipo de mente afín estás buscando?" onclick="setEstado(this)"><span class="comp-estado-sig">⊕</span>Conjuro</button>
+              <button class="comp-estado" data-tipo="niebla" data-ph="A veces el silencio también es parte del proceso…" onclick="setEstado(this)"><span class="comp-estado-sig">☽</span>Niebla</button>
             </div>
             <div class="composer-footer">
-              <select class="comp-sel" id="comp-type">
-                <option value="nuevo_libro">📖 Nuevo libro</option>
-                <option value="capitulo">✏️ Nuevo capítulo</option>
-                <option value="colaboracion">👥 Busco colaborador</option>
-                <option value="reflexion">💬 Reflexión</option>
-              </select>
-              <button class="comp-btn" onclick="submitPost()">Publicar</button>
+              <span class="comp-tipo-label" id="comp-tipo-label">✦ Invocando</span>
+              <input type="hidden" id="comp-type" value="invocando">
+              <button class="comp-btn" onclick="submitPost()">Invocar</button>
             </div>
           </div>
           <div class="feed-posts" id="feed-posts">
@@ -728,6 +732,14 @@ window.darGlimmerPost = async (id) => {
       toast('⬡ Glimmer enviado');
     }
   } catch(e) { toast(e.message, 'err'); }
+};
+
+window.setEstado = (btn) => {
+  document.querySelectorAll('.comp-estado').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('comp-type').value = btn.dataset.tipo;
+  document.getElementById('comp-text').placeholder = btn.dataset.ph;
+  document.getElementById('comp-tipo-label').textContent = btn.querySelector('.comp-estado-sig').textContent + ' ' + btn.childNodes[1].textContent.trim();
 };
 
 window.submitPost = async () => {

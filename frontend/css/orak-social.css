@@ -244,9 +244,14 @@ a{text-decoration:none;color:inherit;}
 .composer-av{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--amber),var(--rust));display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-size:.7rem;font-weight:700;color:#fff;flex-shrink:0;}
 .composer-input{flex:1;border:none;outline:none;resize:none;font-family:'Crimson Pro',serif;font-size:1rem;color:var(--ink);background:transparent;line-height:1.5;min-height:56px;}
 .composer-input::placeholder{color:var(--fog);font-style:italic;}
-.composer-footer{display:flex;align-items:center;gap:8px;padding:8px 12px;border-top:1px solid var(--mist);margin-top:6px;}
-.comp-sel{font-family:'JetBrains Mono',monospace;font-size:.6rem;letter-spacing:.05em;text-transform:uppercase;padding:5px 10px;border-radius:var(--radius-sm);border:1px solid var(--fog);background:transparent;color:var(--amber-dim);cursor:pointer;outline:none;}
-.comp-btn{margin-left:auto;padding:6px 16px;background:var(--amber);color:#fff;border:none;border-radius:var(--radius-sm);font-family:'JetBrains Mono',monospace;font-size:.63rem;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:background var(--transition);}
+.composer-estados{display:flex;gap:5px;padding:8px 12px 6px;flex-wrap:wrap;border-top:1px solid var(--mist);}
+.comp-estado{display:flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;border:1px solid var(--fog);background:transparent;font-family:'JetBrains Mono',monospace;font-size:.58rem;letter-spacing:.04em;color:var(--fog);cursor:pointer;transition:all .18s;white-space:nowrap;}
+.comp-estado:hover{border-color:var(--amber);color:var(--amber-dim);}
+.comp-estado.active{border-color:var(--amber);background:rgba(200,134,10,.08);color:var(--amber-dim);font-weight:600;}
+.comp-estado-sig{font-size:.75rem;line-height:1;}
+.composer-footer{display:flex;align-items:center;gap:8px;padding:7px 12px;border-top:1px solid var(--mist);}
+.comp-tipo-label{font-family:'JetBrains Mono',monospace;font-size:.58rem;letter-spacing:.05em;color:var(--fog);font-style:italic;}
+.comp-btn{margin-left:auto;padding:6px 18px;background:var(--amber);color:#fff;border:none;border-radius:var(--radius-sm);font-family:'JetBrains Mono',monospace;font-size:.63rem;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:background var(--transition);}
 .comp-btn:hover{background:var(--amber-dim);}
 
 /* Posts */
