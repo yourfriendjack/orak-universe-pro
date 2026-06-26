@@ -711,7 +711,7 @@ function postHTML(p, i) {
     ? `<button class="post-follow-btn${leyendo?' leyendo':''}" id="pf-${p.autor_id}" onclick="toggleFollowPost('${p.autor_id}',event)">${leyendo?'✓ Leyendo':'◎ Seguir'}</button>`
     : '';
 
-  return `<div class="post ${est.cls}" style="animation-delay:${i*.06}s" id="post-${p.id}">
+  return `<div class="post ${est.cls}" style="animation-delay:${Math.min(i*.07,0.35).toFixed(2)}s" id="post-${p.id}">
     <div class="post-estado-bar">
       <span class="post-estado-sig">${est.sig}</span>
       <span class="post-estado-lbl">${est.label}</span>
@@ -853,7 +853,7 @@ function renderBooks(containerId, books) {
   const spines = ['bs1','bs2','bs3','bs4','bs5'];
   if (!books.length) { c.innerHTML = '<div class="orak-empty">☽<br>Este género guarda silencio por ahora.</div>'; return; }
   c.innerHTML = books.map((b, i) => `
-    <div class="bcard" style="animation-delay:${i*.05}s;cursor:pointer" data-libro-id="${b.id}">
+    <div class="bcard" style="animation-delay:${Math.min(i*.06,0.36).toFixed(2)}s;cursor:pointer" data-libro-id="${b.id}">
       <div class="bcard-spine ${spines[i%5]}">
         <div class="bcard-ttl">${escapeHtml(b.titulo)}</div>
         <div class="bcard-vis ${b.es_publico?'vis-pub':'vis-pri'}">${b.es_publico?'Público':'Privado'}</div>
@@ -901,7 +901,7 @@ function renderPeople(list, filter='') {
     const ini = p.avatar_url
       ? `<img src="${escapeHtml(p.avatar_url)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" loading="lazy">`
       : initials(p.display_name || p.username);
-    return `<div class="person-card" style="animation-delay:${i*.04}s" id="pcard-${p.id}">
+    return `<div class="person-card" style="animation-delay:${Math.min(i*.06,0.36).toFixed(2)}s" id="pcard-${p.id}">
       <div class="person-av ${av}" data-username="${p.username}" style="cursor:pointer">${ini}</div>
       <div class="person-info">
         <div class="person-name" data-username="${escapeHtml(p.username)}" style="cursor:pointer">${escapeHtml(p.display_name || p.username)}</div>

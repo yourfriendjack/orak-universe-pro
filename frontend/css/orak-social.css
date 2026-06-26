@@ -557,13 +557,4 @@ a{text-decoration:none;color:inherit;}
 /* ══════════════════════════════════════════════════════════════
    ANIMACIONES
 ══════════════════════════════════════════════════════════════ */
-@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
-.post:nth-child(1){animation-delay:.04s;}
-.post:nth-child(2){animation-delay:.08s;}
-.post:nth-child(3){animation-delay:.12s;}
-.post:nth-child(4){animation-delay:.16s;}
-.bcard:nth-child(1){animation-delay:.04s;}
-.bcard:nth-child(2){animation-delay:.08s;}
-.bcard:nth-child(3){animation-delay:.12s;}
-.bcard:nth-child(4){animation-delay:.16s;}
-.bcard:nth-child(5){animation-delay:.20s;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
