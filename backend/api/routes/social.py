@@ -407,7 +407,7 @@ async def invitar_coescritor(libro_id: int, datos: CoescritorIn, usuario = Depen
 async def enviar_mensaje(datos: MensajeIn, usuario = Depends(get_current_user)):
     if datos.receptor_id == usuario["id"]:
         error("No puedes enviarte mensajes a ti mismo")
-    sb = get_supabase_user(usuario["_token"])
+    sb = get_supabase()
     res = sb.table("mensajes").insert({
         "emisor_id":   usuario["id"],
         "receptor_id": datos.receptor_id,

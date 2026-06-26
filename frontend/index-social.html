@@ -2049,11 +2049,11 @@ window.enviarChatMsg = async () => {
   playSound('send');
   try {
     await apiPost('/api/social/mensajes', { receptor_id: CHAT_USER_ID, texto }, getToken());
-    // Quitar el div temporal y dejar que el poll traiga el mensaje con ID real
     tmpDiv.remove();
     await _pollChatThread(CHAT_USER_ID);
-  } catch {
+  } catch(e) {
     tmpDiv.remove();
+    toast(e?.message || 'Error al enviar mensaje', 'err');
   }
 };
 
