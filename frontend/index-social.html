@@ -727,10 +727,6 @@ function postHTML(p, i) {
         <svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><polygon points="10,2 12.2,7.8 18.5,8.1 13.8,12.2 15.5,18.3 10,15 4.5,18.3 6.2,12.2 1.5,8.1 7.8,7.8"/></svg>
         ${p.glimmers||0}
       </button>
-      <button class="pact" data-libro-fork="${p.libro_id||''}" onclick="if(this.dataset.libroFork)window.location.href='/libro?id='+this.dataset.libroFork;else toast('Este post no tiene libro asociado')" title="Fork">
-        <svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="5" cy="5" r="2.5"/><circle cx="15" cy="5" r="2.5"/><circle cx="10" cy="15" r="2.5"/><path d="M5 7.5 L5 11 Q5 12.5 10 12.5 Q15 12.5 15 11 L15 7.5"/></svg>
-        ${p.forks||0}
-      </button>
       <button class="pact" id="nota-btn-${p.id}" onclick="toggleNotas(${p.id})" title="Notas">
         <svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 4h12v9H4z"/><line x1="7" y1="8" x2="13" y2="8"/><line x1="7" y1="11" x2="11" y2="11"/><path d="M13 13 l3 3"/></svg>
         ${p.notas||0}
