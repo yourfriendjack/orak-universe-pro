@@ -31,8 +31,10 @@ body{background:var(--page);}
 .pp-back{position:sticky;top:0;z-index:100;background:rgba(250,247,242,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--fog);display:flex;align-items:center;gap:10px;padding:0 24px;height:52px;}
 .pp-back-link{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--fog);cursor:pointer;transition:color .15s;}
 .pp-back-link:hover{color:var(--amber-dim);}
-.pp-loading{display:flex;align-items:center;justify-content:center;padding:80px;font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--fog);}
+.pp-loading{display:flex;align-items:center;justify-content:center;padding:80px;font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--fog);font-style:italic;}
 .pp-loading::after{content:'';width:16px;height:16px;border:2px solid var(--fog);border-top-color:var(--amber);border-radius:50%;margin-left:10px;animation:spin .7s linear infinite;}
+.pp-empty{padding:48px 24px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--fog);letter-spacing:.04em;line-height:2.2;font-style:italic;}
+.pp-empty small{display:block;font-size:.64rem;opacity:.65;margin-top:4px;line-height:1.5;}
 @keyframes spin{to{transform:rotate(360deg);}}
 .pp-notfound{text-align:center;padding:80px 20px;}
 .pp-notfound-title{font-family:'Cinzel',serif;font-size:1.4rem;font-weight:600;color:var(--ink);margin-bottom:8px;}
@@ -63,7 +65,7 @@ body{background:var(--page);}
 </div>
 
 <div id="pp-loading-wrap">
-  <div class="pp-loading">Cargando perfil</div>
+  <div class="pp-loading">El Oráculo está invocando este perfil…</div>
 </div>
 
 <div id="pp-content" style="display:none">
@@ -166,7 +168,7 @@ async function cargarPerfil() {
 
     _set('pp-name', p.display_name || p.username);
     _set('pp-handle', '@' + p.username);
-    _set('pp-bio', p.bio || 'Este escritor todavía no escribió su bio');
+    _set('pp-bio', p.bio || 'Este escritor aún guarda su historia en silencio.');
     _set('pp-libros', p.libros_count || 0);
     _set('pp-seg', p.seguidores_count || 0);
     _set('pp-sig', p.siguiendo_count || 0);
@@ -231,7 +233,7 @@ window.toggleReaderPP = async (id) => {
 function renderBooks(books) {
   const spines = ['bs1','bs2','bs3','bs4','bs5'];
   const c = document.getElementById('pp-books-grid');
-  if (!books.length) { c.innerHTML = '<div class="loading">Sin libros publicados todavía</div>'; return; }
+  if (!books.length) { c.innerHTML = '<div class="pp-empty">◎<br>Este escritor aún no ha invocado ningún libro.</div>'; return; }
   c.innerHTML = books.map((b,i) => `
     <div class="bcard" style="animation-delay:${i*.05}s;cursor:pointer" data-libro-id="${b.id}">
       <div class="bcard-spine ${spines[i%5]}">
@@ -251,7 +253,7 @@ function renderBooks(books) {
 
 function renderPosts(posts) {
   const c = document.getElementById('pp-posts');
-  if (!posts.length) { c.innerHTML = '<div class="loading">Sin publicaciones todavía</div>'; return; }
+  if (!posts.length) { c.innerHTML = '<div class="pp-empty">✦<br>Este escritor aún no ha invocado nada.<br><small>Quizás está en medio de algo grande.</small></div>'; return; }
   c.innerHTML = posts.map((p,i) => postHTMLpp(p,i)).join('');
 }
 
