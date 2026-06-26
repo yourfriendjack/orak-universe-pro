@@ -537,10 +537,18 @@ function showAuthError(msg) {
 }
 
 // ── LANZAR APP ──────────────────────────────────────────────────
-function launchApp() {
+async function launchApp() {
   document.getElementById('screen-auth').classList.remove('active');
   document.getElementById('screen-app').classList.add('active');
   updateUserUI();
+  // pre-cargar follows para que los botones del feed aparezcan correctos
+  const meId = getPerfil()?.id;
+  if (meId) {
+    try {
+      const f = await apiGet(`/api/social/follows/siguiendo/${meId}`, getToken());
+      S.myFollows = new Set((f || []).map(r => r.seguido_id));
+    } catch {}
+  }
   loadFeed();
   loadRanking();
   startRealtime();
@@ -642,11 +650,18 @@ function postHTML(p, i) {
       <div class="bp-banner bpb${(p.libro_id%4)+1}">${escapeHtml(p.libro_titulo || 'Sin título')}</div>
       <div class="bp-foot"><div class="bp-stats"><span>${escapeHtml(p.libro_genero||'')}</span></div><div class="bp-cta">Leer →</div></div>
     </div>` : '';
+  const meId      = getPerfil()?.id;
+  const esPropio  = p.autor_id === meId;
+  const leyendo   = S.myFollows.has(p.autor_id);
+  const followBtn = (meId && !esPropio) ? `<button class="post-follow-btn${leyendo?' leyendo':''}" id="pf-${p.autor_id}" onclick="toggleFollowPost('${p.autor_id}',event)">${leyendo?'✓ Leyendo':'◎ Seguir'}</button>` : '';
   return `<div class="post" style="animation-delay:${i*.06}s" id="post-${p.id}">
     <div class="post-head">
       <div class="pav ${av}" data-username="${escapeHtml(p.autor_handle)}" style="cursor:pointer">${ini}</div>
       <div class="post-meta">
-        <div class="post-name" data-username="${escapeHtml(p.autor_handle)}" style="cursor:pointer">${escapeHtml(p.autor_nombre || p.autor_handle)}</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="post-name" data-username="${escapeHtml(p.autor_handle)}" style="cursor:pointer">${escapeHtml(p.autor_nombre || p.autor_handle)}</div>
+          ${followBtn}
+        </div>
         <div class="post-handle" data-username="${escapeHtml(p.autor_handle)}" style="cursor:pointer">@${escapeHtml(p.autor_handle)} · ${p.autor_oruns||0} Oruns</div>
       </div>
       <div class="post-time">${timeAgo(p.creado_en)}</div>
@@ -829,6 +844,29 @@ function renderPeople(list, filter='') {
 }
 
 window.filterPeople = (v) => renderPeople(S.people, v);
+
+window.toggleFollowPost = async (autorId, e) => {
+  e.stopPropagation();
+  if (!getToken()) { toast('Inicia sesión para seguir', 'err'); return; }
+  const leyendo = S.myFollows.has(autorId);
+  try {
+    if (leyendo) {
+      await dejarSeguir(autorId, getToken());
+      S.myFollows.delete(autorId);
+    } else {
+      await seguir(autorId, getToken());
+      S.myFollows.add(autorId);
+      actualizarOruns(5); updateUserUI();
+      toast('◎ Siguiendo · +5 Oruns');
+    }
+    // actualizar todos los botones de este autor en el feed
+    document.querySelectorAll(`#pf-${autorId}`).forEach(b => {
+      const ahora = S.myFollows.has(autorId);
+      b.textContent = ahora ? '✓ Leyendo' : '◎ Seguir';
+      b.classList.toggle('leyendo', ahora);
+    });
+  } catch(err) { toast(err.message, 'err'); }
+};
 
 window.toggleFollow = async (id, btn) => {
   const on = btn.classList.contains('on');

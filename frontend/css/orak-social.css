@@ -166,6 +166,10 @@ a{text-decoration:none;color:inherit;}
 .post-name{font-family:'Cinzel',serif;font-size:.86rem;font-weight:600;cursor:pointer;transition:color var(--transition);}
 .post-name:hover{color:var(--amber-dim);}
 .post-handle{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--fog);}
+.post-follow-btn{font-family:'JetBrains Mono',monospace;font-size:.5rem;letter-spacing:.06em;text-transform:uppercase;padding:2px 9px;border:1px solid var(--amber);border-radius:10px;background:transparent;color:var(--amber);cursor:pointer;transition:all .15s;flex-shrink:0;line-height:1.6;}
+.post-follow-btn:hover{background:var(--amber);color:var(--deep);}
+.post-follow-btn.leyendo{border-color:var(--fog);color:var(--fog);}
+.post-follow-btn.leyendo:hover{border-color:#c06040;color:#c06040;background:rgba(192,96,64,.08);}
 .post-time{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--fog);}
 .post-badge{font-family:'JetBrains Mono',monospace;font-size:.54rem;text-transform:uppercase;letter-spacing:.08em;padding:2px 7px;border-radius:var(--radius-sm);}
 .pb-libro{background:rgba(200,134,10,.1);color:var(--amber-dim);}

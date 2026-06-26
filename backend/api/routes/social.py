@@ -29,24 +29,33 @@ async def get_feed(
     limite: int = Query(20, le=50),
     usuario = Depends(get_current_user)
 ):
-    """Feed personalizado: posts de quienes sigues + propios."""
+    """Feed personalizado: posts de quienes sigues + propios.
+    Si el usuario no sigue a nadie, devuelve el feed público de descubrimiento."""
     sb = get_supabase_user(usuario["_token"])
     offset = (pagina - 1) * limite
 
-    # IDs de quienes sigo
     follows = sb.table("follows")\
         .select("seguido_id")\
         .eq("seguidor_id", usuario["id"])\
         .execute()
     ids = [f["seguido_id"] for f in (follows.data or [])]
-    ids.append(usuario["id"])  # incluir los propios
+    ids.append(usuario["id"])
 
-    res = sb.table("vista_feed")\
-        .select("*")\
-        .in_("autor_id", ids)\
-        .order("creado_en", desc=True)\
-        .range(offset, offset + limite - 1)\
-        .execute()
+    # Usuario nuevo sin follows → feed público de descubrimiento
+    if len(ids) == 1:
+        sb_pub = get_supabase()
+        res = sb_pub.table("vista_feed")\
+            .select("*")\
+            .order("creado_en", desc=True)\
+            .range(offset, offset + limite - 1)\
+            .execute()
+    else:
+        res = sb.table("vista_feed")\
+            .select("*")\
+            .in_("autor_id", ids)\
+            .order("creado_en", desc=True)\
+            .range(offset, offset + limite - 1)\
+            .execute()
     return res.data or []
 
 
