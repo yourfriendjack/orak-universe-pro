@@ -267,6 +267,7 @@
         <div class="genre-pills">
           <div class="gpill active" onclick="filterGenre(this,null)">Todos</div>
           <div class="gpill" onclick="filterGenre(this,'fantasía')">Fantasía</div>
+          <div class="gpill" onclick="filterGenre(this,'aventura')">Aventura</div>
           <div class="gpill" onclick="filterGenre(this,'sci-fi')">Sci-Fi</div>
           <div class="gpill" onclick="filterGenre(this,'terror')">Terror</div>
           <div class="gpill" onclick="filterGenre(this,'histórico')">Histórico</div>
@@ -645,7 +646,7 @@ window.goView = (view) => {
   document.getElementById('tnav-' + view)?.classList.add('active');
   document.getElementById('snav-' + view)?.classList.add('active');
   closeNotifPanel();
-  if (view === 'explore'    && !document.getElementById('books-grid').children.length) loadExplore();
+  if (view === 'explore') loadExplore(S.genreFilter);
   if (view === 'people'     && !S.people.length) loadPeople();
   if (view === 'profile')     loadProfile();
   if (view === 'misLibros')   loadMisLibros();
@@ -695,11 +696,11 @@ function postHTML(p, i) {
 
   const book = p.libro_id ? `
     <div class="book-preview" onclick="window.location.href='/libro?id=${p.libro_id}'">
-      <div class="bp-banner bpb${(p.libro_id%4)+1}">
-        <span class="bp-titulo">${escapeHtml(p.libro_titulo || 'Sin título')}</span>
+      <div class="bp-banner${p.libro_portada ? '' : ' bpb'+(p.libro_id%4+1)}"${p.libro_portada ? ` style="background-image:url('${escapeHtml(p.libro_portada)}');background-size:cover;background-position:center;"` : ''}>
+        ${p.libro_portada ? '' : `<span class="bp-titulo">${escapeHtml(p.libro_titulo || 'Sin título')}</span>`}
       </div>
       <div class="bp-foot">
-        <span class="bp-genero">${escapeHtml(p.libro_genero||'')}</span>
+        <span class="bp-genero">${escapeHtml(p.libro_titulo||p.libro_genero||'')}</span>
         <span class="bp-cta">Leer →</span>
       </div>
     </div>` : '';
@@ -852,21 +853,26 @@ function renderBooks(containerId, books) {
   if (!c) return;
   const spines = ['bs1','bs2','bs3','bs4','bs5'];
   if (!books.length) { c.innerHTML = '<div class="orak-empty">☽<br>Este género guarda silencio por ahora.</div>'; return; }
-  c.innerHTML = books.map((b, i) => `
+  c.innerHTML = books.map((b, i) => {
+    const spineStyle = b.portada_url
+      ? `style="background-image:url('${escapeHtml(b.portada_url)}');background-size:cover;background-position:center;"`
+      : '';
+    return `
     <div class="bcard" style="animation-delay:${Math.min(i*.06,0.36).toFixed(2)}s;cursor:pointer" data-libro-id="${b.id}">
-      <div class="bcard-spine ${spines[i%5]}">
+      <div class="bcard-spine ${b.portada_url ? '' : spines[i%5]}" ${spineStyle}>
         <div class="bcard-ttl">${escapeHtml(b.titulo)}</div>
         <div class="bcard-vis ${b.es_publico?'vis-pub':'vis-pri'}">${b.es_publico?'Público':'Privado'}</div>
       </div>
       <div class="bcard-body">
         <div class="bcard-name">${escapeHtml(b.titulo)}</div>
-        <div class="bcard-desc">${escapeHtml(b.descripcion||'Sin descripción')}</div>
+        <div class="bcard-desc">${escapeHtml(b.datos?.descripcion||b.descripcion||'Sin descripción')}</div>
         <div class="bcard-foot">
           <div class="btags"><span class="btag">${escapeHtml(b.genero||'—')}</span></div>
           <div class="bcard-gl">⬡ ${b.glimmers||0}</div>
         </div>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 window.filterGenre = (el, genero) => {

@@ -113,6 +113,18 @@ body{background:var(--page);display:block;}
   font-family:'JetBrains Mono',monospace;font-size:.52rem;letter-spacing:.08em;
   text-transform:uppercase;color:rgba(232,197,90,.5);
 }
+.cover-actions{display:flex;gap:6px;margin-top:8px;}
+.cover-btn{
+  flex:1;padding:7px 4px;border:1px solid var(--fog);border-radius:5px;
+  background:transparent;font-family:'JetBrains Mono',monospace;
+  font-size:.58rem;letter-spacing:.04em;color:var(--fog);
+  cursor:pointer;transition:all .15s;text-align:center;
+}
+.cover-btn:hover{border-color:var(--amber);color:var(--amber-dim);}
+.cover-btn.uploading{opacity:.5;pointer-events:none;}
+.cover-btn-remove{border-color:rgba(139,58,31,.25);color:#c06040;}
+.cover-btn-remove:hover{border-color:var(--rust);background:rgba(139,58,31,.06);}
+.cover-preview.has-img .cover-change{display:none;}
 
 /* ── PANEL CENTRAL — Editor ── */
 .editor-main{
@@ -323,6 +335,11 @@ body{background:var(--page);display:block;}
         <span id="cover-title-preview">Sin título</span>
         <div class="cover-change">Cambiar estilo</div>
       </div>
+      <input type="file" id="portada-file-input" accept="image/jpeg,image/png,image/webp" style="display:none" onchange="onPortadaFile(this)">
+      <div class="cover-actions">
+        <button class="cover-btn" id="btn-subir-portada" onclick="document.getElementById('portada-file-input').click()">⬆ Subir imagen</button>
+        <button class="cover-btn cover-btn-remove" id="btn-quitar-portada" style="display:none" onclick="quitarPortada()">✕ Quitar</button>
+      </div>
     </div>
 
     <!-- Título -->
@@ -525,6 +542,7 @@ const S = {
   libroId:    null,
   esPublico:  true,
   portadaIdx: 1,
+  portadaUrl: null,
   capActual:  0,
   guardando:  false,
   capitulos: [
@@ -542,8 +560,60 @@ updateStats();
 
 // ── Portada ──────────────────────────────────────────────────────
 window.cambiarPortada = () => {
+  if (S.portadaUrl) return; // si hay imagen subida, no rotar estilos
   S.portadaIdx = (S.portadaIdx % 5) + 1;
   document.getElementById('cover-preview').className = `cover-preview cp-${S.portadaIdx}`;
+};
+
+function _applyPortadaImg(url) {
+  const prev = document.getElementById('cover-preview');
+  prev.style.backgroundImage = `url('${url}')`;
+  prev.style.backgroundSize  = 'cover';
+  prev.style.backgroundPosition = 'center';
+  prev.classList.add('has-img');
+  document.getElementById('btn-quitar-portada').style.display = '';
+  document.getElementById('btn-subir-portada').textContent = '⬆ Cambiar';
+}
+
+window.quitarPortada = () => {
+  S.portadaUrl = null;
+  const prev = document.getElementById('cover-preview');
+  prev.style.backgroundImage = '';
+  prev.style.backgroundSize  = '';
+  prev.style.backgroundPosition = '';
+  prev.classList.remove('has-img');
+  prev.className = `cover-preview cp-${S.portadaIdx}`;
+  document.getElementById('btn-quitar-portada').style.display = 'none';
+  document.getElementById('btn-subir-portada').textContent = '⬆ Subir imagen';
+  document.getElementById('portada-file-input').value = '';
+};
+
+window.onPortadaFile = async (input) => {
+  const file = input.files[0];
+  if (!file) return;
+  const btn = document.getElementById('btn-subir-portada');
+  btn.classList.add('uploading');
+  btn.textContent = 'Subiendo…';
+  try {
+    const fd = new FormData();
+    fd.append('file', file);
+    const r = await fetch('/v2/libros/upload-portada', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + TOKEN },
+      body: fd,
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.detail?.mensaje || d.detail || 'Error al subir');
+    S.portadaUrl = d.datos?.portada_url;
+    _applyPortadaImg(S.portadaUrl);
+    _scheduleAutoSave();
+    toast('✦ Portada actualizada');
+  } catch(e) {
+    toast(e.message, 'err');
+    btn.textContent = '⬆ Subir imagen';
+  } finally {
+    btn.classList.remove('uploading');
+  }
 };
 
 window.onTituloChange = (val) => {
@@ -725,6 +795,7 @@ async function guardarTodo_silencioso() {
         titulo, descripcion: document.getElementById('libro-desc').value,
         genero: document.getElementById('libro-genero').value,
         es_publico: S.esPublico, worldbuilding: window._wb_data || null,
+        portada_url: S.portadaUrl || null,
       })
     });
     const d = await r.json();
@@ -739,6 +810,7 @@ async function guardarTodo_silencioso() {
         titulo, descripcion: document.getElementById('libro-desc').value,
         genero: document.getElementById('libro-genero').value,
         es_publico: S.esPublico, worldbuilding: window._wb_data || null,
+        portada_url: S.portadaUrl || null,
       })
     });
   }
@@ -959,6 +1031,7 @@ if (_libroId) {
       S.esPublico = libro.es_publico !== false;
       document.getElementById('vis-toggle').classList.toggle('on', S.esPublico);
       document.getElementById('vis-label').textContent = S.esPublico ? 'Público' : 'Privado';
+      if (libro.portada_url) { S.portadaUrl = libro.portada_url; _applyPortadaImg(libro.portada_url); }
       const d = libro.datos || {};
       if (d.personajes?.length)  { WB.personajes = d.personajes;  renderChars();     updateWbCounts(); }
       if (d.lugares?.length)     { WB.lugares     = d.lugares;     renderLugares();   updateWbCounts(); }

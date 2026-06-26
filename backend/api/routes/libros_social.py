@@ -4,7 +4,7 @@ backend/api/routes/libros_social.py
 CRUD de libros para la red social — usa Supabase directamente.
 Coexiste con libros.py (worldbuilding legacy) sin conflictos.
 """
-from fastapi import APIRouter, Depends, HTTPException, Query, Header
+from fastapi import APIRouter, Depends, HTTPException, Query, Header, UploadFile, File
 from typing import Optional
 from backend.database.supabase_client import get_supabase, get_supabase_user
 from backend.models.schemas import LibroIn, LibroUpdate, OkResponse
@@ -28,7 +28,7 @@ async def listar_libros(
       .select("id,titulo,datos,genero,portada_url,es_publico,glimmers,lectores,forks_count,creado_en,autor_id,autor:perfiles!libros_autor_id_fkey(username,display_name)")\
       .eq("es_publico", True)
     if genero:
-        q = q.eq("genero", genero)
+        q = q.ilike("genero", genero)
     if fork_de:
         q = q.eq("fork_de", fork_de)
     res = q.order("creado_en", desc=True).range(offset, offset+limite-1).execute()
@@ -226,6 +226,29 @@ async def fork_libro(libro_id: int, usuario=Depends(get_current_user)):
     }).execute()
 
     return ok("Fork creado exitosamente", {"libro_id": res.data[0]["id"]})
+
+
+# ── Subir portada ────────────────────────────────────────────────
+@router.post("/upload-portada", response_model=OkResponse)
+async def upload_portada(file: UploadFile = File(...), usuario=Depends(get_current_user)):
+    ext = (file.filename or "").split(".")[-1].lower()
+    if ext not in ("jpg", "jpeg", "png", "webp"):
+        error("Formato no soportado. Usa JPG, PNG o WEBP")
+    contenido = await file.read()
+    if len(contenido) > 8 * 1024 * 1024:
+        error("La imagen no puede superar 8 MB")
+    import time
+    path = f"portadas/{usuario['id']}_{int(time.time())}.{ext}"
+    sb = get_supabase()
+    try:
+        sb.storage.from_("avatares").upload(
+            path, contenido,
+            file_options={"content-type": file.content_type, "upsert": "true"},
+        )
+    except Exception as e:
+        error(f"Error al subir portada: {str(e)}")
+    public_url = sb.storage.from_("avatares").get_public_url(path)
+    return ok("Portada subida", {"portada_url": public_url})
 
 
 # ── Helper ────────────────────────────────────────────────────────

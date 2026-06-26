@@ -238,9 +238,13 @@ function renderBooks(books) {
   const spines = ['bs1','bs2','bs3','bs4','bs5'];
   const c = document.getElementById('pp-books-grid');
   if (!books.length) { c.innerHTML = '<div class="pp-empty">◎<br>Este escritor aún no ha invocado ningún libro.</div>'; return; }
-  c.innerHTML = books.map((b,i) => `
+  c.innerHTML = books.map((b,i) => {
+    const spineStyle = b.portada_url
+      ? `style="background-image:url('${b.portada_url}');background-size:cover;background-position:center;"`
+      : '';
+    return `
     <div class="bcard" style="animation-delay:${i*.05}s;cursor:pointer" data-libro-id="${b.id}">
-      <div class="bcard-spine ${spines[i%5]}">
+      <div class="bcard-spine ${b.portada_url ? '' : spines[i%5]}" ${spineStyle}>
         <div class="bcard-ttl">${b.titulo}</div>
         <div class="bcard-vis ${b.es_publico?'vis-pub':'vis-pri'}">${b.es_publico?'Público':'Privado'}</div>
       </div>
@@ -252,7 +256,8 @@ function renderBooks(books) {
           <div class="bcard-gl">✦ ${b.glimmers||0}</div>
         </div>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 function renderPosts(posts) {
