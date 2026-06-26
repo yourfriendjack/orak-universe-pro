@@ -134,6 +134,7 @@
       </svg>ORAK
     </div>
     <div class="topbar-right">
+      <button class="notif-btn" id="sound-toggle" onclick="window._toggleMute()" title="Sonido on/off" style="font-size:.9rem;letter-spacing:0;border:none;background:none;cursor:pointer;color:var(--fog);padding:6px 8px;transition:color .15s;" onmouseover="this.style.color='var(--amber)'" onmouseout="this.style.color='var(--fog)'">🔊</button>
       <button class="notif-btn" id="notif-btn" onclick="toggleNotif()">
         <svg class="orak-icon icon-notif" viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.3"><polygon points="10,2 12.2,7.8 18.5,8.1 13.8,12.2 15.5,18.3 10,15 4.5,18.3 6.2,12.2 1.5,8.1 7.8,7.8"/></svg>
         <div class="notif-dot" id="notif-dot"></div>
@@ -488,6 +489,7 @@
 <script type="module">
 import { initAuth, login, logout, registro, getPerfil, getToken, getOruns, getGlimmers, actualizarOruns, actualizarGlimmers, actualizarPerfil, estaLogueado } from './js/services/auth.js';
 import { getFeed, getExplorar, crearPost, borrarPost, seguir, dejarSeguir, darGlimmer, quitarGlimmer, getRanking, getNotificaciones, leerNotificaciones, getLibrosPerfil, getMisCompras, comprarItem, equiparItem, apiGet, apiPost, apiPatch } from './js/services/api.js';
+import { playSound, toggleMute, isMuted } from './js/orak-sounds.js';
 
 // ── Estado ─────────────────────────────────────────────────────
 const S = {
@@ -777,6 +779,7 @@ window.darGlimmerPost = async (id) => {
       btn.classList.add('liked');
       const nuevo = actual + 1;
       btn.textContent = `⬡ ${nuevo} Glimmer${nuevo !== 1 ? 's' : ''}`;
+      playSound('glimmer');
       toast('⬡ Glimmer enviado');
     }
   } catch(e) { toast(e.message, 'err'); }
@@ -1356,8 +1359,10 @@ window.quickFollow = async (id, btn) => {
 async function loadNotifs() {
   try {
     const data = await getNotificaciones(getToken());
+    const prevUnread = S.notifs.filter(n => !n.leida).length;
     S.notifs = data;
     const unread = data.filter(n => !n.leida).length;
+    if (unread > prevUnread) playSound('notif');
     const dot = document.getElementById('notif-dot');
     const badge = document.getElementById('snav-badge');
     if (unread) { dot.classList.add('show'); badge.textContent = unread; badge.style.display = 'inline'; }
@@ -1575,11 +1580,20 @@ document.addEventListener('click', e => {
   }
 });
 
+window._toggleMute = () => {
+  const muted = toggleMute();
+  document.getElementById('sound-toggle').textContent = muted ? '🔇' : '🔊';
+  if (!muted) playSound('ui');
+};
+// Inicializar ícono al cargar
+document.getElementById('sound-toggle').textContent = isMuted() ? '🔇' : '🔊';
+
 let _tt;
 window.toast = (msg, type='') => {
   const el = document.getElementById('toast');
   el.textContent = msg; el.className = 'toast' + (type?' '+type:'') + ' show';
   clearTimeout(_tt); _tt = setTimeout(() => el.classList.remove('show'), 2800);
+  playSound(type === 'err' ? 'error' : 'success');
 };
 
 // ── HELPERS ──────────────────────────────────────────────────────
@@ -1698,6 +1712,7 @@ async function rtPollMsgs() {
     }
     if (_rtPrevMsg >= 0 && total > _rtPrevMsg) {
       const d = total - _rtPrevMsg;
+      playSound('message');
       toast(`✉ ${d} mensaje${d > 1 ? 's' : ''} nuevo${d > 1 ? 's' : ''}`);
     }
     _rtPrevMsg = total;
@@ -1963,6 +1978,7 @@ async function _pollChatThread(userId) {
     nuevos.forEach(m => c.appendChild(_msgDiv(m, meId)));
     if (atBottom) c.scrollTop = c.scrollHeight;
     _chatLastMsgId = lastId;
+    if (nuevos.some(m => m.emisor_id !== meId)) playSound('message');
   } catch {}
 }
 
@@ -2027,6 +2043,7 @@ window.enviarChatMsg = async () => {
   const c = document.getElementById('chat-msgs');
   try {
     await apiPost('/api/social/mensajes', { receptor_id: CHAT_USER_ID, texto }, getToken());
+    playSound('send');
     // re-fetch para obtener el id real del mensaje recién enviado
     const msgs = await apiGet(`/api/social/mensajes/${CHAT_USER_ID}`, getToken());
     const existing = new Set([...c.querySelectorAll('[data-mid]')].map(el => el.dataset.mid));
