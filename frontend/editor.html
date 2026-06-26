@@ -313,7 +313,8 @@ body{background:var(--page);display:block;}
 <div class="editor-shell">
 
   <!-- ── IZQUIERDA — Config ── -->
-  <div class="editor-left">
+  <div class="editor-left" id="editor-left">
+    <button class="drawer-close" onclick="closeDrawers()">✕ Cerrar</button>
 
     <!-- Portada -->
     <div class="el-section">
@@ -389,7 +390,8 @@ body{background:var(--page);display:block;}
   </div>
 
   <!-- ── DERECHA — Info ── -->
-  <div class="editor-right">
+  <div class="editor-right" id="editor-right">
+    <button class="drawer-close" onclick="closeDrawers()">✕ Cerrar</button>
 
     <div class="er-block">
       <div class="er-label">Estadísticas</div>
@@ -986,7 +988,28 @@ window.toast = (msg, type='') => {
 };
 </script>
 
+<!-- ── MOBILE: overlay + FABs + drawer close buttons ── -->
+<div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawers()"></div>
 
+<!-- Botones flotantes -->
+<div class="mob-fab-wrap">
+  <button class="mob-fab mob-fab-config" title="Configuración del libro" onclick="toggleDrawer('editor-left')">⚙</button>
+  <button class="mob-fab" title="Lista de capítulos" onclick="toggleDrawer('editor-right')">☰</button>
+</div>
+
+<script>
+function toggleDrawer(id) {
+  const panel = document.getElementById(id);
+  const overlay = document.getElementById('drawer-overlay');
+  const isOpen = panel.classList.contains('open');
+  closeDrawers();
+  if (!isOpen) { panel.classList.add('open'); overlay.classList.add('open'); }
+}
+function closeDrawers() {
+  document.querySelectorAll('.editor-left,.editor-right').forEach(p => p.classList.remove('open'));
+  document.getElementById('drawer-overlay')?.classList.remove('open');
+}
+</script>
 
 </body>
 </html>
@@ -995,47 +1018,105 @@ window.toast = (msg, type='') => {
 /* ══════════════════════════════════════════════════════════
    RESPONSIVE — MÓVIL
 ══════════════════════════════════════════════════════════ */
+/* ══ MÓVIL ════════════════════════════════════════════════ */
 @media (max-width: 900px) {
-  .editor-top{padding:0 16px;gap:8px;}
-  .editor-title{font-size:.85rem;}
-  .status-dot span{display:none;}
-  .save-btn{font-size:.6rem;padding:6px 12px;}
 
-  .main-tabs{padding:0 16px;}
-  .main-tab{padding:10px 14px 8px;font-size:.6rem;}
+  /* Topbar compacto */
+  .editor-top{padding:0 14px;gap:8px;}
+  .editor-title{font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px;}
+  .status-dot span,.status-dot .dot{display:none;}
+  .back-link span{display:none;}
+  .save-btn{font-size:.6rem;padding:6px 14px;}
 
-  .editor-shell{grid-template-columns:1fr;}
-  .editor-left{
-    position:static;height:auto;width:100%;
-    border-right:none;border-bottom:1px solid var(--fog);
-    padding:18px 16px;
+  /* Main tabs */
+  .main-tabs{padding:0 14px;top:54px;}
+  .main-tab{padding:9px 12px 7px;font-size:.6rem;}
+
+  /* Layout escritura: solo el área central ocupa la pantalla */
+  .editor-shell{
+    display:flex;flex-direction:column;
+    min-height:calc(100vh - 108px);
   }
-  .cover-preview{max-width:160px;margin:0 auto;}
-  .editor-main{order:-1;}
-  .chapter-tabs{padding:0 16px;}
-  .writing-area{padding:24px 18px;max-width:100%;}
-  .chapter-title-input{font-size:1.25rem;}
-  .editor-right{
-    position:static;height:auto;width:100%;
-    border-left:none;border-top:1px solid var(--fog);
-    padding:18px 16px;
+  .editor-main{flex:1;display:flex;flex-direction:column;order:0;}
+  .chapter-tabs{padding:0 14px;}
+  .writing-area{padding:20px 16px;max-width:100%;flex:1;}
+  .chapter-title-input{font-size:1.1rem;margin-bottom:14px;}
+  .chapter-body{min-height:calc(100vh - 280px);font-size:1rem;}
+  .word-count{padding:8px 16px;}
+
+  /* Paneles laterales: drawers desde la derecha */
+  .editor-left,.editor-right{
+    position:fixed;top:0;right:0;bottom:0;
+    width:min(88vw,340px);z-index:500;
+    background:var(--page);overflow-y:auto;
+    transform:translateX(100%);
+    transition:transform .3s cubic-bezier(.4,0,.2,1);
+    box-shadow:-8px 0 32px rgba(0,0,0,.35);
+    border:none;padding:56px 20px 24px;
+  }
+  .editor-left.open,.editor-right.open{transform:translateX(0);}
+  .cover-preview{max-width:140px;margin:0 auto;}
+
+  /* Overlay */
+  .drawer-overlay{
+    display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:499;
+  }
+  .drawer-overlay.open{display:block;}
+
+  /* Botones flotantes para abrir drawers */
+  .mob-fab-wrap{
+    position:fixed;bottom:22px;right:16px;z-index:400;
+    display:flex;flex-direction:column;gap:10px;
+  }
+  .mob-fab{
+    width:44px;height:44px;border-radius:50%;
+    background:var(--ink);color:var(--gold);
+    border:none;cursor:pointer;font-size:1rem;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 4px 14px rgba(0,0,0,.4);
+    transition:background .15s,transform .15s;
+  }
+  .mob-fab:hover{background:#2a2820;transform:scale(1.07);}
+  .mob-fab-config{font-size:.75rem;letter-spacing:-.01em;}
+
+  /* Botón cerrar dentro del drawer */
+  .drawer-close{
+    position:absolute;top:14px;right:16px;
+    background:none;border:none;cursor:pointer;
+    font-family:'JetBrains Mono',monospace;font-size:.6rem;
+    color:var(--fog);letter-spacing:.05em;
+    display:flex;align-items:center;gap:4px;
   }
 
-  .wb-shell{grid-template-columns:1fr;height:auto;}
+  /* Worldbuilding mobile */
+  .wb-shell{display:flex;flex-direction:column;height:auto;min-height:calc(100vh - 108px);}
   .wb-nav{
     display:flex;overflow-x:auto;padding:10px 12px;
     border-right:none;border-bottom:1px solid var(--fog);gap:4px;
+    scrollbar-width:none;
   }
-  .wb-nav-item{flex-shrink:0;white-space:nowrap;border-left:none;border-bottom:2px solid transparent;}
+  .wb-nav::-webkit-scrollbar{display:none;}
+  .wb-nav-item{flex-shrink:0;white-space:nowrap;border-left:none;border-bottom:2px solid transparent;padding:7px 14px;}
   .wb-nav-item.active{border-left:none;border-bottom-color:var(--amber);}
-  .wb-content{padding:18px 16px;}
+  .wb-content{padding:18px 16px;overflow-y:auto;}
   .wb-form-grid{grid-template-columns:1fr;}
   .wb-grid{grid-template-columns:repeat(2,1fr);gap:10px;}
 }
 
 @media (max-width: 480px) {
-  .editor-title{display:none;}
+  .editor-title{max-width:90px;}
   .wb-grid{grid-template-columns:1fr;}
   .tl-year-badge{min-width:55px;font-size:.68rem;}
+}
+
+/* Ocultar FABs en desktop */
+@media (min-width: 901px) {
+  .mob-fab-wrap,.drawer-overlay,.drawer-close{display:none !important;}
+}
+
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  @media (max-width: 900px) {
+    .mob-fab-wrap{bottom:calc(22px + env(safe-area-inset-bottom));}
+  }
 }
 </style>
