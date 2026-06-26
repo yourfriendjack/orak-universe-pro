@@ -502,7 +502,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
   const sesion = await initAuth();
   if (!sesion) {
-    document.getElementById('screen-auth').classList.add('active');
+    window.location.replace('/auth.html');
     return;
   }
   launchApp();

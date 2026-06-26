@@ -450,7 +450,7 @@ body {
       <div class="field">
         <div class="field-label"><span>Contraseña</span></div>
         <div class="field-wrap">
-          <input class="field-input" type="password" id="reg-pass" placeholder="Mínimo 6 caracteres">
+          <input class="field-input" type="password" id="reg-pass" placeholder="Mínimo 6 caracteres" onkeydown="if(event.key==='Enter') doRegister()">
           <button class="eye-btn" onclick="toggleEye('reg-pass',this)">👁</button>
         </div>
       </div>
@@ -490,6 +490,12 @@ body {
 </div>
 
 <script>
+// Si ya tiene sesión activa, ir directo al feed
+try {
+  const s = JSON.parse(localStorage.getItem('orak_sesion') || '{}');
+  if (s?.access_token && s?.perfil) window.location.replace('/index-social.html');
+} catch {}
+
 // ── Canvas de estrellas ─────────────────────────────────────────
 const canvas = document.getElementById('cosmos');
 const ctx    = canvas.getContext('2d');
