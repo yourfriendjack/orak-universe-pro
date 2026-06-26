@@ -1257,6 +1257,15 @@ function aplicarTema(itemId, tipo) {
   }
 }
 
+// Uso desde consola del browser: await grantAllItems()
+window.grantAllItems = async () => {
+  try {
+    await apiPost('/api/social/tienda/grant-all', {}, getToken());
+    await renderTienda();
+    toast('✦ Todos los ítems registrados — ya puedes equiparlos');
+  } catch(e) { toast(e.message, 'err'); }
+};
+
 let _prevTimer = null;
 window.previsualizarTema = (itemId, clase, evt) => {
   evt?.stopPropagation();

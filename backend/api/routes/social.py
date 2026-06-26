@@ -530,15 +530,16 @@ async def comprar_item(datos: CompraIn, usuario = Depends(get_current_user)):
     if datos.item_id not in PRECIOS:
         error("Ítem no válido")
     precio = PRECIOS[datos.item_id]
-    sb = get_supabase()
-    perfil = sb.table("perfiles").select("oruns").eq("id", usuario["id"]).single().execute()
+    sb_admin = get_supabase()
+    sb_user  = get_supabase_user(usuario["_token"])
+    perfil = sb_admin.table("perfiles").select("oruns").eq("id", usuario["id"]).single().execute()
     if not perfil.data or (perfil.data["oruns"] or 0) < precio:
         error("Oruns insuficientes")
-    ya = sb.table("tienda_compras").select("id").eq("user_id", usuario["id"]).eq("item_id", datos.item_id).execute()
+    ya = sb_user.table("tienda_compras").select("id").eq("user_id", usuario["id"]).eq("item_id", datos.item_id).execute()
     if ya.data:
         error("Ya compraste este ítem")
-    sb.table("perfiles").update({"oruns": perfil.data["oruns"] - precio}).eq("id", usuario["id"]).execute()
-    sb.table("tienda_compras").insert({"user_id": usuario["id"], "item_id": datos.item_id}).execute()
+    sb_admin.table("perfiles").update({"oruns": perfil.data["oruns"] - precio}).eq("id", usuario["id"]).execute()
+    sb_admin.table("tienda_compras").insert({"user_id": usuario["id"], "item_id": datos.item_id}).execute()
     return ok(f"¡{datos.item_id} desbloqueado!")
 
 @router.post("/tienda/equipar", response_model=OkResponse)
@@ -546,17 +547,29 @@ async def equipar_item(datos: EquiparIn, usuario = Depends(get_current_user)):
     if datos.item_id not in PRECIOS and datos.item_id != "default":
         error("Ítem no válido")
     if datos.item_id != "default":
-        ya = sb_check = get_supabase().table("tienda_compras").select("id")\
+        sb_user = get_supabase_user(usuario["_token"])
+        ya = sb_user.table("tienda_compras").select("id")\
             .eq("user_id", usuario["id"]).eq("item_id", datos.item_id).execute()
         if not ya.data:
             error("No has comprado este ítem")
     campo = {"tema_ui": "tema_ui", "tema_lectura": "tema_lectura", "titulo": "titulo_activo"}.get(datos.tipo)
     if not campo:
         error("Tipo inválido")
-    sb = get_supabase()
-    sb.table("perfiles").update({campo: None if datos.item_id == "default" else datos.item_id})\
+    get_supabase().table("perfiles").update({campo: None if datos.item_id == "default" else datos.item_id})\
       .eq("id", usuario["id"]).execute()
     return ok("Equipado")
+
+@router.post("/tienda/grant-all", response_model=OkResponse)
+async def grant_all_items(usuario = Depends(get_current_user)):
+    """Registra en tienda_compras todos los ítems del catálogo para el usuario.
+    Útil para desarrollo/testing cuando las compras previas no se grabaron."""
+    sb = get_supabase()
+    for item_id in PRECIOS:
+        try:
+            sb.table("tienda_compras").insert({"user_id": usuario["id"], "item_id": item_id}).execute()
+        except Exception:
+            pass  # ignora duplicados (UNIQUE constraint)
+    return ok("Todos los ítems registrados")
 
 
 # ══════════════════════════════════════════════════════════
