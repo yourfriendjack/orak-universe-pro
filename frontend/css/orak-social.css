@@ -126,7 +126,50 @@ a{text-decoration:none;color:inherit;}
 .snav-item{display:flex;align-items:center;gap:8px;padding:8px 16px;font-size:.9rem;color:var(--ink);cursor:pointer;transition:all var(--transition);border-left:2px solid transparent;}
 .snav-item:hover{background:var(--mist);}
 .snav-item.active{border-left-color:var(--amber);background:rgba(200,134,10,.06);color:var(--amber-dim);font-weight:600;}
-.snav-icon{font-size:.9rem;width:18px;text-align:center;}
+.snav-icon{width:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+
+/* ── Íconos SVG ORAK ──────────────────────────────────────────── */
+.orak-icon{display:block;overflow:visible;transition:transform .28s cubic-bezier(.34,1.56,.64,1),filter .28s ease;flex-shrink:0;}
+.orak-icon *{transition:transform .28s cubic-bezier(.34,1.56,.64,1),opacity .25s ease;transform-box:fill-box;transform-origin:center;}
+
+/* Feed — pupila se dilata */
+.snav-item:hover .icon-feed .icon-pupil,.snav-item:active .icon-feed .icon-pupil,
+.tnav:hover .icon-feed .icon-pupil,.tnav:active .icon-feed .icon-pupil{transform:scale(1.9);}
+.snav-item:hover .icon-feed .icon-orbit,.snav-item:active .icon-feed .icon-orbit{opacity:.7;}
+
+/* Explorar — brújula gira */
+.snav-item:hover .icon-explore,.snav-item:active .icon-explore,
+.tnav:hover .icon-explore,.tnav:active .icon-explore{transform:rotate(45deg);}
+
+/* Escritores — constelación flota */
+.snav-item:hover .icon-people,.snav-item:active .icon-people,
+.tnav:hover .icon-people,.tnav:active .icon-people{transform:translateY(-2px) scale(1.08);}
+
+/* Perfil — luna rota */
+.snav-item:hover .icon-profile,.snav-item:active .icon-profile,
+.tnav:hover .icon-profile,.tnav:active .icon-profile{transform:rotate(-22deg);}
+
+/* Libros — grimorio levita */
+.snav-item:hover .icon-libros,.snav-item:active .icon-libros,
+.tnav:hover .icon-libros,.tnav:active .icon-libros{transform:translateY(-2px);}
+
+/* Colaboraciones — anillos se separan */
+.snav-item:hover .icon-collab .collab-l,.snav-item:active .icon-collab .collab-l{transform:translateX(-1.8px);}
+.snav-item:hover .icon-collab .collab-r,.snav-item:active .icon-collab .collab-r{transform:translateX(1.8px);}
+
+/* Notificaciones — estrella rota */
+.snav-item:hover .icon-notif,.snav-item:active .icon-notif{transform:rotate(30deg) scale(1.1);}
+
+/* Mensajes — portal pulsa */
+@keyframes portal-pulse{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.18);opacity:.35;}}
+.snav-item:hover .icon-mensajes .msg-outer,.snav-item:active .icon-mensajes .msg-outer{animation:portal-pulse .7s ease infinite;}
+
+/* Tienda — gema brilla */
+.snav-item:hover .icon-tienda,.snav-item:active .icon-tienda{transform:scale(1.12);filter:drop-shadow(0 0 3px currentColor);}
+.snav-item:hover .icon-tienda .gem-face,.snav-item:active .icon-tienda .gem-face{opacity:.75;}
+
+/* Cerrar sesión — flecha desliza */
+.snav-item:hover .icon-logout .logout-arr,.snav-item:active .icon-logout .logout-arr{transform:translateX(3px);}
 .snav-badge{margin-left:auto;background:var(--amber);color:#fff;font-family:'JetBrains Mono',monospace;font-size:.54rem;padding:1px 6px;border-radius:10px;}
 
 /* ── VISTAS ── */
