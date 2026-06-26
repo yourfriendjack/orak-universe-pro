@@ -23,6 +23,12 @@ const DEFAULT_PALETTE = { freq: 660, type: 'sine', decay: 0.40, gain: 0.09 };
 
 let _ctx = null;
 let _muted = localStorage.getItem('orak_muted') === '1';
+let _gestured = false;
+
+// Chrome bloquea AudioContext hasta el primer gesto del usuario
+['click', 'keydown', 'touchstart'].forEach(evt =>
+  document.addEventListener(evt, () => { _gestured = true; }, { once: false, passive: true })
+);
 
 function _getCtx() {
   if (!_ctx) _ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -63,7 +69,7 @@ function _sequence(notes, p) {
 }
 
 export function playSound(event) {
-  if (_muted) return;
+  if (_muted || !_gestured) return;
   try {
     const p = _getPalette();
     const ctx = _getCtx();
