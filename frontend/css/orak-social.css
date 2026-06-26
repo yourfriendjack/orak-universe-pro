@@ -224,8 +224,9 @@ a{text-decoration:none;color:inherit;}
   font-size:.78rem;overflow:hidden;
 }
 .oraculo-book-thumb img{width:100%;height:100%;object-fit:cover;}
-.oraculo-row-name{font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:600;color:var(--ink);}
-.oraculo-row-sub{font-family:'JetBrains Mono',monospace;font-size:.59rem;color:var(--fog);}
+.oraculo-row-name{font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:600;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.oraculo-row-sub{font-family:'JetBrains Mono',monospace;font-size:.59rem;color:var(--fog);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.oraculo-row-info{min-width:0;flex:1;}
 
 /* ── VISTAS ── */
 .view{display:none;overflow-y:auto;height:calc(100vh - 54px);}

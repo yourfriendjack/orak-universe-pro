@@ -1429,7 +1429,7 @@ async function loadNotifs() {
           : '';
         html += `<div class="oraculo-row" onclick="window.location.href='/perfil?u=${encodeURIComponent(e.username)}'">
           <div class="oraculo-av" ${av}>${av ? '' : ini}</div>
-          <div><div class="oraculo-row-name">${e.display_name || e.username}</div><div class="oraculo-row-sub">@${e.username}</div></div>
+          <div class="oraculo-row-info"><div class="oraculo-row-name">${e.display_name || e.username}</div><div class="oraculo-row-sub">@${e.username}</div></div>
         </div>`;
       });
     }
@@ -1440,7 +1440,7 @@ async function loadNotifs() {
         const autor = l.autor?.display_name || l.autor?.username || '';
         html += `<div class="oraculo-row" onclick="window.location.href='/libro?id=${l.id}'">
           <div class="oraculo-book-thumb">${img}</div>
-          <div><div class="oraculo-row-name">${l.titulo}</div><div class="oraculo-row-sub">${autor}</div></div>
+          <div class="oraculo-row-info"><div class="oraculo-row-name">${l.titulo}</div><div class="oraculo-row-sub">${autor}</div></div>
         </div>`;
       });
     }
@@ -2245,6 +2245,9 @@ const _origLoadPeople = window.loadPeople;
   .feed-widgets{display:none;}
   .composer{margin:14px 12px 0;}
   .feed-posts{padding:12px;}
+  /* estados del compositor: scroll horizontal en lugar de múltiples filas */
+  .composer-estados{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:10px;scrollbar-width:none;}
+  .composer-estados::-webkit-scrollbar{display:none;}
   .post-actions{flex-wrap:wrap;}
   .pact{font-size:.56rem;padding:6px 8px;}
   .books-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));padding:12px;gap:10px;}
@@ -2258,15 +2261,35 @@ const _origLoadPeople = window.loadPeople;
   .prof-tabs-row{padding:0 14px;}
   .ptab-pane{padding:14px;}
   .notif-panel{width:calc(100vw - 24px);right:12px;}
+  /* tienda: 2 columnas desde 480px */
+  .tienda-grid{grid-template-columns:repeat(2,1fr);padding:12px;gap:10px;}
+  .titem-preview{height:110px;}
+  .titem-prev-nombre{font-size:.7rem;}
 }
 
 @media (max-width: 480px) {
-  .topbar{padding:0 12px;gap:8px;}
-  .logo{font-size:.85rem;}
-  .logo svg{width:24px;height:24px;}
+  .topbar{padding:0 10px;gap:6px;}
+  .logo{font-size:.8rem;letter-spacing:.04em;}
+  .logo svg{width:22px;height:22px;}
   .composer-input{font-size:.95rem;}
   .post-text{font-size:.92rem;}
   .books-grid{grid-template-columns:repeat(2,1fr);}
+  /* post: follow button baja al siguiente renglón en pantallas muy estrechas */
+  .post-name-row{flex-wrap:wrap;gap:4px;}
+  .post-follow-btn{font-size:.52rem;padding:2px 7px;}
+  /* tienda: 1 columna en móvil estrecho */
+  .tienda-grid{grid-template-columns:1fr;}
+  .titem-preview{height:120px;}
+  .titem-btns{flex-wrap:wrap;gap:4px;}
+}
+
+/* Safe area para iPhones con notch/Dynamic Island */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  @media (max-width: 600px) {
+    #chat-float{bottom:calc(16px + env(safe-area-inset-bottom));}
+    #chat-win{padding-bottom:env(safe-area-inset-bottom);}
+    #chat-thread-win{padding-bottom:env(safe-area-inset-bottom);}
+  }
 }
 </style>
 
