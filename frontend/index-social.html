@@ -1344,7 +1344,7 @@ async function loadNotifs() {
       data.libros.forEach(l => {
         const img = l.portada_url ? `<img src="${l.portada_url}" alt="">` : '📖';
         const autor = l.autor?.display_name || l.autor?.username || '';
-        html += `<div class="oraculo-row" onclick="window.location.href='/libro?t=${encodeURIComponent(l.titulo)}'">
+        html += `<div class="oraculo-row" onclick="window.location.href='/libro?id=${l.id}'">
           <div class="oraculo-book-thumb">${img}</div>
           <div><div class="oraculo-row-name">${l.titulo}</div><div class="oraculo-row-sub">${autor}</div></div>
         </div>`;
