@@ -1155,21 +1155,31 @@ window.tiendaTab = (el, tab, silent) => {
         </div>
       </div>`;
     }
-    return `<div class="titem ${equipado?'titem-eq':''} ${bloqueado?'titem-lock':''}">
+    const pSize = i => `width:${i}px;height:${i}px`;
+    return `<div class="titem ${equipado?'titem-eq':''} ${bloqueado?'titem-lock':''}" style="--titem-acento:${it.acento}44">
       <div class="titem-preview" style="background:${it.preview}">
         ${equipado ? '<div class="titem-eq-badge">✓ ACTIVO</div>' : ''}
-        ${bloqueado ? `<div class="titem-lock-badge">⊘ ${it.req}+ Oruns</div>` : ''}
-        <div class="titem-dot" style="background:${it.acento};box-shadow:0 0 8px ${it.acento}"></div>
+        ${bloqueado ? `<div class="titem-lock-badge"><span>⊘</span><span style="font-size:.55rem">${it.req.toLocaleString()}+ Oruns</span></div>` : ''}
+        <div class="titem-prev-nombre" style="color:${it.acento}">${it.nombre}</div>
+        <div class="titem-particles">
+          <span class="titem-p" style="${pSize(7)};background:${it.acento}"></span>
+          <span class="titem-p" style="${pSize(5)};background:${it.acento}"></span>
+          <span class="titem-p" style="${pSize(7)};background:${it.acento}"></span>
+        </div>
+        <div class="titem-acento-bar" style="background:${it.acento}"></div>
       </div>
       <div class="titem-info">
         <div class="titem-nombre">${it.nombre}</div>
         <div class="titem-desc">${it.desc}</div>
         <div class="titem-footer">
-          <div class="titem-precio">${it.precio} ⬡</div>
-          ${equipado   ? `<button class="titem-btn titem-btn-eq" onclick="quitarEquipo('${it.id}','${it.tipo}')">✓ Activo</button>` : ''}
-          ${!equipado && comprado  ? `<button class="titem-btn" onclick="equipar('${it.id}','${it.tipo}')">Equipar</button>` : ''}
-          ${!comprado && !bloqueado ? `<button class="titem-btn titem-btn-buy ${puedeComprar?'':'titem-btn-dim'}" onclick="comprar('${it.id}')" ${puedeComprar?'':'disabled'}>Comprar</button>` : ''}
-          ${bloqueado ? `<button class="titem-btn titem-btn-dim" disabled>Bloqueado</button>` : ''}
+          <div class="titem-precio">${it.precio === 0 ? 'Gratis' : it.precio + ' ⬡'}</div>
+          <div class="titem-btns">
+            ${!equipado && !bloqueado && (comprado || it.precio===0) ? `<button class="titem-btn titem-btn-prev" onclick="previsualizarTema('${it.id}','${it.clase}',event)">◉ Ver</button>` : ''}
+            ${equipado   ? `<button class="titem-btn titem-btn-eq" onclick="quitarEquipo('${it.id}','${it.tipo}')">✓ Activo</button>` : ''}
+            ${!equipado && (comprado || it.precio===0) ? `<button class="titem-btn" onclick="equipar('${it.id}','${it.tipo}')">Equipar</button>` : ''}
+            ${!comprado && it.precio>0 && !bloqueado ? `<button class="titem-btn titem-btn-buy ${puedeComprar?'':'titem-btn-dim'}" onclick="comprar('${it.id}')" ${puedeComprar?'':'disabled'}>Comprar</button>` : ''}
+            ${bloqueado ? `<button class="titem-btn titem-btn-dim" disabled>Bloqueado</button>` : ''}
+          </div>
         </div>
       </div>
     </div>`;
@@ -1246,6 +1256,22 @@ function aplicarTema(itemId, tipo) {
     localStorage.setItem('orak_tema_lectura', itemId === 'default' ? '' : itemId);
   }
 }
+
+let _prevTimer = null;
+window.previsualizarTema = (itemId, clase, evt) => {
+  evt?.stopPropagation();
+  if (_prevTimer) { clearTimeout(_prevTimer); _prevTimer = null; }
+  const ALL = ['theme-dark-fantasy','theme-glitch','theme-lunar','theme-sangre','theme-cosmos','theme-aurora','theme-rubi','theme-esmeralda','theme-eldergloom','theme-weirdcore','theme-vaporwave','theme-cloudcore'];
+  const actual = T.tema_ui ? (CATALOGO.find(x=>x.id===T.tema_ui)?.clase || '') : '';
+  ALL.forEach(c => document.documentElement.classList.remove(c));
+  if (clase) document.documentElement.classList.add(clase);
+  toast('◉ Vista previa — 4 s');
+  _prevTimer = setTimeout(() => {
+    ALL.forEach(c => document.documentElement.classList.remove(c));
+    if (actual) document.documentElement.classList.add(actual);
+    _prevTimer = null;
+  }, 4000);
+};
 
 // ── PERFIL ──────────────────────────────────────────────────────
 async function loadProfile() {
@@ -2126,25 +2152,37 @@ const _origLoadPeople = window.loadPeople;
 .ttab:hover{color:var(--ink);}
 .ttab.active{color:var(--amber);border-bottom-color:var(--amber);}
 .tienda-grid{padding:20px 16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;}
-.titem{background:var(--mist);border:1px solid rgba(205,199,184,.1);border-radius:10px;overflow:hidden;transition:border-color var(--transition),transform var(--transition);}
-.titem:hover{border-color:rgba(212,168,67,.3);transform:translateY(-2px);}
-.titem-eq{border-color:rgba(212,168,67,.5);box-shadow:0 0 0 1px rgba(212,168,67,.25);}
-.titem-lock{opacity:.55;}
-.titem-preview{height:90px;position:relative;display:flex;align-items:center;justify-content:center;}
-.titem-eq-badge{position:absolute;top:8px;left:8px;background:rgba(212,168,67,.9);color:#000;font-family:'JetBrains Mono',monospace;font-size:.55rem;font-weight:700;padding:2px 7px;border-radius:4px;}
-.titem-lock-badge{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.55);font-family:'JetBrains Mono',monospace;font-size:.65rem;color:rgba(205,199,184,.8);}
-.titem-dot{width:18px;height:18px;border-radius:50%;}
+.titem{background:var(--mist);border:1px solid rgba(205,199,184,.1);border-radius:10px;overflow:hidden;transition:border-color .2s,transform .2s,box-shadow .2s;}
+.titem:hover{border-color:var(--titem-acento,rgba(212,168,67,.4));transform:translateY(-3px);box-shadow:0 8px 28px rgba(0,0,0,.35);}
+.titem-eq{border-color:var(--titem-acento,rgba(212,168,67,.5));box-shadow:0 0 0 1px var(--titem-acento,rgba(212,168,67,.25));}
+.titem-lock{opacity:.5;}
+/* ── Preview window ── */
+.titem-preview{height:140px;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;}
+.titem-preview::after{content:'';position:absolute;bottom:0;left:0;right:0;height:40px;background:linear-gradient(transparent,rgba(0,0,0,.5));pointer-events:none;}
+.titem-eq-badge{position:absolute;top:8px;left:8px;background:rgba(212,168,67,.92);color:#000;font-family:'JetBrains Mono',monospace;font-size:.52rem;font-weight:700;padding:2px 7px;border-radius:4px;z-index:2;letter-spacing:.06em;}
+.titem-lock-badge{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:rgba(0,0,0,.62);font-family:'JetBrains Mono',monospace;font-size:.65rem;color:rgba(205,199,184,.8);z-index:2;}
+.titem-prev-nombre{font-family:'Cinzel',serif;font-size:.78rem;font-weight:700;letter-spacing:.14em;text-shadow:0 0 18px currentColor,0 2px 6px rgba(0,0,0,.6);position:relative;z-index:1;}
+.titem-particles{display:flex;gap:8px;align-items:center;position:relative;z-index:1;}
+.titem-p{border-radius:50%;animation:tp-pulse 2.4s ease-in-out infinite;}
+.titem-p:nth-child(2){animation-delay:.7s;width:5px;height:5px;}
+.titem-p:nth-child(3){animation-delay:1.4s;}
+@keyframes tp-pulse{0%,100%{opacity:.25;transform:scale(.8);}50%{opacity:1;transform:scale(1.4);}}
+.titem-acento-bar{position:absolute;bottom:0;left:0;right:0;height:2px;z-index:2;}
+/* ── Info ── */
 .titem-info{padding:10px 12px 12px;}
 .titem-nombre{font-family:'Cinzel',serif;font-size:.82rem;font-weight:700;color:var(--ink);margin-bottom:3px;}
 .titem-desc{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--fog);line-height:1.5;margin-bottom:10px;}
-.titem-footer{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.titem-footer{display:flex;align-items:center;justify-content:space-between;gap:6px;flex-wrap:wrap;}
 .titem-precio{font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;color:var(--amber);}
-.titem-btn{padding:5px 12px;border:1px solid var(--amber);border-radius:5px;background:transparent;color:var(--amber);font-family:'JetBrains Mono',monospace;font-size:.62rem;cursor:pointer;transition:all var(--transition);}
+.titem-btns{display:flex;gap:5px;align-items:center;}
+.titem-btn{padding:5px 11px;border:1px solid var(--amber);border-radius:5px;background:transparent;color:var(--amber);font-family:'JetBrains Mono',monospace;font-size:.6rem;cursor:pointer;transition:all var(--transition);}
 .titem-btn:hover{background:var(--amber);color:var(--deep);}
 .titem-btn-eq{background:rgba(212,168,67,.12);}
 .titem-btn-buy{background:var(--amber);color:var(--deep);border-color:var(--amber);}
 .titem-btn-buy:hover{background:var(--gold);}
 .titem-btn-dim{opacity:.4;cursor:not-allowed;pointer-events:none;}
+.titem-btn-prev{border-color:rgba(205,199,184,.2);color:var(--fog);font-size:.58rem;padding:4px 8px;}
+.titem-btn-prev:hover{border-color:rgba(205,199,184,.4);color:var(--parchment);background:transparent;}
 .titem-titulo{padding:16px;display:flex;flex-direction:column;gap:6px;border-left:3px solid var(--tc,var(--amber));}
 .tit-nombre{font-family:'Cinzel',serif;font-size:.9rem;font-weight:700;}
 .tit-desc{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--fog);line-height:1.5;}
