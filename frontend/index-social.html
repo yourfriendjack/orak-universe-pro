@@ -526,6 +526,7 @@ window.doRegister = async () => {
 
 window.doLogout = async () => {
   stopRealtime();
+  document.getElementById('chat-float').style.display = 'none';
   await logout();
 };
 
@@ -543,6 +544,7 @@ function launchApp() {
   loadFeed();
   loadRanking();
   startRealtime();
+  document.getElementById('chat-float').style.display = 'flex';
   toast('✦ Bienvenido a ORAK Universe');
 }
 
@@ -1498,11 +1500,16 @@ function stopRealtime() {
         <button class="chat-head-btn" onclick="cerrarChatFloat()" title="Cerrar">✕</button>
       </div>
     </div>
+    <div class="chat-tab-row">
+      <div class="chat-tab active" id="chat-tab-msgs" onclick="switchChatTab('msgs')">Mensajes</div>
+      <div class="chat-tab" id="chat-tab-sig"  onclick="switchChatTab('sig')">Siguiendo</div>
+    </div>
     <div id="chat-buscar-float" style="display:none;padding:8px 10px;border-bottom:1px solid rgba(160,110,60,.2)">
       <input id="chat-buscar-input" class="nota-textarea" style="width:100%;padding:5px 8px;font-size:.75rem;border-radius:5px" placeholder="Buscar usuario…" oninput="buscarFloatMsg(this.value)">
       <div id="chat-buscar-res" style="margin-top:6px"></div>
     </div>
     <div id="chat-conv-list" style="overflow-y:auto;flex:1"></div>
+    <div id="chat-sig-list"  style="display:none;overflow-y:auto;flex:1"></div>
   </div>
 </div>
 
@@ -1522,7 +1529,7 @@ function stopRealtime() {
 
 <style>
 /* ── Chat flotante ─────────────────────────────────────── */
-#chat-float{position:fixed;bottom:24px;right:24px;z-index:600;display:flex;flex-direction:column;align-items:flex-end;gap:10px;}
+#chat-float{position:fixed;bottom:24px;right:24px;z-index:600;display:none;flex-direction:column;align-items:flex-end;gap:10px;}
 #chat-float-btn{width:52px;height:52px;border-radius:50%;background:var(--amber);color:#0e0d0b;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 16px rgba(212,168,67,.4);position:relative;transition:transform .15s,box-shadow .15s;flex-shrink:0;animation:chat-breathe 4s ease-in-out infinite;}
 #chat-float-btn:hover{transform:scale(1.08);box-shadow:0 6px 22px rgba(212,168,67,.55);animation:none;}
 @keyframes chat-breathe{
@@ -1593,7 +1600,10 @@ function stopRealtime() {
 .chat-win-title{font-family:'Cinzel',serif;font-size:.82rem;font-weight:700;color:#3d2008;flex:1;letter-spacing:.04em;}
 .chat-head-btn{background:none;border:none;cursor:pointer;color:#7a5030;font-size:.9rem;padding:2px 6px;border-radius:4px;transition:background .12s,color .12s;}
 .chat-head-btn:hover{background:rgba(160,110,60,.2);color:#3d2008;}
-.chat-conv-item{display:flex;align-items:center;gap:10px;padding:10px 12px 10px 40px;cursor:pointer;border-bottom:1px solid rgba(100,120,160,.15);transition:background .12s;}
+.chat-tab-row{display:flex;border-bottom:1px solid rgba(160,110,60,.2);}
+.chat-tab{flex:1;text-align:center;padding:8px 4px;font-family:'JetBrains Mono',monospace;font-size:.58rem;letter-spacing:.04em;text-transform:uppercase;color:#a07850;cursor:pointer;border-bottom:2px solid transparent;transition:all .13s;}
+.chat-tab.active{color:#3d2008;border-bottom-color:#c8a860;}
+.chat-conv-item{display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;border-bottom:1px solid rgba(100,120,160,.15);transition:background .12s;}
 .chat-conv-item:hover,.chat-conv-item.active{background:rgba(185,140,80,.15);}
 #chat-msgs{flex:1;overflow-y:auto;padding:10px 12px 10px 40px;display:flex;flex-direction:column;gap:6px;}
 .chat-msg-mio{align-self:flex-end;background:#c8a860;color:#2a1200;padding:7px 11px;border-radius:12px 12px 3px 12px;font-size:.82rem;max-width:78%;line-height:1.5;word-break:break-word;box-shadow:0 1px 3px rgba(0,0,0,.15);}
@@ -1631,7 +1641,7 @@ window.toggleChatFloat = () => {
   const win = document.getElementById('chat-win');
   const open = win.style.display !== 'none';
   win.style.display = open ? 'none' : 'flex';
-  if (!open) loadChatConvs();
+  if (!open) { switchChatTab('msgs'); loadChatConvs(); }
 };
 window.cerrarChatFloat = () => {
   document.getElementById('chat-win').style.display = 'none';
@@ -1653,8 +1663,11 @@ async function loadChatConvs() {
       const otro  = conv.interlocutor || {};
       const ini   = (otro.display_name || otro.username || '?')[0].toUpperCase();
       const badge = conv.no_leidos > 0 ? `<span style="background:#8b3a1a;color:#f5ead8;font-size:.55rem;font-weight:700;border-radius:8px;padding:1px 5px">${conv.no_leidos}</span>` : '';
+      const avEl  = otro.avatar_url
+        ? `<div style="width:28px;height:28px;border-radius:50%;background:url(${escapeStr(otro.avatar_url)}) center/cover no-repeat;flex-shrink:0"></div>`
+        : `<div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#c8a860,#8b5a2b);display:flex;align-items:center;justify-content:center;font-size:.62rem;font-weight:700;color:#f5ead8;flex-shrink:0">${escapeStr(ini)}</div>`;
       return `<div class="chat-conv-item" onclick="abrirChatThread('${otro.id}','${escapeStr(otro.username||'')}','${escapeStr(otro.display_name||otro.username||'')}')">
-        <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#c8a860,#8b5a2b);display:flex;align-items:center;justify-content:center;font-size:.62rem;font-weight:700;color:#f5ead8;flex-shrink:0">${escapeStr(ini)}</div>
+        ${avEl}
         <div style="flex:1;min-width:0">
           <div style="font-size:.78rem;font-weight:600;color:#3d2008">${escapeStr(otro.display_name||otro.username||'—')}</div>
           <div style="font-size:.66rem;color:#7a5030;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${escapeStr((conv.texto||'').slice(0,32))}</div>
@@ -1725,6 +1738,46 @@ window.enviarChatMsg = async () => {
     await renderChatMsgs(CHAT_USER_ID);
   } catch(e) {}
 };
+
+// ── Tabs del chat ────────────────────────────────────────
+window.switchChatTab = (tab) => {
+  document.querySelectorAll('.chat-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(`chat-tab-${tab}`)?.classList.add('active');
+  const isMsgs = tab === 'msgs';
+  document.getElementById('chat-conv-list').style.display  = isMsgs ? 'block' : 'none';
+  document.getElementById('chat-sig-list').style.display   = isMsgs ? 'none'  : 'block';
+  document.getElementById('chat-buscar-float').style.display = 'none';
+  if (!isMsgs) loadChatSiguiendo();
+};
+
+async function loadChatSiguiendo() {
+  const meId = getPerfil()?.id;
+  const c = document.getElementById('chat-sig-list');
+  if (!meId) return;
+  c.innerHTML = '<div style="font-size:.72rem;color:#a07850;padding:14px">Cargando…</div>';
+  try {
+    const data = await apiGet(`/api/social/follows/siguiendo/${meId}`, getToken());
+    if (!data?.length) {
+      c.innerHTML = '<div style="font-size:.75rem;color:#a07850;padding:16px;font-style:italic">No sigues a nadie todavía.</div>';
+      return;
+    }
+    c.innerHTML = data.map(row => {
+      const p   = row.perfiles || {};
+      const ini = (p.display_name || p.username || '?')[0].toUpperCase();
+      const avEl = p.avatar_url
+        ? `<div style="width:28px;height:28px;border-radius:50%;background:url(${escapeStr(p.avatar_url)}) center/cover no-repeat;flex-shrink:0"></div>`
+        : `<div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#c8a860,#8b5a2b);display:flex;align-items:center;justify-content:center;font-size:.62rem;font-weight:700;color:#f5ead8;flex-shrink:0">${escapeStr(ini)}</div>`;
+      return `<div class="chat-conv-item" onclick="seleccionarChatUser('${p.id}','${escapeStr(p.username||'')}','${escapeStr(p.display_name||p.username||'')}')">
+        ${avEl}
+        <div style="flex:1;min-width:0">
+          <div style="font-size:.78rem;font-weight:600;color:#3d2008">${escapeStr(p.display_name||p.username||'—')}</div>
+          <div style="font-size:.66rem;color:#7a5030">@${escapeStr(p.username||'')}</div>
+        </div>
+        <div style="font-size:.7rem;color:#c8a860">✉</div>
+      </div>`;
+    }).join('');
+  } catch { c.innerHTML = '<div style="font-size:.72rem;color:#c06040;padding:14px">Error al cargar</div>'; }
+}
 
 // ── Buscador ─────────────────────────────────────────────
 window.toggleBuscadorFloat = () => {
