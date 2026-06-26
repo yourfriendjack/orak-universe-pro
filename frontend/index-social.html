@@ -8,6 +8,19 @@
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/orak-social.css">
 <link rel="stylesheet" href="css/themes.css">
+<script>
+  (function(){
+    const CLASES = {
+      'ui-aurora':'theme-aurora','ui-cosmos':'theme-cosmos','ui-lunar':'theme-lunar',
+      'ui-sangre':'theme-sangre','ui-dark-fantasy':'theme-dark-fantasy','ui-glitch':'theme-glitch',
+      'ui-rubi':'theme-rubi','ui-esmeralda':'theme-esmeralda','ui-eldergloom':'theme-eldergloom',
+      'ui-weirdcore':'theme-weirdcore','ui-vaporwave':'theme-vaporwave','ui-cloudcore':'theme-cloudcore',
+    };
+    const id = localStorage.getItem('orak_tema_ui');
+    const cls = CLASES[id];
+    if (cls) document.documentElement.classList.add(cls);
+  })();
+</script>
 </head>
 <body>
 
@@ -496,10 +509,6 @@ function initials(name) { return (name||'?').split(' ').map(w=>w[0]).join('').sl
 
 // ── Arranque ────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', async () => {
-  // Aplicar tema UI guardado antes de pintar
-  const temaUI = localStorage.getItem('orak_tema_ui');
-  if (temaUI) document.documentElement.classList.add(CATALOGO.find(x=>x.id===temaUI)?.clase || '');
-
   const sesion = await initAuth();
   if (!sesion) {
     window.location.replace('/auth.html');
