@@ -589,6 +589,12 @@ async function launchApp() {
   startRealtime();
   document.getElementById('chat-float').style.display = 'flex';
   toast('✦ Bienvenido a ORAK Universe');
+  // Heartbeat de presencia
+  const _pingPresencia = () => {
+    if (getToken()) apiPost('/api/social/presencia/ping', {}, getToken()).catch(() => {});
+  };
+  setTimeout(_pingPresencia, 2000);
+  setInterval(_pingPresencia, 60000);
 }
 
 function updateUserUI() {
@@ -1572,10 +1578,14 @@ window.abrirModalFoto = (tipo) => {
 };
 
 
-// ── Navegar a perfil público al hacer click en nombre/avatar ──────
+// ── Navegar a perfil al hacer click en nombre/avatar ──────────────
 document.addEventListener('click', e => {
   const el = e.target.closest('[data-username]');
-  if (el && el.dataset.username) {
+  if (!el?.dataset.username) return;
+  const miUsername = getPerfil()?.username;
+  if (el.dataset.username === miUsername) {
+    goView('profile');
+  } else {
     window.location.href = '/perfil?u=' + el.dataset.username;
   }
 });
@@ -1632,6 +1642,20 @@ document.addEventListener('click', e => {
 });
 document.getElementById('glimmer-modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal('glimmer-modal'); });
 
+// ── Presencia (global, accesible desde ambos módulos) ────────────
+window._presenciaInfo = function(ultimo_visto) {
+  if (!ultimo_visto) return { clase: 'offline', texto: 'Sin actividad' };
+  const diff = (Date.now() - new Date(ultimo_visto).getTime()) / 1000;
+  if (diff < 300)  return { clase: 'online',   texto: 'Activo ahora' };
+  if (diff < 1800) return { clase: 'reciente', texto: `hace ${Math.floor(diff/60)} min` };
+  if (diff < 86400) {
+    const h = Math.floor(diff / 3600);
+    return { clase: 'offline', texto: `hace ${h} ${h === 1 ? 'hora' : 'horas'}` };
+  }
+  const d = Math.floor(diff / 86400);
+  return { clase: 'offline', texto: `hace ${d} ${d === 1 ? 'día' : 'días'}` };
+};
+
 // ── PANEL SEGUIDORES / SIGUIENDO ────────────────────────────────
 window.toggleFollowsPanel = async (which, e) => {
   e.stopPropagation();
@@ -1665,11 +1689,15 @@ window.toggleFollowsPanel = async (which, e) => {
       const name   = p.display_name || p.username || '—';
       const handle = p.username || '';
       const av     = p.avatar_url  || '';
+      const pres   = _presenciaInfo(p.ultimo_visto || null);
       return `<div class="follow-row">
-        <div class="follow-row-av" style="${av ? `background-image:url(${av})` : ''}"></div>
+        <div style="position:relative;flex-shrink:0;width:32px;height:32px">
+          <div class="follow-row-av" style="width:100%;height:100%;${av ? `background-image:url(${av})` : ''}"></div>
+          <span class="presencia-dot ${pres.clase}" style="position:absolute;bottom:0;right:0"></span>
+        </div>
         <div class="follow-row-info">
           <div class="follow-row-name">${name}</div>
-          <div class="follow-row-handle">@${handle}</div>
+          <div class="follow-row-handle presencia-texto">${pres.texto}</div>
         </div>
       </div>`;
     }).join('');
@@ -1777,7 +1805,10 @@ function stopRealtime() {
 <div id="chat-thread-win" style="display:none">
   <div class="chat-win-head">
     <button class="chat-head-btn" onclick="cerrarChatThread()" title="Volver">←</button>
-    <span class="chat-win-title" id="chat-thread-title">—</span>
+    <div style="flex:1;display:flex;flex-direction:column;gap:1px">
+      <span class="chat-win-title" id="chat-thread-title">—</span>
+      <span class="presencia-texto" id="chat-thread-subtitulo"></span>
+    </div>
     <button class="chat-head-btn" onclick="cerrarChatThread()" title="Cerrar">✕</button>
   </div>
   <div id="chat-msgs" style="flex:1;overflow-y:auto;padding:10px 14px 10px 40px;display:flex;flex-direction:column;gap:6px"></div>
@@ -1865,6 +1896,11 @@ function stopRealtime() {
 .chat-tab.active{color:#3d2008;border-bottom-color:#c8a860;}
 .chat-conv-item{display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;border-bottom:1px solid rgba(100,120,160,.15);transition:background .12s;}
 .chat-conv-item:hover,.chat-conv-item.active{background:rgba(185,140,80,.15);}
+.presencia-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;border:1.5px solid rgba(255,255,255,.7);}
+.presencia-dot.online{background:#4caf7d;}
+.presencia-dot.reciente{background:#e6b84a;}
+.presencia-dot.offline{background:#888;opacity:.5;}
+.presencia-texto{font-size:.58rem;color:#9a7040;font-style:italic;}
 #chat-msgs{flex:1;overflow-y:auto;padding:10px 12px 10px 40px;display:flex;flex-direction:column;gap:6px;}
 .chat-msg-wrap{display:flex;flex-direction:column;position:relative;}
 .chat-msg-wrap.mio{align-items:flex-end;}
@@ -1879,7 +1915,7 @@ function stopRealtime() {
 .msg-picker{display:none;gap:4px;padding:4px 7px;background:rgba(250,245,232,.97);border:1px solid rgba(180,140,60,.25);border-radius:20px;box-shadow:0 4px 16px rgba(0,0,0,.12);position:absolute;bottom:calc(100% + 4px);z-index:10;}
 .chat-msg-wrap.mio .msg-picker{right:0;}
 .chat-msg-wrap.suyo .msg-picker{left:0;}
-.chat-msg-wrap:hover .msg-picker{display:flex;}
+.msg-picker.visible{display:flex;}
 .msg-picker-glifo{font-size:1rem;cursor:pointer;padding:2px 4px;border-radius:6px;transition:transform .12s,background .12s;line-height:1;}
 .msg-picker-glifo:hover{transform:scale(1.3);background:rgba(200,168,96,.2);}
 #chat-win .nota-textarea{background:rgba(255,255,255,.5);border-color:rgba(160,110,60,.3);color:#3d2008;font-size:.82rem;}
@@ -1901,6 +1937,7 @@ function stopRealtime() {
 
 <script type="module">
 import { apiGet, apiPost, apiDelete } from './js/services/api.js';
+import { playSound as _playSound } from './js/orak-sounds.js';
 import { getToken, getPerfil } from './js/services/auth.js';
 import { playSound } from './js/orak-sounds.js';
 
@@ -1924,6 +1961,7 @@ window.cerrarChatFloat = () => {
   cerrarChatThread();
 };
 
+
 // ── Lista de conversaciones ──────────────────────────────
 async function loadChatConvs() {
   if (!getToken()) return;
@@ -1939,14 +1977,15 @@ async function loadChatConvs() {
       const otro  = conv.interlocutor || {};
       const ini   = (otro.display_name || otro.username || '?')[0].toUpperCase();
       const badge = conv.no_leidos > 0 ? `<span style="background:#8b3a1a;color:#f5ead8;font-size:.55rem;font-weight:700;border-radius:8px;padding:1px 5px">${conv.no_leidos}</span>` : '';
+      const pres  = _presenciaInfo(otro.ultimo_visto);
       const avEl  = otro.avatar_url
-        ? `<div style="width:28px;height:28px;border-radius:50%;background:url(${escapeStr(otro.avatar_url)}) center/cover no-repeat;flex-shrink:0"></div>`
-        : `<div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#c8a860,#8b5a2b);display:flex;align-items:center;justify-content:center;font-size:.62rem;font-weight:700;color:#f5ead8;flex-shrink:0">${escapeStr(ini)}</div>`;
-      return `<div class="chat-conv-item" onclick="abrirChatThread('${otro.id}','${escapeStr(otro.username||'')}','${escapeStr(otro.display_name||otro.username||'')}')">
+        ? `<div style="position:relative;flex-shrink:0;width:32px;height:32px"><div style="width:32px;height:32px;border-radius:50%;background:url(${escapeStr(otro.avatar_url)}) center/cover no-repeat"></div><span class="presencia-dot ${pres.clase}" style="position:absolute;bottom:0;right:0"></span></div>`
+        : `<div style="position:relative;flex-shrink:0;width:32px;height:32px"><div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#c8a860,#8b5a2b);display:flex;align-items:center;justify-content:center;font-size:.62rem;font-weight:700;color:#f5ead8">${escapeStr(ini)}</div><span class="presencia-dot ${pres.clase}" style="position:absolute;bottom:0;right:0"></span></div>`;
+      return `<div class="chat-conv-item" onclick="abrirChatThread('${otro.id}','${escapeStr(otro.username||'')}','${escapeStr(otro.display_name||otro.username||'')}','${escapeStr(otro.ultimo_visto||'')}')">
         ${avEl}
         <div style="flex:1;min-width:0">
           <div style="font-size:.78rem;font-weight:600;color:#3d2008">${escapeStr(otro.display_name||otro.username||'—')}</div>
-          <div style="font-size:.66rem;color:#7a5030;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${escapeStr((conv.texto||'').slice(0,32))}</div>
+          <div class="presencia-texto">${pres.texto}</div>
         </div>
         ${badge}
       </div>`;
@@ -1958,7 +1997,7 @@ async function loadChatConvs() {
 let _chatPollInterval = null;
 let _chatLastMsgId    = null;
 
-const GLIPHS = ['✦','⬡','❧','◎','⋔','◆'];
+const GLIPHS = ['✨','🖤','🌙','🔥','💀','🌿'];
 
 function _msgDiv(m, meId) {
   const esMio = m.emisor_id === meId;
@@ -1966,12 +2005,7 @@ function _msgDiv(m, meId) {
   wrap.className = 'chat-msg-wrap ' + (esMio ? 'mio' : 'suyo');
   wrap.dataset.mid = m.id;
 
-  // Picker de glifos (aparece al hover)
   const isTmp = String(m.id).startsWith('tmp_');
-  const pickerHtml = isTmp ? '' : `
-    <div class="msg-picker">
-      ${GLIPHS.map(g => `<span class="msg-picker-glifo" onclick="toggleReaccion('${m.id}','${g}',this)">${g}</span>`).join('')}
-    </div>`;
 
   // Burbuja del mensaje
   const burbuja = document.createElement('div');
@@ -1984,9 +2018,52 @@ function _msgDiv(m, meId) {
   reacBar.id = 'reac-' + m.id;
   _renderReacBar(reacBar, m.reacciones || [], meId);
 
-  wrap.innerHTML = pickerHtml;
   wrap.appendChild(burbuja);
   wrap.appendChild(reacBar);
+
+  // Picker de glifos — aparece al mantener presionado 400ms
+  if (!isTmp) {
+    const picker = document.createElement('div');
+    picker.className = 'msg-picker';
+    picker.innerHTML = GLIPHS.map(g =>
+      `<span class="msg-picker-glifo" data-glifo="${g}" data-mid="${m.id}">${g}</span>`
+    ).join('');
+    picker.addEventListener('click', e => {
+      const el = e.target.closest('.msg-picker-glifo');
+      if (el) toggleReaccion(el.dataset.mid, el.dataset.glifo, el);
+    });
+    wrap.appendChild(picker);
+
+    let _pressTimer = null;
+    let _docHandler = null;
+
+    const _showPicker = () => {
+      // Cerrar cualquier otro picker abierto
+      document.querySelectorAll('.msg-picker.visible').forEach(p => p.classList.remove('visible'));
+      picker.classList.add('visible');
+      // Delay pequeño para no capturar el mouseup/touchend actual
+      setTimeout(() => {
+        _docHandler = (e) => {
+          if (!wrap.contains(e.target)) {
+            picker.classList.remove('visible');
+            document.removeEventListener('mousedown', _docHandler);
+            document.removeEventListener('touchstart', _docHandler);
+            _docHandler = null;
+          }
+        };
+        document.addEventListener('mousedown', _docHandler);
+        document.addEventListener('touchstart', _docHandler, { passive: true });
+      }, 50);
+    };
+
+    burbuja.addEventListener('mousedown', () => { _pressTimer = setTimeout(_showPicker, 400); });
+    burbuja.addEventListener('mouseup', () => clearTimeout(_pressTimer));
+    burbuja.addEventListener('mouseleave', () => clearTimeout(_pressTimer));
+    burbuja.addEventListener('touchstart', () => { _pressTimer = setTimeout(_showPicker, 400); }, { passive: true });
+    burbuja.addEventListener('touchend', () => clearTimeout(_pressTimer));
+    burbuja.addEventListener('touchmove', () => clearTimeout(_pressTimer), { passive: true });
+  }
+
   return wrap;
 }
 
@@ -2017,7 +2094,7 @@ window.toggleReaccion = async (msgId, glifo, pickerEl) => {
       await apiDelete(`/api/social/mensajes/${msgId}/reaccion?glifo=${encodeURIComponent(glifo)}`, getToken());
     } else {
       await apiPost(`/api/social/mensajes/${msgId}/reaccion`, { glifo }, getToken());
-      playSound('glimmer');
+      _playSound('glimmer');
     }
     // Refrescar reacciones de este mensaje
     const data = await apiGet(`/api/social/mensajes/${msgId}/reacciones`, getToken());
@@ -2056,12 +2133,15 @@ async function _pollChatThread(userId) {
   } catch {}
 }
 
-window.abrirChatThread = async (userId, username, nombre) => {
+window.abrirChatThread = async (userId, username, nombre, ultimoVisto) => {
   CHAT_USER_ID = userId;
   const tw = document.getElementById('chat-thread-win');
   const cw = document.getElementById('chat-win');
 
   document.getElementById('chat-thread-title').textContent = nombre || ('@' + username);
+  const pres = _presenciaInfo(ultimoVisto || null);
+  const subEl = document.getElementById('chat-thread-subtitulo');
+  if (subEl) { subEl.className = 'presencia-texto'; subEl.textContent = pres.texto; }
 
   cw.classList.remove('spawning');
   void cw.offsetWidth;

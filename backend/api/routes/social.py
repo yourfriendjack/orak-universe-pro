@@ -178,7 +178,7 @@ async def dejar_de_seguir(seguido_id: str, usuario = Depends(get_current_user)):
 async def get_seguidores(perfil_id: str, limite: int = Query(50, le=100)):
     sb = get_supabase()
     res = sb.table("follows")\
-        .select("seguidor_id, perfiles!follows_seguidor_id_fkey(username,display_name,avatar_url,oruns)")\
+        .select("seguidor_id, perfiles!follows_seguidor_id_fkey(username,display_name,avatar_url,oruns,ultimo_visto)")\
         .eq("seguido_id", perfil_id)\
         .limit(limite)\
         .execute()
@@ -189,7 +189,7 @@ async def get_seguidores(perfil_id: str, limite: int = Query(50, le=100)):
 async def get_siguiendo(perfil_id: str, limite: int = Query(50, le=100)):
     sb = get_supabase()
     res = sb.table("follows")\
-        .select("seguido_id, perfiles!follows_seguido_id_fkey(username,display_name,avatar_url,oruns)")\
+        .select("seguido_id, perfiles!follows_seguido_id_fkey(username,display_name,avatar_url,oruns,ultimo_visto)")\
         .eq("seguidor_id", perfil_id)\
         .limit(limite)\
         .execute()
@@ -426,7 +426,7 @@ async def enviar_mensaje(datos: MensajeIn, usuario = Depends(get_current_user)):
 async def listar_conversaciones(usuario = Depends(get_current_user)):
     sb = get_supabase_user(usuario["_token"])
     res = sb.table("mensajes")\
-        .select("*, emisor:perfiles!mensajes_emisor_id_fkey(id,username,display_name,avatar_url), receptor:perfiles!mensajes_receptor_id_fkey(id,username,display_name,avatar_url)")\
+        .select("*, emisor:perfiles!mensajes_emisor_id_fkey(id,username,display_name,avatar_url,ultimo_visto), receptor:perfiles!mensajes_receptor_id_fkey(id,username,display_name,avatar_url,ultimo_visto)")\
         .or_(f"emisor_id.eq.{usuario['id']},receptor_id.eq.{usuario['id']}")\
         .order("creado_en", desc=True)\
         .execute()
@@ -478,7 +478,7 @@ async def hilo_mensajes(otro_id: str, usuario = Depends(get_current_user)):
 @router.post("/mensajes/{msg_id}/reaccion", response_model=OkResponse)
 async def agregar_reaccion(msg_id: int, datos: dict, usuario = Depends(get_current_user)):
     glifo = (datos.get("glifo") or "").strip()
-    GLIPHS = {"✦", "⬡", "❧", "◎", "⋔", "◆"}
+    GLIPHS = {"✨", "🖤", "🌙", "🔥", "💀", "🌿"}
     if glifo not in GLIPHS:
         error("Glifo no válido")
     sb = get_supabase()
@@ -510,6 +510,27 @@ async def get_reacciones(msg_id: int, usuario = Depends(get_current_user)):
         .eq("mensaje_id", msg_id)\
         .execute()
     return res.data or []
+
+
+# ══════════════════════════════════════════════════════════
+#  PRESENCIA
+# ══════════════════════════════════════════════════════════
+
+@router.post("/presencia/ping", response_model=OkResponse)
+async def ping_presencia(usuario = Depends(get_current_user)):
+    from datetime import datetime, timezone
+    sb = get_supabase()
+    sb.table("perfiles").update({
+        "ultimo_visto": datetime.now(timezone.utc).isoformat()
+    }).eq("id", usuario["id"]).execute()
+    return ok("ok")
+
+
+@router.get("/presencia/{usuario_id}")
+async def get_presencia(usuario_id: str):
+    sb = get_supabase()
+    res = sb.table("perfiles").select("ultimo_visto").eq("id", usuario_id).single().execute()
+    return { "ultimo_visto": res.data.get("ultimo_visto") if res.data else None }
 
 
 # ══════════════════════════════════════════════════════════
