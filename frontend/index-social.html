@@ -473,7 +473,7 @@
 import { initAuth, login, logout, registro, getPerfil, getToken, getOruns, getGlimmers, actualizarOruns, actualizarGlimmers, actualizarPerfil, estaLogueado } from './js/services/auth.js';
 import { getFeed, getExplorar, crearPost, borrarPost, seguir, dejarSeguir, darGlimmer, quitarGlimmer, getRanking, getNotificaciones, leerNotificaciones, getLibrosPerfil, getMisCompras, comprarItem, equiparItem, apiGet, apiPost, apiPatch } from './js/services/api.js';
 import { playSound, toggleMute, isMuted } from './js/orak-sounds.js';
-import { registrarSW, instalarApp, estaInstalada, suscribirPush } from './js/pwa/orak-pwa.js';
+import { registrarSW, instalarApp, estaInstalada } from './js/pwa/orak-pwa.js';
 registrarSW();
 
 // ── Estado ─────────────────────────────────────────────────────
@@ -1358,30 +1358,55 @@ async function _plog(e, d='') {
   try { await fetch('/api/social/push/log',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({event:e,detail:d})}); } catch{}
 }
 
+const _VAPID_PUB = 'BL6HXpkznFdXpDBYo8t2ExX7iM6uhXKFtXsfsb3Idj18mW04w3Lvxo0ALkegl1nbvZ1PIr9JmevPuMppCfwF50E';
+function _b64ToUint8(b64) {
+  const pad = '='.repeat((4 - b64.length % 4) % 4);
+  const raw = atob((b64 + pad).replace(/-/g, '+').replace(/_/g, '/'));
+  return Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
+}
+
+async function _suscribir() {
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    await _plog('sw-ready', reg.active?.state || '?');
+    let sub = await reg.pushManager.getSubscription();
+    if (!sub) {
+      sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: _b64ToUint8(_VAPID_PUB) });
+    }
+    await _plog('subscribed', sub.endpoint.slice(0, 60));
+    const res = await fetch('/api/social/push/subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}` },
+      body: JSON.stringify({ subscription: sub.toJSON() }),
+    });
+    await _plog('saved', res.ok ? 'ok' : `error ${res.status}`);
+  } catch(e) {
+    await _plog('error', `${e.name}: ${e.message}`);
+  }
+}
+
 async function initPush() {
   const hasPush = 'PushManager' in window;
   const perm = typeof Notification !== 'undefined' ? Notification.permission : 'unsupported';
-  await _plog('init', `hasPush=${hasPush} perm=${perm} ios=${_isIOS} ua=${navigator.userAgent.slice(0,60)}`);
+  await _plog('init', `hasPush=${hasPush} perm=${perm} ios=${_isIOS}`);
   if (!hasPush) return;
   if (perm === 'granted') {
-    await _plog('auto-subscribe', 'permission already granted');
-    await suscribirPush(getToken);
+    await _suscribir();
   } else if (perm === 'default') {
     if (_isIOS) {
-      await _plog('show-banner', 'iOS needs gesture');
       document.getElementById('push-banner').style.display = 'flex';
     } else {
-      await _plog('auto-request', 'non-iOS');
-      await suscribirPush(getToken);
+      const p = await Notification.requestPermission();
+      if (p === 'granted') await _suscribir();
     }
-  } else {
-    await _plog('denied', perm);
   }
 }
 
 window.activarPushManual = async function() {
   document.getElementById('push-banner').style.display = 'none';
-  await suscribirPush(getToken);
+  const p = await Notification.requestPermission();
+  await _plog('manual-perm', p);
+  if (p === 'granted') await _suscribir();
 };
 
 // ── NOTIFICACIONES ──────────────────────────────────────────────
