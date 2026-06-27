@@ -1354,10 +1354,6 @@ window.quickFollow = async (id, btn) => {
 // ── PUSH NOTIFICATIONS ──────────────────────────────────────────
 const _isIOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
-async function _plog(e, d='') {
-  try { await fetch('/api/social/push/log',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({event:e,detail:d})}); } catch{}
-}
-
 const _VAPID_PUB = 'BL6HXpkznFdXpDBYo8t2ExX7iM6uhXKFtXsfsb3Idj18mW04w3Lvxo0ALkegl1nbvZ1PIr9JmevPuMppCfwF50E';
 function _b64ToUint8(b64) {
   const pad = '='.repeat((4 - b64.length % 4) % 4);
@@ -1366,53 +1362,41 @@ function _b64ToUint8(b64) {
 }
 
 async function _suscribir() {
-  await _plog('suscribir-start', 'entered');
   try {
-    // serviceWorker.ready cuelga en iOS con module SW — usar getRegistration con fallback
     let reg = await navigator.serviceWorker.getRegistration('/');
     if (!reg) reg = await Promise.race([
       navigator.serviceWorker.ready,
-      new Promise((_, rej) => setTimeout(() => rej(new Error('SW timeout 6s')), 6000))
+      new Promise((_, rej) => setTimeout(() => rej(new Error('SW timeout')), 8000))
     ]);
-    await _plog('sw-ready', `active=${reg.active?.state} scope=${reg.scope}`);
     let sub = await reg.pushManager.getSubscription();
     if (!sub) {
       sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: _b64ToUint8(_VAPID_PUB) });
     }
-    await _plog('subscribed', sub.endpoint.slice(0, 60));
-    const res = await fetch('/api/social/push/subscribe', {
+    await fetch('/api/social/push/subscribe', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}` },
       body: JSON.stringify({ subscription: sub.toJSON() }),
     });
-    await _plog('saved', res.ok ? 'ok' : `error ${res.status}`);
-  } catch(e) {
-    await _plog('error', `${e.name}: ${e.message}`);
-  }
+  } catch {}
 }
 
 async function initPush() {
-  const hasPush = 'PushManager' in window;
-  const perm = typeof Notification !== 'undefined' ? Notification.permission : 'unsupported';
-  await _plog('init', `hasPush=${hasPush} perm=${perm} ios=${_isIOS}`);
-  if (!hasPush) return;
+  if (!('PushManager' in window)) return;
+  const perm = typeof Notification !== 'undefined' ? Notification.permission : 'denied';
   if (perm === 'granted') {
     await _suscribir();
   } else if (perm === 'default') {
     if (_isIOS) {
       document.getElementById('push-banner').style.display = 'flex';
     } else {
-      const p = await Notification.requestPermission();
-      if (p === 'granted') await _suscribir();
+      if ((await Notification.requestPermission()) === 'granted') await _suscribir();
     }
   }
 }
 
 window.activarPushManual = async function() {
   document.getElementById('push-banner').style.display = 'none';
-  const p = await Notification.requestPermission();
-  await _plog('manual-perm', p);
-  if (p === 'granted') await _suscribir();
+  if ((await Notification.requestPermission()) === 'granted') await _suscribir();
 };
 
 // ── NOTIFICACIONES ──────────────────────────────────────────────
