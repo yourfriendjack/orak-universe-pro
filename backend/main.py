@@ -87,6 +87,11 @@ app.mount("/css",    StaticFiles(directory=os.path.join(_FRONTEND, "css")),    n
 app.mount("/assets", StaticFiles(directory=os.path.join(_FRONTEND, "assets")), name="assets")
 app.mount("/icons",  StaticFiles(directory=os.path.join(_FRONTEND, "icons")),  name="icons")
 
+@app.get("/apple-touch-icon.png", include_in_schema=False)
+@app.get("/apple-touch-icon-precomposed.png", include_in_schema=False)
+async def apple_icon():
+    return FileResponse(os.path.join(_FRONTEND, "apple-touch-icon.png"), media_type="image/png")
+
 @app.get("/manifest.json", include_in_schema=False)
 async def manifest():
     return FileResponse(os.path.join(_FRONTEND, "manifest.json"), media_type="application/manifest+json")
