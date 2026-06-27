@@ -1366,7 +1366,9 @@ function _b64ToUint8(b64) {
 }
 
 async function _suscribir() {
+  await _plog('suscribir-start', 'entered');
   try {
+    await _plog('before-sw-ready', '');
     const reg = await navigator.serviceWorker.ready;
     await _plog('sw-ready', reg.active?.state || '?');
     let sub = await reg.pushManager.getSubscription();
