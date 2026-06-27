@@ -1354,19 +1354,28 @@ window.quickFollow = async (id, btn) => {
 // ── PUSH NOTIFICATIONS ──────────────────────────────────────────
 const _isIOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
+async function _plog(e, d='') {
+  try { await fetch('/api/social/push/log',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({event:e,detail:d})}); } catch{}
+}
+
 async function initPush() {
-  if (!('PushManager' in window)) return;
-  if (Notification.permission === 'granted') {
-    // Ya tiene permiso: suscribir silenciosamente
+  const hasPush = 'PushManager' in window;
+  const perm = typeof Notification !== 'undefined' ? Notification.permission : 'unsupported';
+  await _plog('init', `hasPush=${hasPush} perm=${perm} ios=${_isIOS} ua=${navigator.userAgent.slice(0,60)}`);
+  if (!hasPush) return;
+  if (perm === 'granted') {
+    await _plog('auto-subscribe', 'permission already granted');
     await suscribirPush(getToken);
-  } else if (Notification.permission === 'default') {
+  } else if (perm === 'default') {
     if (_isIOS) {
-      // iOS requiere gesto: mostrar banner
+      await _plog('show-banner', 'iOS needs gesture');
       document.getElementById('push-banner').style.display = 'flex';
     } else {
-      // Android/desktop: pedir permiso automáticamente
+      await _plog('auto-request', 'non-iOS');
       await suscribirPush(getToken);
     }
+  } else {
+    await _plog('denied', perm);
   }
 }
 
