@@ -1,16 +1,23 @@
 /**
- * sw.js — Service Worker de ORAK Universe
- * La Memoria de Orak: guarda, sirve y sincroniza recursos.
- *
- * Estrategias:
- *   API calls   → Network only   (siempre datos frescos)
- *   HTML pages  → Network first  (fresco si hay red, caché si no)
- *   Assets      → Cache first    (rápido, actualiza en segundo plano)
+ * sw.js — Service Worker de ORAK Universe (classic, compatible iOS)
  */
 
-import { MEMORIA_VERSION, SHELL, esAPI, esNetworkFirst } from '/js/pwa/orak-cache.js';
+const MEMORIA_VERSION = 'orak-memoria-v5';
+const SHELL = [
+  '/', '/index-social.html', '/offline.html',
+  '/css/orak-social.css', '/css/themes.css',
+  '/js/orak-sounds.js', '/js/services/api.js', '/js/services/auth.js',
+  '/js/themes/theme-engine.js', '/manifest.json', '/logo.svg',
+];
+const API_BYPASS   = ['/api/', '/auth/'];
+const NETWORK_FIRST_PATHS = ['/index-social.html', '/'];
 
-// ── Instalación: precachear el shell de la app ────────────────
+function esAPI(url) { return API_BYPASS.some(p => url.includes(p)); }
+function esNetworkFirst(url) {
+  try { const p = new URL(url).pathname; return NETWORK_FIRST_PATHS.some(r => p === r || p.startsWith(r)); } catch { return false; }
+}
+
+// ── Instalación ───────────────────────────────────────────────
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(MEMORIA_VERSION).then(cache => cache.addAll(SHELL))
@@ -18,48 +25,31 @@ self.addEventListener('install', event => {
   self.skipWaiting();
 });
 
-// ── Activación: limpiar versiones antiguas ────────────────────
+// ── Activación ────────────────────────────────────────────────
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys =>
-      Promise.all(
-        keys
-          .filter(k => k !== MEMORIA_VERSION)
-          .map(k => caches.delete(k))
-      )
+      Promise.all(keys.filter(k => k !== MEMORIA_VERSION).map(k => caches.delete(k)))
     )
   );
   self.clients.claim();
 });
 
-// ── Fetch: interceptar todas las peticiones ───────────────────
+// ── Fetch ─────────────────────────────────────────────────────
 self.addEventListener('fetch', event => {
-  const { request } = event;
-  const url = request.url;
-
-  // API → siempre red, nunca caché
+  const url = event.request.url;
   if (esAPI(url)) {
     event.respondWith(
-      fetch(request).catch(() =>
-        new Response(JSON.stringify({ error: 'Sin conexión' }), {
-          headers: { 'Content-Type': 'application/json' },
-        })
+      fetch(event.request).catch(() =>
+        new Response(JSON.stringify({ error: 'Sin conexión' }), { headers: { 'Content-Type': 'application/json' } })
       )
     );
     return;
   }
-
-  // HTML principal → red primero, caché como respaldo
-  if (esNetworkFirst(url)) {
-    event.respondWith(networkFirst(request));
-    return;
-  }
-
-  // Assets (CSS, JS, imágenes) → caché primero, actualiza en fondo
-  event.respondWith(cacheFirst(request));
+  if (esNetworkFirst(url)) { event.respondWith(networkFirst(event.request)); return; }
+  event.respondWith(cacheFirst(event.request));
 });
 
-// ── Estrategia: red primero ───────────────────────────────────
 async function networkFirst(request) {
   try {
     const respuesta = await fetch(request);
@@ -67,8 +57,22 @@ async function networkFirst(request) {
     cache.put(request, respuesta.clone());
     return respuesta;
   } catch {
-    const cached = await caches.match(request);
-    return cached || caches.match('/offline.html');
+    return (await caches.match(request)) || caches.match('/offline.html');
+  }
+}
+
+async function cacheFirst(request) {
+  const cached = await caches.match(request);
+  if (cached) {
+    fetch(request).then(async r => { if (r.ok) (await caches.open(MEMORIA_VERSION)).put(request, r); }).catch(() => {});
+    return cached;
+  }
+  try {
+    const respuesta = await fetch(request);
+    if (respuesta.ok) (await caches.open(MEMORIA_VERSION)).put(request, respuesta.clone());
+    return respuesta;
+  } catch {
+    return caches.match('/offline.html');
   }
 }
 
@@ -99,28 +103,3 @@ self.addEventListener('notificationclick', event => {
     })
   );
 });
-
-// ── Estrategia: caché primero ─────────────────────────────────
-async function cacheFirst(request) {
-  const cached = await caches.match(request);
-  if (cached) {
-    // Actualizar en segundo plano sin bloquear
-    fetch(request).then(async respuesta => {
-      if (respuesta.ok) {
-        const cache = await caches.open(MEMORIA_VERSION);
-        cache.put(request, respuesta);
-      }
-    }).catch(() => {});
-    return cached;
-  }
-  try {
-    const respuesta = await fetch(request);
-    if (respuesta.ok) {
-      const cache = await caches.open(MEMORIA_VERSION);
-      cache.put(request, respuesta.clone());
-    }
-    return respuesta;
-  } catch {
-    return caches.match('/offline.html');
-  }
-}

@@ -7,7 +7,7 @@
 export async function registrarSW() {
   if (!('serviceWorker' in navigator)) return;
   try {
-    const reg = await navigator.serviceWorker.register('/sw.js', { type: 'module' });
+    const reg = await navigator.serviceWorker.register('/sw.js');
     reg.addEventListener('updatefound', () => {
       const nuevo = reg.installing;
       nuevo.addEventListener('statechange', () => {
