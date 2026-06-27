@@ -1368,9 +1368,13 @@ function _b64ToUint8(b64) {
 async function _suscribir() {
   await _plog('suscribir-start', 'entered');
   try {
-    await _plog('before-sw-ready', '');
-    const reg = await navigator.serviceWorker.ready;
-    await _plog('sw-ready', reg.active?.state || '?');
+    // serviceWorker.ready cuelga en iOS con module SW — usar getRegistration con fallback
+    let reg = await navigator.serviceWorker.getRegistration('/');
+    if (!reg) reg = await Promise.race([
+      navigator.serviceWorker.ready,
+      new Promise((_, rej) => setTimeout(() => rej(new Error('SW timeout 6s')), 6000))
+    ]);
+    await _plog('sw-ready', `active=${reg.active?.state} scope=${reg.scope}`);
     let sub = await reg.pushManager.getSubscription();
     if (!sub) {
       sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: _b64ToUint8(_VAPID_PUB) });
