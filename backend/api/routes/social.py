@@ -688,24 +688,29 @@ def _crear_notif(sb, usuario_id: str, tipo: str, titulo: str, cuerpo: str, ref_i
 
 def _enviar_push(sb, usuario_id: str, titulo: str, cuerpo: str):
     """Envía push notification a todas las suscripciones activas del usuario."""
+    import json, os, logging
+    log = logging.getLogger("orak.push")
     try:
-        import json, os
         from pywebpush import webpush, WebPushException
         from backend.core.config import get_settings
         cfg = get_settings()
         if not cfg.VAPID_PUBLIC_KEY or not cfg.VAPID_PRIVATE_PEM_PATH:
+            log.warning("[PUSH] VAPID no configurado en .env")
             return
         pem_path = cfg.VAPID_PRIVATE_PEM_PATH
         if not os.path.isabs(pem_path):
             pem_path = os.path.join(os.path.dirname(__file__), '..', '..', pem_path)
         if not os.path.exists(pem_path):
+            log.warning(f"[PUSH] No existe vapid_private.pem en {pem_path}")
             return
         subs = sb.table("push_subscriptions")\
             .select("subscription_json")\
             .eq("usuario_id", usuario_id)\
             .execute()
         if not subs.data:
+            log.info(f"[PUSH] Sin suscripciones para usuario {usuario_id}")
             return
+        log.info(f"[PUSH] Enviando a {len(subs.data)} suscripción(es) de {usuario_id}")
         payload = json.dumps({"title": titulo, "body": cuerpo})
         for row in subs.data:
             try:
@@ -718,10 +723,13 @@ def _enviar_push(sb, usuario_id: str, titulo: str, cuerpo: str):
                     vapid_private_key=pem_path,
                     vapid_claims={"sub": cfg.VAPID_CONTACT},
                 )
-            except WebPushException:
-                pass
-    except Exception:
-        pass
+                log.info(f"[PUSH] Enviado OK → {sub.get('endpoint','')[:60]}")
+            except WebPushException as e:
+                log.error(f"[PUSH] WebPushException: {e} — respuesta: {e.response.text if hasattr(e,'response') and e.response else 'sin respuesta'}")
+            except Exception as e:
+                log.error(f"[PUSH] Error inesperado: {e}")
+    except Exception as e:
+        log.error(f"[PUSH] Error general: {e}")
 
 
 # ══════════════════════════════════════════════════════════
