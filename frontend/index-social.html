@@ -1866,8 +1866,22 @@ function stopRealtime() {
 .chat-conv-item{display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;border-bottom:1px solid rgba(100,120,160,.15);transition:background .12s;}
 .chat-conv-item:hover,.chat-conv-item.active{background:rgba(185,140,80,.15);}
 #chat-msgs{flex:1;overflow-y:auto;padding:10px 12px 10px 40px;display:flex;flex-direction:column;gap:6px;}
-.chat-msg-mio{align-self:flex-end;background:#c8a860;color:#2a1200;padding:7px 11px;border-radius:12px 12px 3px 12px;font-size:.82rem;max-width:78%;line-height:1.5;word-break:break-word;box-shadow:0 1px 3px rgba(0,0,0,.15);}
-.chat-msg-suyo{align-self:flex-start;background:rgba(255,255,255,.55);color:#3d2008;border:1px solid rgba(160,110,60,.2);padding:7px 11px;border-radius:12px 12px 12px 3px;font-size:.82rem;max-width:78%;line-height:1.5;word-break:break-word;}
+.chat-msg-wrap{display:flex;flex-direction:column;position:relative;}
+.chat-msg-wrap.mio{align-items:flex-end;}
+.chat-msg-wrap.suyo{align-items:flex-start;}
+.chat-msg-mio{background:#c8a860;color:#2a1200;padding:7px 11px;border-radius:12px 12px 3px 12px;font-size:.82rem;max-width:78%;line-height:1.5;word-break:break-word;box-shadow:0 1px 3px rgba(0,0,0,.15);cursor:default;}
+.chat-msg-suyo{background:rgba(255,255,255,.55);color:#3d2008;border:1px solid rgba(160,110,60,.2);padding:7px 11px;border-radius:12px 12px 12px 3px;font-size:.82rem;max-width:78%;line-height:1.5;word-break:break-word;cursor:default;}
+.msg-reac-bar{display:flex;gap:3px;margin-top:3px;flex-wrap:wrap;}
+.msg-reac-burbuja{font-size:.72rem;padding:1px 6px;border-radius:10px;background:rgba(200,168,96,.18);border:1px solid rgba(200,168,96,.3);cursor:pointer;transition:all .13s;display:flex;align-items:center;gap:2px;color:#5a3a08;}
+.msg-reac-burbuja.mia{background:rgba(200,168,96,.38);border-color:rgba(200,168,96,.6);}
+.msg-reac-burbuja:hover{background:rgba(200,168,96,.5);}
+.msg-reac-count{font-family:'JetBrains Mono',monospace;font-size:.6rem;}
+.msg-picker{display:none;gap:4px;padding:4px 7px;background:rgba(250,245,232,.97);border:1px solid rgba(180,140,60,.25);border-radius:20px;box-shadow:0 4px 16px rgba(0,0,0,.12);position:absolute;bottom:calc(100% + 4px);z-index:10;}
+.chat-msg-wrap.mio .msg-picker{right:0;}
+.chat-msg-wrap.suyo .msg-picker{left:0;}
+.chat-msg-wrap:hover .msg-picker{display:flex;}
+.msg-picker-glifo{font-size:1rem;cursor:pointer;padding:2px 4px;border-radius:6px;transition:transform .12s,background .12s;line-height:1;}
+.msg-picker-glifo:hover{transform:scale(1.3);background:rgba(200,168,96,.2);}
 #chat-win .nota-textarea{background:rgba(255,255,255,.5);border-color:rgba(160,110,60,.3);color:#3d2008;font-size:.82rem;}
 #chat-win .nota-textarea::placeholder{color:#a07850;}
 #chat-win .nota-textarea:focus{border-color:rgba(160,110,60,.6);background:rgba(255,255,255,.7);}
@@ -1886,7 +1900,7 @@ function stopRealtime() {
 </style>
 
 <script type="module">
-import { apiGet, apiPost } from './js/services/api.js';
+import { apiGet, apiPost, apiDelete } from './js/services/api.js';
 import { getToken, getPerfil } from './js/services/auth.js';
 import { playSound } from './js/orak-sounds.js';
 
@@ -1944,13 +1958,72 @@ async function loadChatConvs() {
 let _chatPollInterval = null;
 let _chatLastMsgId    = null;
 
+const GLIPHS = ['✦','⬡','❧','◎','⋔','◆'];
+
 function _msgDiv(m, meId) {
-  const d = document.createElement('div');
-  d.className = m.emisor_id === meId ? 'chat-msg-mio' : 'chat-msg-suyo';
-  d.dataset.mid = m.id;
-  d.textContent = m.texto;
-  return d;
+  const esMio = m.emisor_id === meId;
+  const wrap = document.createElement('div');
+  wrap.className = 'chat-msg-wrap ' + (esMio ? 'mio' : 'suyo');
+  wrap.dataset.mid = m.id;
+
+  // Picker de glifos (aparece al hover)
+  const isTmp = String(m.id).startsWith('tmp_');
+  const pickerHtml = isTmp ? '' : `
+    <div class="msg-picker">
+      ${GLIPHS.map(g => `<span class="msg-picker-glifo" onclick="toggleReaccion('${m.id}','${g}',this)">${g}</span>`).join('')}
+    </div>`;
+
+  // Burbuja del mensaje
+  const burbuja = document.createElement('div');
+  burbuja.className = esMio ? 'chat-msg-mio' : 'chat-msg-suyo';
+  burbuja.textContent = m.texto;
+
+  // Barra de reacciones existentes
+  const reacBar = document.createElement('div');
+  reacBar.className = 'msg-reac-bar';
+  reacBar.id = 'reac-' + m.id;
+  _renderReacBar(reacBar, m.reacciones || [], meId);
+
+  wrap.innerHTML = pickerHtml;
+  wrap.appendChild(burbuja);
+  wrap.appendChild(reacBar);
+  return wrap;
 }
+
+function _renderReacBar(bar, reacciones, meId) {
+  // Agrupar por glifo
+  const grupos = {};
+  (reacciones || []).forEach(r => {
+    if (!grupos[r.glifo]) grupos[r.glifo] = { count: 0, mia: false };
+    grupos[r.glifo].count++;
+    if (r.usuario_id === meId) grupos[r.glifo].mia = true;
+  });
+  bar.innerHTML = Object.entries(grupos).map(([g, v]) =>
+    `<span class="msg-reac-burbuja${v.mia ? ' mia' : ''}" onclick="toggleReaccion('${bar.id.replace('reac-','')}','${g}',null)">
+      ${g}<span class="msg-reac-count">${v.count}</span>
+    </span>`
+  ).join('');
+}
+
+window.toggleReaccion = async (msgId, glifo, pickerEl) => {
+  const meId = getPerfil()?.id;
+  const bar = document.getElementById('reac-' + msgId);
+  if (!bar) return;
+  // Ver si ya tengo esta reacción
+  const yaExiste = bar.querySelector(`.msg-reac-burbuja.mia`) &&
+    [...bar.querySelectorAll('.msg-reac-burbuja.mia')].some(el => el.textContent.trim().startsWith(glifo));
+  try {
+    if (yaExiste) {
+      await apiDelete(`/api/social/mensajes/${msgId}/reaccion?glifo=${encodeURIComponent(glifo)}`, getToken());
+    } else {
+      await apiPost(`/api/social/mensajes/${msgId}/reaccion`, { glifo }, getToken());
+      playSound('glimmer');
+    }
+    // Refrescar reacciones de este mensaje
+    const data = await apiGet(`/api/social/mensajes/${msgId}/reacciones`, getToken());
+    _renderReacBar(bar, data || [], meId);
+  } catch(e) { console.error(e); }
+};
 
 function _startChatPoll(userId) {
   _stopChatPoll();

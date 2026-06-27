@@ -444,17 +444,70 @@ async def listar_conversaciones(usuario = Depends(get_current_user)):
 
 @router.get("/mensajes/{otro_id}")
 async def hilo_mensajes(otro_id: str, usuario = Depends(get_current_user)):
-    sb = get_supabase_user(usuario["_token"])
+    sb     = get_supabase_user(usuario["_token"])
+    sb_adm = get_supabase()
     res = sb.table("mensajes")\
         .select("*, emisor:perfiles!mensajes_emisor_id_fkey(username,display_name)")\
         .or_(f"and(emisor_id.eq.{usuario['id']},receptor_id.eq.{otro_id}),and(emisor_id.eq.{otro_id},receptor_id.eq.{usuario['id']})")\
         .order("creado_en")\
         .execute()
+    msgs = res.data or []
     # Marcar como leídos los mensajes recibidos
     sb.table("mensajes")\
         .update({"leido": True})\
         .eq("emisor_id", otro_id)\
         .eq("receptor_id", usuario["id"])\
+        .execute()
+    # Adjuntar reacciones
+    if msgs:
+        ids = [m["id"] for m in msgs]
+        reac = sb_adm.table("message_reactions")\
+            .select("mensaje_id,glifo,usuario_id")\
+            .in_("mensaje_id", ids)\
+            .execute()
+        reac_map = {}
+        for r in (reac.data or []):
+            reac_map.setdefault(r["mensaje_id"], []).append(
+                {"glifo": r["glifo"], "usuario_id": r["usuario_id"]}
+            )
+        for m in msgs:
+            m["reacciones"] = reac_map.get(m["id"], [])
+    return msgs
+
+
+@router.post("/mensajes/{msg_id}/reaccion", response_model=OkResponse)
+async def agregar_reaccion(msg_id: int, datos: dict, usuario = Depends(get_current_user)):
+    glifo = (datos.get("glifo") or "").strip()
+    GLIPHS = {"✦", "⬡", "❧", "◎", "⋔", "◆"}
+    if glifo not in GLIPHS:
+        error("Glifo no válido")
+    sb = get_supabase()
+    sb.table("message_reactions").upsert({
+        "mensaje_id":  msg_id,
+        "usuario_id":  usuario["id"],
+        "glifo":       glifo,
+    }, on_conflict="mensaje_id,usuario_id,glifo").execute()
+    return ok("Reacción añadida")
+
+
+@router.delete("/mensajes/{msg_id}/reaccion", response_model=OkResponse)
+async def quitar_reaccion(msg_id: int, glifo: str, usuario = Depends(get_current_user)):
+    sb = get_supabase()
+    sb.table("message_reactions")\
+        .delete()\
+        .eq("mensaje_id", msg_id)\
+        .eq("usuario_id", usuario["id"])\
+        .eq("glifo", glifo)\
+        .execute()
+    return ok("Reacción quitada")
+
+
+@router.get("/mensajes/{msg_id}/reacciones")
+async def get_reacciones(msg_id: int, usuario = Depends(get_current_user)):
+    sb = get_supabase()
+    res = sb.table("message_reactions")\
+        .select("glifo,usuario_id")\
+        .eq("mensaje_id", msg_id)\
         .execute()
     return res.data or []
 
