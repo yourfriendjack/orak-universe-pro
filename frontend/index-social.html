@@ -4,6 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ORAK Universe</title>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#c8860a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ORAK">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/orak-social.css">
@@ -494,6 +499,8 @@
 import { initAuth, login, logout, registro, getPerfil, getToken, getOruns, getGlimmers, actualizarOruns, actualizarGlimmers, actualizarPerfil, estaLogueado } from './js/services/auth.js';
 import { getFeed, getExplorar, crearPost, borrarPost, seguir, dejarSeguir, darGlimmer, quitarGlimmer, getRanking, getNotificaciones, leerNotificaciones, getLibrosPerfil, getMisCompras, comprarItem, equiparItem, apiGet, apiPost, apiPatch } from './js/services/api.js';
 import { playSound, toggleMute, isMuted } from './js/orak-sounds.js';
+import { registrarSW, instalarApp, estaInstalada } from './js/pwa/orak-pwa.js';
+registrarSW();
 
 // ── Estado ─────────────────────────────────────────────────────
 const S = {

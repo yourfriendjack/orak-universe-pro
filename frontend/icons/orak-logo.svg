@@ -1,0 +1,151 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <!-- Fondo espacial -->
+    <radialGradient id="bg" cx="38%" cy="32%" r="75%">
+      <stop offset="0%"   stop-color="#0d1828"/>
+      <stop offset="55%"  stop-color="#080d18"/>
+      <stop offset="100%" stop-color="#030508"/>
+    </radialGradient>
+
+    <!-- Nebulosa sutil -->
+    <radialGradient id="nebula" cx="32%" cy="38%" r="55%">
+      <stop offset="0%"   stop-color="#0c2a4a" stop-opacity=".55"/>
+      <stop offset="100%" stop-color="#0c2a4a" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Orbe: gradiente centrado exacto en el círculo -->
+    <radialGradient id="orb" cx="50%" cy="50%" r="100%" gradientUnits="objectBoundingBox">
+      <stop offset="0%"   stop-color="#f0feff"/>
+      <stop offset="30%"  stop-color="#22d3ee"/>
+      <stop offset="70%"  stop-color="#0369a1"/>
+      <stop offset="100%" stop-color="#0c2a4a"/>
+    </radialGradient>
+
+    <!-- Orbe: halo externo -->
+    <radialGradient id="halo" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#22d3ee" stop-opacity=".35"/>
+      <stop offset="100%" stop-color="#22d3ee" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- ── Fondo ───────────────────────────────────── -->
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <rect width="512" height="512" fill="url(#nebula)"/>
+
+  <!-- ── Campo de estrellas ────────────────────── -->
+  <g fill="white">
+    <circle cx="38"  cy="34"  r="1.1" opacity=".8"/>
+    <circle cx="92"  cy="68"  r=".7"  opacity=".5"/>
+    <circle cx="145" cy="22"  r="1.3" opacity=".7"/>
+    <circle cx="390" cy="30"  r="1"   opacity=".6"/>
+    <circle cx="440" cy="62"  r=".8"  opacity=".9"/>
+    <circle cx="480" cy="40"  r="1.2" opacity=".5"/>
+    <circle cx="28"  cy="148" r=".9"  opacity=".6"/>
+    <circle cx="72"  cy="182" r="1.1" opacity=".4"/>
+    <circle cx="460" cy="138" r=".8"  opacity=".7"/>
+    <circle cx="490" cy="170" r="1"   opacity=".5"/>
+    <circle cx="32"  cy="265" r="1"   opacity=".5"/>
+    <circle cx="478" cy="255" r=".9"  opacity=".7"/>
+    <circle cx="62"  cy="368" r=".8"  opacity=".6"/>
+    <circle cx="420" cy="375" r="1.1" opacity=".4"/>
+    <circle cx="472" cy="360" r=".7"  opacity=".8"/>
+    <circle cx="48"  cy="468" r=".9"  opacity=".5"/>
+    <circle cx="108" cy="482" r="1.1" opacity=".7"/>
+    <circle cx="178" cy="458" r=".7"  opacity=".4"/>
+    <circle cx="360" cy="472" r=".9"  opacity=".6"/>
+    <circle cx="428" cy="450" r="1"   opacity=".5"/>
+    <circle cx="478" cy="478" r=".8"  opacity=".8"/>
+    <!-- Estrellas brillantes -->
+    <circle cx="75"  cy="310" r="1.6" opacity=".95"/>
+    <circle cx="445" cy="205" r="1.4" opacity=".9"/>
+    <circle cx="155" cy="82"  r="1.5" opacity=".85"/>
+    <circle cx="358" cy="92"  r="1.2" opacity=".75"/>
+  </g>
+
+  <!-- ── Halo del orbe ─────────────────────────── -->
+  <circle cx="256" cy="224" r="118" fill="url(#halo)"/>
+  <circle cx="256" cy="224" r="88"  fill="#06b6d4" opacity=".07"/>
+  <circle cx="256" cy="224" r="68"  fill="#06b6d4" opacity=".10"/>
+
+  <!-- ── Sigilo ORAK ────────────────────────────── -->
+  <!-- El sigilo es una runa original: espina vertical + corona angular + brazos K -->
+  <g stroke-linecap="round" stroke-linejoin="round" fill="none">
+
+    <!-- Espina superior (sobre el orbe) -->
+    <line x1="256" y1="44" x2="256" y2="172"
+      stroke="#94a3b8" stroke-width="3.5"/>
+
+    <!-- Corona izquierda: dos segmentos angulares -->
+    <polyline points="256,88 196,50 208,34"
+      stroke="#94a3b8" stroke-width="3" stroke-opacity=".95"/>
+    <!-- Pestaña interior izquierda -->
+    <line x1="208" y1="34" x2="196" y2="44"
+      stroke="#94a3b8" stroke-width="2" stroke-opacity=".6"/>
+
+    <!-- Corona derecha: espejo -->
+    <polyline points="256,88 316,50 304,34"
+      stroke="#94a3b8" stroke-width="3" stroke-opacity=".95"/>
+    <!-- Pestaña interior derecha -->
+    <line x1="304" y1="34" x2="316" y2="44"
+      stroke="#94a3b8" stroke-width="2" stroke-opacity=".6"/>
+
+    <!-- Travesaño central -->
+    <line x1="220" y1="126" x2="292" y2="126"
+      stroke="#94a3b8" stroke-width="2.5" stroke-opacity=".8"/>
+
+    <!-- Brazos inferiores (elemento K) -->
+    <line x1="256" y1="152" x2="304" y2="184"
+      stroke="#94a3b8" stroke-width="2.5" stroke-opacity=".65"/>
+    <line x1="256" y1="152" x2="208" y2="184"
+      stroke="#94a3b8" stroke-width="2.5" stroke-opacity=".65"/>
+
+    <!-- Espina inferior (bajo el orbe, más tenue) -->
+    <line x1="256" y1="276" x2="256" y2="348"
+      stroke="#94a3b8" stroke-width="3" stroke-opacity=".25"/>
+  </g>
+
+  <!-- Línea del sigilo que atraviesa el orbe (cian) -->
+  <line x1="256" y1="172" x2="256" y2="276"
+    stroke="#67e8f9" stroke-width="2.5" stroke-opacity=".75"/>
+
+  <!-- ── Orbe principal (sin gradients — capas directas) ── -->
+  <!-- Halo exterior difuso -->
+  <circle cx="256" cy="224" r="72" fill="#0e7490" opacity=".18"/>
+  <circle cx="256" cy="224" r="62" fill="#06b6d4" opacity=".22"/>
+  <!-- Base sólida del orbe -->
+  <circle cx="256" cy="224" r="52" fill="#0891b2"/>
+  <!-- Zona brillante central -->
+  <circle cx="248" cy="216" r="30"  fill="#22d3ee" opacity=".75"/>
+  <circle cx="244" cy="211" r="18"  fill="#67e8f9" opacity=".70"/>
+  <circle cx="242" cy="208" r="10"  fill="#cffafe" opacity=".65"/>
+  <!-- Borde brillante -->
+  <circle cx="256" cy="224" r="52"
+    fill="none" stroke="#67e8f9" stroke-width="2" stroke-opacity=".8"/>
+  <circle cx="256" cy="224" r="55"
+    fill="none" stroke="#22d3ee" stroke-width="1" stroke-opacity=".35"/>
+  <!-- Reflejo especular superior izquierdo -->
+  <ellipse cx="240" cy="207" rx="15" ry="9" fill="white" opacity=".32"/>
+  <ellipse cx="237" cy="204" rx="6"  ry="3.5" fill="white" opacity=".55"/>
+
+  <!-- ── Separador decorativo ───────────────────── -->
+  <line x1="148" y1="376" x2="364" y2="376"
+    stroke="#22d3ee" stroke-width=".8" stroke-opacity=".25"/>
+  <circle cx="148" cy="376" r="2" fill="#22d3ee" opacity=".35"/>
+  <circle cx="364" cy="376" r="2" fill="#22d3ee" opacity=".35"/>
+
+  <!-- ── Texto ORAK ─────────────────────────────── -->
+  <!-- Capa glow (duplicado difuso) -->
+  <g opacity=".3" fill="#22d3ee">
+    <text x="160" y="436" text-anchor="middle" font-family="Helvetica Neue,Helvetica,Arial,sans-serif" font-size="56" font-weight="200">O</text>
+    <text x="224" y="436" text-anchor="middle" font-family="Helvetica Neue,Helvetica,Arial,sans-serif" font-size="56" font-weight="200">R</text>
+    <text x="288" y="436" text-anchor="middle" font-family="Helvetica Neue,Helvetica,Arial,sans-serif" font-size="56" font-weight="200">A</text>
+    <text x="352" y="436" text-anchor="middle" font-family="Helvetica Neue,Helvetica,Arial,sans-serif" font-size="56" font-weight="200">K</text>
+  </g>
+  <!-- Texto principal -->
+  <g fill="#22d3ee" opacity=".95">
+    <text x="160" y="432" text-anchor="middle" font-family="Helvetica Neue,Helvetica,Arial,sans-serif" font-size="56" font-weight="200">O</text>
+    <text x="224" y="432" text-anchor="middle" font-family="Helvetica Neue,Helvetica,Arial,sans-serif" font-size="56" font-weight="200">R</text>
+    <text x="288" y="432" text-anchor="middle" font-family="Helvetica Neue,Helvetica,Arial,sans-serif" font-size="56" font-weight="200">A</text>
+    <text x="352" y="432" text-anchor="middle" font-family="Helvetica Neue,Helvetica,Arial,sans-serif" font-size="56" font-weight="200">K</text>
+  </g>
+</svg>
