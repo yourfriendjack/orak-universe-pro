@@ -8,7 +8,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, FileResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from backend.core.config import get_settings
@@ -85,6 +85,19 @@ _FRONTEND = os.path.join(os.path.dirname(__file__), "..", "frontend")
 app.mount("/js",     StaticFiles(directory=os.path.join(_FRONTEND, "js")),     name="js")
 app.mount("/css",    StaticFiles(directory=os.path.join(_FRONTEND, "css")),    name="css")
 app.mount("/assets", StaticFiles(directory=os.path.join(_FRONTEND, "assets")), name="assets")
+app.mount("/icons",  StaticFiles(directory=os.path.join(_FRONTEND, "icons")),  name="icons")
+
+@app.get("/manifest.json", include_in_schema=False)
+async def manifest():
+    return FileResponse(os.path.join(_FRONTEND, "manifest.json"), media_type="application/manifest+json")
+
+@app.get("/sw.js", include_in_schema=False)
+async def service_worker():
+    return FileResponse(os.path.join(_FRONTEND, "sw.js"), media_type="application/javascript")
+
+@app.get("/offline.html", include_in_schema=False)
+async def offline():
+    return FileResponse(os.path.join(_FRONTEND, "offline.html"), media_type="text/html")
 
 # ── 404 ───────────────────────────────────────────────────────────────────────
 @app.exception_handler(404)
