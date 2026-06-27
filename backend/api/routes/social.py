@@ -766,3 +766,14 @@ async def push_unsubscribe(
     endpoint = datos.subscription.get("endpoint", "")
     sb.table("push_subscriptions").delete().eq("endpoint", endpoint).execute()
     return ok("Suscripción eliminada")
+
+
+class PushLogIn(BaseModel):
+    event: str
+    detail: str = ""
+
+@router.post("/push/log", include_in_schema=False)
+async def push_log(datos: PushLogIn):
+    import logging
+    logging.getLogger("orak.push").warning(f"[PUSH-CLIENT] {datos.event}: {datos.detail}")
+    return {"ok": True}

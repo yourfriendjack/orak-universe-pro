@@ -79,26 +79,42 @@ function urlBase64ToUint8Array(b64) {
   return Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
 }
 
+async function _pushLog(event, detail = '') {
+  try { await fetch('/api/social/push/log', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ event, detail }) }); } catch {}
+}
+
 export async function suscribirPush(getToken) {
-  if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+    await _pushLog('no-support', navigator.userAgent.slice(0, 80));
+    return;
+  }
   try {
     const perm = await Notification.requestPermission();
+    await _pushLog('permission', perm);
     if (perm !== 'granted') return;
+
     const reg = await navigator.serviceWorker.ready;
+    await _pushLog('sw-ready', reg.active?.state || 'unknown');
+
     let sub = await reg.pushManager.getSubscription();
+    await _pushLog('existing-sub', sub ? sub.endpoint.slice(0, 60) : 'none');
+
     if (!sub) {
       sub = await reg.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
       });
+      await _pushLog('subscribed', sub.endpoint.slice(0, 60));
     }
+
     const token = typeof getToken === 'function' ? getToken() : getToken;
-    await fetch('/api/social/push/subscribe', {
+    const res = await fetch('/api/social/push/subscribe', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
       body: JSON.stringify({ subscription: sub.toJSON() }),
     });
-  } catch {
-    // Push no disponible en este entorno (desktop Linux sin cuenta Google)
+    await _pushLog('saved', res.ok ? 'ok' : `error ${res.status}`);
+  } catch (e) {
+    await _pushLog('error', `${e.name}: ${e.message}`);
   }
 }
