@@ -112,22 +112,35 @@ export function playSound(event) {
       case 'message':
         _tone(p.freq * 1.25, p.type, p.gain * 0.8, now, p.decay * 0.4);
         break;
+
+      case 'sound-on':
+        // Chime ascendente — "despertando"
+        _tone(p.freq * 0.75, 'sine', p.gain * 0.6, now,        p.decay * 0.3);
+        _tone(p.freq * 1.0,  'sine', p.gain * 0.7, now + 0.09, p.decay * 0.35);
+        _tone(p.freq * 1.5,  'sine', p.gain * 0.8, now + 0.18, p.decay * 0.50);
+        break;
+
+      case 'sound-off':
+        // Click suave descendente — "durmiendo"
+        _tone(p.freq * 1.0,  'sine', p.gain * 0.5, now,        p.decay * 0.25);
+        _tone(p.freq * 0.66, 'sine', p.gain * 0.35, now + 0.08, p.decay * 0.20);
+        break;
     }
   } catch { /* silencioso si el browser bloquea */ }
 }
 
 export function toggleMute() {
-  _muted = !_muted;
-  localStorage.setItem('orak_muted', _muted ? '1' : '0');
-  _updateMuteBtn();
+  if (_muted) {
+    _muted = false;
+    localStorage.setItem('orak_muted', '0');
+    playSound('sound-on');
+  } else {
+    playSound('sound-off'); // _muted aún es false aquí, así que suena
+    _muted = true;
+    localStorage.setItem('orak_muted', '1');
+  }
   return _muted;
 }
 
 export function isMuted() { return _muted; }
 
-function _updateMuteBtn() {
-  const btn = document.getElementById('sound-toggle');
-  if (btn) btn.textContent = _muted ? '🔇' : '🔊';
-}
-
-document.addEventListener('DOMContentLoaded', _updateMuteBtn);
