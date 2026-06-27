@@ -55,21 +55,8 @@ body {
 
 /* Logo */
 .logo {
-  display: flex; align-items: center; gap: 10px;
+  display: flex; align-items: center; gap: 0;
   margin-bottom: 44px;
-}
-.logo-hex {
-  width: 32px; height: 32px;
-  background: var(--amber);
-  clip-path: polygon(50% 0%,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);
-  display: flex; align-items: center; justify-content: center;
-  position: relative;
-}
-.logo-hex::after {
-  content:'';
-  width: 12px; height: 12px;
-  background: #141210;
-  clip-path: polygon(50% 0%,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);
 }
 .logo-text {
   font-family: 'Cinzel', serif;
@@ -224,7 +211,7 @@ body {
   background: #050404;
   position: relative;
   overflow: hidden;
-  display: flex; align-items: flex-end; justify-content: flex-start;
+  display: flex; align-items: center; justify-content: center;
   padding: 28px 32px;
 }
 
@@ -324,25 +311,42 @@ body {
   animation: vline-fade var(--vd, 4s) ease-in-out infinite var(--vdel,0s);
 }
 
+/* Logo centrado en el panel derecho */
+.cosmos-logo-wrap {
+  position: relative; z-index: 2;
+  display: flex; flex-direction: column;
+  align-items: center; gap: 28px;
+}
+.cosmos-logo-img {
+  width: 340px; height: auto;
+  animation: logoUniverse 18s linear infinite;
+}
+@keyframes logoUniverse {
+  0%   { transform: rotate(0deg)   scale(1);    filter: invert(1) drop-shadow(0 0 26px rgba(80,120,255,.8))  drop-shadow(0 0 60px rgba(80,120,255,.4)); }
+  25%  { transform: rotate(90deg)  scale(1.04); filter: invert(1) drop-shadow(0 0 42px rgba(180,80,255,1))   drop-shadow(0 0 95px rgba(160,60,255,.65)); }
+  50%  { transform: rotate(180deg) scale(1);    filter: invert(1) drop-shadow(0 0 26px rgba(220,235,255,.9)) drop-shadow(0 0 60px rgba(200,220,255,.5)); }
+  75%  { transform: rotate(270deg) scale(1.04); filter: invert(1) drop-shadow(0 0 42px rgba(180,80,255,1))   drop-shadow(0 0 95px rgba(160,60,255,.65)); }
+  100% { transform: rotate(360deg) scale(1);    filter: invert(1) drop-shadow(0 0 26px rgba(80,120,255,.8))  drop-shadow(0 0 60px rgba(80,120,255,.4)); }
+}
+
 /* Branding */
 .cosmos-brand {
   position: relative; z-index: 2;
   font-family: 'Cinzel', serif;
-  font-size: .75rem;
+  font-size: 1.5rem;
   font-weight: 900;
-  letter-spacing: .2em;
-  color: rgba(168,212,232,.4);
+  letter-spacing: .28em;
+  color: rgba(200,220,255,.85);
+  text-shadow: 0 0 20px rgba(120,140,255,.6), 0 0 60px rgba(100,160,255,.3);
 }
 
 .cosmos-tagline {
-  position: absolute;
-  top: 28px; left: 32px;
-  z-index: 2;
   font-family: 'JetBrains Mono', monospace;
-  font-size: .56rem;
-  letter-spacing: .1em;
+  font-size: .58rem;
+  letter-spacing: .14em;
   text-transform: uppercase;
-  color: rgba(168,212,232,.25);
+  color: rgba(168,212,232,.35);
+  margin-top: 6px;
 }
 
 /* ── Animaciones ── */
@@ -395,7 +399,7 @@ body {
   <!-- ── IZQUIERDA ── -->
   <div class="left">
     <div class="logo">
-      <div class="logo-hex"></div>
+      <img src="/logo.svg" alt="ORAK" class="auth-header-logo">
       <div class="logo-text">ORAK UNIVERSE</div>
     </div>
 
@@ -474,17 +478,11 @@ body {
   <!-- ── DERECHA — COSMOS ── -->
   <div class="right">
     <canvas id="cosmos"></canvas>
-
-    <!-- Planeta -->
-    <div class="orbit-line ol-1"></div>
-    <div class="orbit-line ol-2"></div>
-    <div class="ring"></div>
-    <div class="planet"></div>
-    <div class="moon moon-1"></div>
-    <div class="moon moon-2"></div>
-
-    <div class="cosmos-tagline">Universo Narrativo Colectivo</div>
-    <div class="cosmos-brand">ORAK</div>
+    <div class="cosmos-logo-wrap">
+      <img src="/logo.svg" alt="ORAK" class="cosmos-logo-img">
+      <div class="cosmos-brand">ORAK UNIVERSE</div>
+      <div class="cosmos-tagline">Universo Narrativo Colectivo</div>
+    </div>
   </div>
 
 </div>
@@ -672,6 +670,13 @@ async function doRegister() {
 </body>
 </html>
 <style>
+/* Logo cabecera — desktop */
+.auth-header-logo {
+  height: 44px; flex-shrink: 0;
+  margin-right: -14px;
+  filter: invert(1) drop-shadow(0 0 8px rgba(100,130,255,.9)) drop-shadow(0 0 20px rgba(120,140,255,.5));
+}
+
 @media (max-width: 700px) {
   .shell { grid-template-columns: 1fr; height: min(640px, 94vh); }
   .right { display: none; }
@@ -697,7 +702,32 @@ async function doRegister() {
     overflow-y: auto;
     height: 100vh;
   }
-  .logo { margin-bottom: 32px; }
+
+  /* Logo móvil — grande, apilado, con destello */
+  .logo {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-bottom: 36px;
+    gap: 14px;
+  }
+  .auth-header-logo {
+    height: auto !important;
+    width: min(260px, 72vw);
+    animation: logoShimmer 3.5s ease-in-out infinite;
+  }
+  .logo-text {
+    font-size: 1.1rem;
+    letter-spacing: .22em;
+  }
+  @keyframes logoShimmer {
+    0%   { filter: invert(1) drop-shadow(0 0 16px rgba(80,120,255,.9))  drop-shadow(0 0 40px rgba(80,120,255,.5)); }
+    30%  { filter: invert(1) drop-shadow(0 0 28px rgba(180,80,255,1))   drop-shadow(0 0 70px rgba(160,60,255,.7)); }
+    60%  { filter: invert(1) drop-shadow(0 0 36px rgba(220,235,255,1))  drop-shadow(0 0 80px rgba(200,220,255,.8)); }
+    80%  { filter: invert(1) drop-shadow(0 0 28px rgba(100,140,255,1))  drop-shadow(0 0 65px rgba(80,160,255,.7)); }
+    100% { filter: invert(1) drop-shadow(0 0 16px rgba(80,120,255,.9))  drop-shadow(0 0 40px rgba(80,120,255,.5)); }
+  }
+
   .form-title { font-size: 1.6rem; }
   .panel.active {
     max-height: none;

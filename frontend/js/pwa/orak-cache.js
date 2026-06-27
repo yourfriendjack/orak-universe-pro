@@ -3,7 +3,7 @@
  * Define qué se guarda en la Memoria de Orak y cómo.
  */
 
-export const MEMORIA_VERSION = 'orak-memoria-v1';
+export const MEMORIA_VERSION = 'orak-memoria-v2';
 
 // Archivos que se cachean al instalar el SW (shell de la app)
 export const SHELL = [

@@ -92,6 +92,22 @@ app.mount("/icons",  StaticFiles(directory=os.path.join(_FRONTEND, "icons")),  n
 async def apple_icon():
     return FileResponse(os.path.join(_FRONTEND, "apple-touch-icon.png"), media_type="image/png")
 
+@app.get("/logo-oficial.png", include_in_schema=False)
+async def logo_oficial():
+    return FileResponse(os.path.join(_FRONTEND, "logo-oficial.png"), media_type="image/png")
+
+@app.get("/logo-icon-sm.png", include_in_schema=False)
+async def logo_icon_sm():
+    return FileResponse(os.path.join(_FRONTEND, "logo-icon-sm.png"), media_type="image/png")
+
+@app.get("/logo-negro.png", include_in_schema=False)
+async def logo_negro():
+    return FileResponse(os.path.join(_FRONTEND, "logo-negro.png"), media_type="image/png")
+
+@app.get("/logo.svg", include_in_schema=False)
+async def logo_svg():
+    return FileResponse(os.path.join(_FRONTEND, "logo.svg"), media_type="image/svg+xml")
+
 @app.get("/manifest.json", include_in_schema=False)
 async def manifest():
     return FileResponse(os.path.join(_FRONTEND, "manifest.json"), media_type="application/manifest+json")

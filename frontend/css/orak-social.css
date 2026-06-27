@@ -58,10 +58,13 @@ a{text-decoration:none;color:inherit;}
 .auth-card{
   position:relative;z-index:1;
   background:rgba(18,16,13,.88);border:1px solid rgba(205,199,184,.12);
-  border-radius:var(--radius-lg);padding:44px 40px;width:420px;
+  border-radius:var(--radius-lg);padding:44px 40px;width:440px;
   backdrop-filter:blur(20px);animation:fadeUp .5s ease both;
 }
-.auth-logo{text-align:center;margin-bottom:28px;}
+.auth-logo{text-align:center;margin-bottom:16px;position:relative;}
+.auth-logo::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 60% at 50% 50%,rgba(100,120,255,.12) 0%,transparent 70%);pointer-events:none;}
+.auth-logo-img{display:block;margin:0 auto 12px;width:260px;height:auto;animation:logoBreath 4.5s ease-in-out infinite;}
+@keyframes logoBreath{0%,100%{filter:invert(1) drop-shadow(0 0 22px rgba(80,120,255,.8)) drop-shadow(0 0 55px rgba(80,120,255,.4));}50%{filter:invert(1) drop-shadow(0 0 40px rgba(150,170,255,1)) drop-shadow(0 0 90px rgba(120,200,255,.65));}}
 .auth-title{font-family:'Cinzel',serif;font-size:1.3rem;font-weight:900;letter-spacing:.15em;color:var(--gold);}
 .auth-sub{font-family:'JetBrains Mono',monospace;font-size:.6rem;letter-spacing:.12em;color:rgba(205,199,184,.3);margin-top:4px;}
 .auth-tabs{display:flex;border-bottom:1px solid rgba(205,199,184,.1);margin-bottom:24px;}
@@ -95,7 +98,13 @@ a{text-decoration:none;color:inherit;}
   border-bottom:1px solid var(--fog);
   display:flex;align-items:center;gap:12px;padding:0 20px;
 }
-.logo{display:flex;align-items:center;gap:8px;font-family:'Cinzel',serif;font-weight:900;font-size:1rem;letter-spacing:.12em;flex-shrink:0;cursor:pointer;}
+.logo{display:flex;align-items:center;gap:2px;font-family:'Cinzel',serif;font-weight:900;font-size:1rem;letter-spacing:.12em;flex-shrink:0;cursor:pointer;}
+.topbar-logo-img{height:32px;width:auto;flex-shrink:0;animation:topbarGlow 5s ease-in-out infinite;}
+@keyframes topbarGlow{
+  0%,100%{filter:invert(1) drop-shadow(0 0 5px rgba(80,120,255,.9))  drop-shadow(0 0 14px rgba(80,120,255,.5));}
+  35%    {filter:invert(1) drop-shadow(0 0 10px rgba(180,80,255,1))   drop-shadow(0 0 26px rgba(160,60,255,.7));}
+  65%    {filter:invert(1) drop-shadow(0 0 16px rgba(220,235,255,1))  drop-shadow(0 0 34px rgba(180,210,255,.8));}
+}
 .topbar-right{margin-left:auto;display:flex;align-items:center;gap:10px;}
 
 /* ── Sound pill (liquid glass) ─────────────────────────── */
