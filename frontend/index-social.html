@@ -6,9 +6,11 @@
 <title>ORAK Universe</title>
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#c8860a">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="ORAK">
+<link rel="icon" type="image/svg+xml" href="/logo.svg">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="apple-touch-icon-precomposed" href="/apple-touch-icon-precomposed.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -113,7 +115,7 @@
       </div>
       <button class="notif-btn" id="notif-btn" onclick="toggleNotif()">
         <svg class="orak-icon icon-notif" viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.3"><polygon points="10,2 12.2,7.8 18.5,8.1 13.8,12.2 15.5,18.3 10,15 4.5,18.3 6.2,12.2 1.5,8.1 7.8,7.8"/></svg>
-        <div class="notif-dot" id="notif-dot"></div>
+        <div class="notif-badge" id="notif-dot"></div>
       </button>
       <div class="user-av" id="topbar-av" onclick="goView('profile')">…</div>
     </div>
@@ -374,6 +376,11 @@
     <div class="notif-head-title">Notificaciones</div>
     <div class="notif-clear" onclick="clearNotifs()">Marcar como leídas</div>
   </div>
+  <div id="push-banner" style="display:none;align-items:center;gap:8px;padding:10px 14px;background:var(--mist);border-bottom:1px solid var(--fog);">
+    <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 2a6 6 0 016 6v3l1.5 2.5H2.5L4 11V8a6 6 0 016-6z"/><path d="M8 17a2 2 0 004 0"/></svg>
+    <span style="flex:1;font-family:'JetBrains Mono',monospace;font-size:.6rem;letter-spacing:.04em;color:var(--fog)">Recibe avisos aunque la app esté cerrada</span>
+    <button onclick="activarPushManual()" style="background:var(--amber);color:#0e0d0b;border:none;border-radius:5px;padding:5px 10px;font-family:'JetBrains Mono',monospace;font-size:.58rem;font-weight:700;cursor:pointer;white-space:nowrap;">Activar</button>
+  </div>
   <div class="notif-list" id="notif-list"></div>
 </div>
 
@@ -466,7 +473,7 @@
 import { initAuth, login, logout, registro, getPerfil, getToken, getOruns, getGlimmers, actualizarOruns, actualizarGlimmers, actualizarPerfil, estaLogueado } from './js/services/auth.js';
 import { getFeed, getExplorar, crearPost, borrarPost, seguir, dejarSeguir, darGlimmer, quitarGlimmer, getRanking, getNotificaciones, leerNotificaciones, getLibrosPerfil, getMisCompras, comprarItem, equiparItem, apiGet, apiPost, apiPatch } from './js/services/api.js';
 import { playSound, toggleMute, isMuted } from './js/orak-sounds.js';
-import { registrarSW, instalarApp, estaInstalada } from './js/pwa/orak-pwa.js';
+import { registrarSW, instalarApp, estaInstalada, suscribirPush } from './js/pwa/orak-pwa.js';
 registrarSW();
 
 // ── Estado ─────────────────────────────────────────────────────
@@ -570,6 +577,8 @@ async function launchApp() {
   startRealtime();
   document.getElementById('chat-float').style.display = 'flex';
   toast('✦ Bienvenido a ORAK Universe');
+  // Push: auto en Android, banner manual en iOS (requiere gesto del usuario)
+  setTimeout(() => initPush(), 3000);
   // Heartbeat de presencia
   const _pingPresencia = () => {
     if (getToken()) apiPost('/api/social/presencia/ping', {}, getToken()).catch(() => {});
@@ -1342,6 +1351,30 @@ window.quickFollow = async (id, btn) => {
   } catch(e) { toast(e.message,'err'); }
 };
 
+// ── PUSH NOTIFICATIONS ──────────────────────────────────────────
+const _isIOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+async function initPush() {
+  if (!('PushManager' in window)) return;
+  if (Notification.permission === 'granted') {
+    // Ya tiene permiso: suscribir silenciosamente
+    await suscribirPush(getToken);
+  } else if (Notification.permission === 'default') {
+    if (_isIOS) {
+      // iOS requiere gesto: mostrar banner
+      document.getElementById('push-banner').style.display = 'flex';
+    } else {
+      // Android/desktop: pedir permiso automáticamente
+      await suscribirPush(getToken);
+    }
+  }
+}
+
+window.activarPushManual = async function() {
+  document.getElementById('push-banner').style.display = 'none';
+  await suscribirPush(getToken);
+};
+
 // ── NOTIFICACIONES ──────────────────────────────────────────────
 async function loadNotifs() {
   try {
@@ -1352,8 +1385,15 @@ async function loadNotifs() {
     if (unread > prevUnread) playSound('notif');
     const dot = document.getElementById('notif-dot');
     const badge = document.getElementById('snav-badge');
-    if (unread) { dot.classList.add('show'); badge.textContent = unread; badge.style.display = 'inline'; }
-    else        { dot.classList.remove('show'); badge.style.display = 'none'; }
+    if (unread) {
+      dot.classList.add('show');
+      dot.textContent = unread > 9 ? '9+' : unread;
+      badge.textContent = unread; badge.style.display = 'inline';
+    } else {
+      dot.classList.remove('show');
+      dot.textContent = '';
+      badge.style.display = 'none';
+    }
     const icoMap = { glimmer:'ni-g ⬡', fork:'ni-f ⋔', follow:'ni-fw ⊙', lector_fiel:'ni-c ❧', collab:'ni-c ⊕' };
     document.getElementById('notif-list').innerHTML = data.slice(0,20).map(n => {
       const [cls, ico] = (icoMap[n.tipo]||'ni-g ●').split(' ');
@@ -1459,7 +1499,7 @@ window.toggleNotif = () => {
   document.getElementById('notif-panel').classList.toggle('open', S.notifOpen);
 };
 window.clearNotifs = async () => {
-  try { await leerNotificaciones(getToken()); document.getElementById('notif-dot').classList.remove('show'); document.getElementById('snav-badge').style.display='none'; toast('✓ Todo leído'); } catch{}
+  try { await leerNotificaciones(getToken()); const d=document.getElementById('notif-dot'); d.classList.remove('show'); d.textContent=''; document.getElementById('snav-badge').style.display='none'; toast('✓ Todo leído'); } catch{}
 };
 function closeNotifPanel() { S.notifOpen = false; document.getElementById('notif-panel').classList.remove('open'); }
 

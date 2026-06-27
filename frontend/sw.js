@@ -72,6 +72,34 @@ async function networkFirst(request) {
   }
 }
 
+// ── Push Notifications ────────────────────────────────────────
+self.addEventListener('push', event => {
+  let data = { title: 'ORAK Universe', body: 'Tienes una nueva notificación' };
+  try { if (event.data) data = event.data.json(); } catch {}
+  event.waitUntil(
+    self.registration.showNotification(data.title || 'ORAK Universe', {
+      body: data.body || '',
+      icon: '/icons/icon-192.png',
+      badge: '/icons/icon-72.png',
+      tag: 'orak-notif',
+      renotify: true,
+      data: { url: '/' },
+    })
+  );
+});
+
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  const url = event.notification.data?.url || '/';
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(cs => {
+      const c = cs.find(c => c.url.includes(self.location.origin));
+      if (c) { c.focus(); c.postMessage({ type: 'NOTIF_CLICK' }); }
+      else clients.openWindow(url);
+    })
+  );
+});
+
 // ── Estrategia: caché primero ─────────────────────────────────
 async function cacheFirst(request) {
   const cached = await caches.match(request);

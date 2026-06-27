@@ -3,7 +3,7 @@
  * Define qué se guarda en la Memoria de Orak y cómo.
  */
 
-export const MEMORIA_VERSION = 'orak-memoria-v2';
+export const MEMORIA_VERSION = 'orak-memoria-v3';
 
 // Archivos que se cachean al instalar el SW (shell de la app)
 export const SHELL = [
@@ -11,12 +11,13 @@ export const SHELL = [
   '/index-social.html',
   '/offline.html',
   '/css/orak-social.css',
-  '/css/orak-themes.css',
+  '/css/themes.css',
   '/js/orak-sounds.js',
   '/js/services/api.js',
   '/js/services/auth.js',
   '/js/themes/theme-engine.js',
   '/manifest.json',
+  '/logo.svg',
 ];
 
 // Rutas de API que nunca se cachean (siempre frescas)

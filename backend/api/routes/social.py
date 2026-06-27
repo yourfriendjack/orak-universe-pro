@@ -7,6 +7,7 @@ Todos requieren usuario autenticado salvo lectura pública.
 """
 from fastapi import APIRouter, Depends, HTTPException, Query
 from typing import Optional
+from pydantic import BaseModel
 from backend.database.supabase_client import get_supabase, get_supabase_user
 from backend.models.schemas import (
     PostIn, FollowIn, LectorFielIn, LectorFielAccion,
@@ -682,3 +683,78 @@ def _crear_notif(sb, usuario_id: str, tipo: str, titulo: str, cuerpo: str, ref_i
         }).execute()
     except Exception:
         pass
+    _enviar_push(sb, usuario_id, titulo, cuerpo)
+
+
+def _enviar_push(sb, usuario_id: str, titulo: str, cuerpo: str):
+    """Envía push notification a todas las suscripciones activas del usuario."""
+    try:
+        import json, os
+        from pywebpush import webpush, WebPushException
+        from backend.core.config import get_settings
+        cfg = get_settings()
+        if not cfg.VAPID_PUBLIC_KEY or not cfg.VAPID_PRIVATE_PEM_PATH:
+            return
+        pem_path = cfg.VAPID_PRIVATE_PEM_PATH
+        if not os.path.isabs(pem_path):
+            pem_path = os.path.join(os.path.dirname(__file__), '..', '..', pem_path)
+        if not os.path.exists(pem_path):
+            return
+        subs = sb.table("push_subscriptions")\
+            .select("subscription_json")\
+            .eq("usuario_id", usuario_id)\
+            .execute()
+        if not subs.data:
+            return
+        payload = json.dumps({"title": titulo, "body": cuerpo})
+        for row in subs.data:
+            try:
+                sub = row["subscription_json"]
+                if isinstance(sub, str):
+                    sub = json.loads(sub)
+                webpush(
+                    subscription_info=sub,
+                    data=payload,
+                    vapid_private_key=pem_path,
+                    vapid_claims={"sub": cfg.VAPID_CONTACT},
+                )
+            except WebPushException:
+                pass
+    except Exception:
+        pass
+
+
+# ══════════════════════════════════════════════════════════
+#  PUSH SUBSCRIPTIONS
+# ══════════════════════════════════════════════════════════
+
+class PushSubscribeIn(BaseModel):
+    subscription: dict
+
+
+@router.post("/push/subscribe", response_model=OkResponse)
+async def push_subscribe(
+    datos: PushSubscribeIn,
+    usuario = Depends(get_current_user)
+):
+    import json
+    sb = get_supabase()
+    endpoint = datos.subscription.get("endpoint", "")
+    # Upsert por endpoint para evitar duplicados
+    sb.table("push_subscriptions").upsert({
+        "usuario_id": usuario["id"],
+        "endpoint": endpoint,
+        "subscription_json": json.dumps(datos.subscription),
+    }, on_conflict="endpoint").execute()
+    return ok("Suscripción guardada")
+
+
+@router.delete("/push/unsubscribe", response_model=OkResponse)
+async def push_unsubscribe(
+    datos: PushSubscribeIn,
+    usuario = Depends(get_current_user)
+):
+    sb = get_supabase()
+    endpoint = datos.subscription.get("endpoint", "")
+    sb.table("push_subscriptions").delete().eq("endpoint", endpoint).execute()
+    return ok("Suscripción eliminada")

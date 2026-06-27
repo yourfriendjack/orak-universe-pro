@@ -68,3 +68,37 @@ export function estaInstalada() {
   return window.matchMedia('(display-mode: standalone)').matches
     || window.navigator.standalone === true;
 }
+
+// ── Push Notifications ────────────────────────────────────────
+const VAPID_PUBLIC_KEY = 'BL6HXpkznFdXpDBYo8t2ExX7iM6uhXKFtXsfsb3Idj18mW04w3Lvxo0ALkegl1nbvZ1PIr9JmevPuMppCfwF50E';
+
+function urlBase64ToUint8Array(b64) {
+  const padding = '='.repeat((4 - b64.length % 4) % 4);
+  const base64 = (b64 + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const raw = atob(base64);
+  return Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
+}
+
+export async function suscribirPush(getToken) {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+  try {
+    const perm = await Notification.requestPermission();
+    if (perm !== 'granted') return;
+    const reg = await navigator.serviceWorker.ready;
+    let sub = await reg.pushManager.getSubscription();
+    if (!sub) {
+      sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+      });
+    }
+    const token = typeof getToken === 'function' ? getToken() : getToken;
+    await fetch('/api/social/push/subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify({ subscription: sub.toJSON() }),
+    });
+  } catch {
+    // Push no disponible en este entorno (desktop Linux sin cuenta Google)
+  }
+}

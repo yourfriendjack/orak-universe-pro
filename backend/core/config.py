@@ -36,6 +36,11 @@ class Settings(BaseSettings):
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24  # 24h
 
+    # ── VAPID (Push Notifications) ────────────────────────────
+    VAPID_PUBLIC_KEY: str = ""
+    VAPID_PRIVATE_PEM_PATH: str = "vapid_private.pem"
+    VAPID_CONTACT: str = "mailto:joshua.cruz.urrutia@gmail.com"
+
     # ── IA (futuro) ───────────────────────────────────────────
     OPENAI_API_KEY: str = ""
     ANTHROPIC_API_KEY: str = ""
